@@ -83,11 +83,11 @@ namespace RubyGM { namespace Helper {
     template<typename T> struct ruby_arg { };
     // ruby arg to c++: for void
     template<> struct ruby_arg<void> {
-        // set mruby
-        template<typename ...Args>
-        static auto set(mrb_state* , Args...) noexcept { return mrb_nil_value(); }
         // get mruby
         static auto get(const mrb_value& v) noexcept { return ; }
+        // set mruby
+        template<typename Lam>
+        static auto set(mrb_state*, Lam lam) noexcept { lam(); return mrb_nil_value(); }
     };
     // ruby arg to c++: for bool
     template<> struct ruby_arg<bool> {
@@ -95,15 +95,19 @@ namespace RubyGM { namespace Helper {
         static auto set(mrb_state* , bool b) noexcept { return mrb_bool_value(b); }
         // get mruby
         static auto get(const mrb_value& v) noexcept { return mrb_test(v); }
+        // set mruby
+        template<typename Lam>
+        static auto set(mrb_state*, Lam lam) noexcept { return mrb_bool_value(lam()); }
     };
     // mruby arg to c++: for float
     template<> struct ruby_arg<mrb_float> {
-        // set mruby
-        static auto set(mrb_state *mrb, mrb_float f) noexcept { return mrb_float_value(mrb, f); }
         // get
         static auto get(const mrb_value& v) noexcept { 
             return mrb_float_p(v) ? static_cast<mrb_float>(mrb_float(v)) : static_cast<mrb_float>(mrb_fixnum(v)); 
         }
+        // set mruby
+        template<typename Lam>
+        static auto set(mrb_state* ms, Lam lam) noexcept { return mrb_float_value(ms, lam()); }
     };
     // mruby arg to c++: for int32_t
     template<> struct ruby_arg<int32_t> {
@@ -111,16 +115,25 @@ namespace RubyGM { namespace Helper {
         static auto get(const mrb_value& v) noexcept { 
             return mrb_fixnum_p(v) ?  static_cast<int32_t>(mrb_fixnum(v)) : static_cast<int32_t>(mrb_float(v)); 
         }
+        // set mruby
+        template<typename Lam>
+        static auto set(mrb_state*, Lam lam) noexcept { return mrb_fixnum_value(lam()); }
     };
     // mruby arg to c++: for const char*
     template<> struct ruby_arg<const char*> {
         // get
         static auto get(const mrb_value& v) noexcept { return RSTRING_PTR(v); }
+        // set mruby
+        template<typename Lam>
+        static auto set(mrb_state* ms, Lam lam) noexcept { return mrb_str_new_cstr(ms, lam()); }
     };
     // mruby arg to c++: for void*
     template<> struct ruby_arg<void*> {
         // get
         static auto get(const mrb_value& v) noexcept { return mrb_cptr(v); }
+        // set mruby
+        template<typename Lam>
+        static auto set(mrb_state* ms, Lam lam) noexcept { return mrb_cptr_value(ms, lam()); }
     };
     // -----------------------
     // ADD YOUR OWN TYPE HERE
@@ -136,7 +149,7 @@ namespace RubyGM { namespace Helper {
                 // bind
                 template<typename T> 
                 static inline auto bind(const class_binder<CppClass>& binder, const char* method_name, T method) noexcept {
-                    return method_helper_ex<type_helper<T>::arg<0>::type>::bind(binder, const char* method_name, T method);
+                    return method_helper_ex<type_helper<T>::arg<0>::type>::bind(binder, method_name, method);
                 }
             };
             // method helper for zero arg
@@ -149,22 +162,79 @@ namespace RubyGM { namespace Helper {
                     static const auto real_method(method);
                     // define
                     ::mrb_define_class_method(binder.get_mruby(), binder.get_class(), method_name, [](mrb_state* mrb, mrb_value self) noexcept {
-                        return ruby_arg<type_helper<T>::result_type>::set(mrb, real_method());
+                        return ruby_arg<type_helper<T>::result_type>::set(mrb, real_method);
                     }, MRB_ARGS_NONE());
                 }
             };
-            /*// method helper ex -- obj-ref
-            template<typename T> inline auto method_helper_ex<CppClass&>(const char* method_name,T method) noexcept {
-                using traits = type_helper<T>;
-                // real ctor lambda to avoid capture
-                static const auto real_method(method);
-                ::mrb_define_method(mstate, cla, method_name, [](mrb_state* mrb, mrb_value self) noexcept {
-                    auto& obj = reinterpret_cast<CppClass*>(DATA_PTR(self));
-                    mrb_value* args; int narg;
-                    mrb_get_args(mrb, "*", &args, &narg);
-                    return ruby_arg<type_helper<T>::result_type>::set(mrb, call_helper<traits::arity>::call<traits>(real_method, args));
-                }, MRB_ARGS_REQ(traits::arity));
-            }*/
+            // method helper ex
+            template<typename First> struct method_helper_ex {
+                // bind
+                template<typename T> 
+                static inline auto bind(const class_binder<CppClass>& binder, const char* method_name, T method) noexcept {
+                    // no-arg -> [rb]class-method call [cpp]static-class-function
+                    // real ctor lambda to avoid capture
+                    static const auto real_method(method);
+                    // define
+                    ::mrb_define_class_method(binder.get_mruby(), binder.get_class(), method_name, [](mrb_state* mrb, mrb_value self) noexcept {
+                        mrb_value* args; int narg;
+                        mrb_get_args(mrb, "*", &args, &narg);
+                        // no arg call
+                        auto no_arg_lambda = [args]() noexcept {
+                            using traits = type_helper<T>;
+                            return call_helper<traits::arity>::call<traits>(real_method, args);
+                        };
+                        return ruby_arg<type_helper<T>::result_type>::set(mrb, no_arg_lambda);
+                    }, MRB_ARGS_NONE());
+                }
+            };
+            // method helper ex: for object-ref
+            template<> struct method_helper_ex<CppClass&> {
+                // bind
+                template<typename T> 
+                static inline auto bind(const class_binder<CppClass>& binder, const char* method_name, T method) noexcept {
+                    // no-arg -> [rb]class-method call [cpp]static-class-function
+                    // real ctor lambda to avoid capture
+                    static const auto real_method(method);
+                    // define
+                    ::mrb_define_method(binder.get_mruby(), binder.get_class(), method_name, [](mrb_state* mrb, mrb_value self) noexcept {
+                        auto& obj = *reinterpret_cast<CppClass*>(DATA_PTR(self));
+                        mrb_value* args; int narg;
+                        mrb_get_args(mrb, "*", &args, &narg);
+                        // no arg call
+                        auto no_arg_lambda = [args, &obj]() noexcept {
+                            using traits = type_helper<T>;
+                            return call_helper<traits::arity-1>::call<traits>(real_method, args, obj);
+                        };
+                        return ruby_arg<type_helper<T>::result_type>::set(mrb, no_arg_lambda);
+                    }, MRB_ARGS_NONE());
+                }
+            };
+            // method helper ex: for object-ptr
+            template<> struct method_helper_ex<CppClass*> {
+                // bind
+                template<typename T> 
+                static inline auto bind(const class_binder<CppClass>& binder, const char* method_name, T method) noexcept {
+                    // no-arg -> [rb]class-method call [cpp]static-class-function
+                    // real ctor lambda to avoid capture
+                    static const auto real_method(method);
+                    // define
+                    ::mrb_define_method(binder.get_mruby(), binder.get_class(), method_name, [](mrb_state* mrb, mrb_value self) noexcept {
+                        auto obj = reinterpret_cast<CppClass*>(DATA_PTR(self));
+                        mrb_value* args; int narg;
+                        mrb_get_args(mrb, "*", &args, &narg);
+                        // no arg call
+                        auto no_arg_lambda = [args, obj]() noexcept {
+                            using traits = type_helper<T>;
+                            return call_helper<traits::arity-1>::call<traits>(real_method, args, obj);
+                        };
+                        return ruby_arg<type_helper<T>::result_type>::set(mrb, no_arg_lambda);
+                    }, MRB_ARGS_NONE());
+                }
+            };
+            // method helper ex: for const object-ref
+            template<> struct method_helper_ex<const CppClass&> : method_helper_ex<CppClass&> { };
+            // method helper ex: for const object-ref
+            template<> struct method_helper_ex<const CppClass*> : method_helper_ex<CppClass*> { };
         public:
             // get class
             auto get_class() const noexcept { return classr; }
