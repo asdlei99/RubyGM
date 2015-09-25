@@ -1,0 +1,36 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{ee20c716-5990-43a0-b4eb-fcbaddbb0b4a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{0658bfff-7a5d-43fa-b650-9b046a17613f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="CoreGM">
+      <UniqueIdentifier>{11665e10-d019-448b-9554-80dc32323f7d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="CoreGM\mruby">
+      <UniqueIdentifier>{2fddc254-8813-4dec-b389-674984c7c651}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\src\core\main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\include\core\rubygm.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\core\rubybind.h">
+      <Filter>CoreGM</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\core\mruby\mruby.h">
+      <Filter>CoreGM\mruby</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\core\mruby\mrbconf.h">
+      <Filter>CoreGM\mruby</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

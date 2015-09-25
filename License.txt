@@ -1,0 +1,2 @@
+﻿RubyGM-Core License: 
+  see: ./RubyGM-Core/License.txt
