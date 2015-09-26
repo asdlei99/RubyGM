@@ -50,14 +50,15 @@ auto binder_mruby(mrb_state* mruby) {
     int random_data = 0;
     auto binder = RubyGM::Helper::ruby_binder(mruby);
     {
+        // ctor
         auto classbinder = binder.bind_class("Foo", [](int a, int b) {
             return new(std::nothrow) Foo(a+b);
         });
         // first argument is binded-class pointer/reference -> instance-method
-        classbinder.bind("bar", [](const Foo* obj, int a , int b, int c) noexcept { return obj->bar(a, b, c); });
-        // LAST argument not binded-class pointer -> class-method
+        classbinder.bind("bar", [](Foo& obj, int a, int b, int c) noexcept { return obj.bar(a, b, c); });
+        // first argument not binded-class pointer -> class-method
         classbinder.bind("baz", [](int b) noexcept { return Foo::baz(b, 5, 7); });
-        // limited lambda working(do not capture object because of static lambda)
+        // limited lambda working(do not capture value-passed-object because of static lambda)
         classbinder.bind("baa", [&]() noexcept { return Foo::baz(random_data, 5, 7); });
     }
     {
@@ -66,6 +67,7 @@ auto binder_mruby(mrb_state* mruby) {
         });
     }
 }
+
 
 // main
 int main(int argc, char* argv[]) {

@@ -11,9 +11,12 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\src\core\graphics.cpp" />
     <ClCompile Include="..\src\core\main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\include\core\graphics\graphics.h" />
+    <ClInclude Include="..\include\core\graphics\sprite.h" />
     <ClInclude Include="..\include\core\mruby\mrbconf.h" />
     <ClInclude Include="..\include\core\mruby\mruby.h" />
     <ClInclude Include="..\include\core\rubybind.h" />
@@ -50,7 +53,7 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>$(SolutionDir)\include\;$(SolutionDir)\include\core\mruby\;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)\include\;$(SolutionDir)\include\core\mruby\;$(SolutionDir)..\LongUI\include\;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)$(Configuration)\;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">

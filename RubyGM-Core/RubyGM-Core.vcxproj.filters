@@ -13,9 +13,15 @@
     <Filter Include="CoreGM\mruby">
       <UniqueIdentifier>{2fddc254-8813-4dec-b389-674984c7c651}</UniqueIdentifier>
     </Filter>
+    <Filter Include="CoreGM\Graphics">
+      <UniqueIdentifier>{9b35dec6-ef0c-4b5a-944a-2e4c332d84fa}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\core\main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\graphics.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -31,6 +37,12 @@
     </ClInclude>
     <ClInclude Include="..\include\core\mruby\mrbconf.h">
       <Filter>CoreGM\mruby</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\core\graphics\sprite.h">
+      <Filter>CoreGM\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\core\graphics\graphics.h">
+      <Filter>CoreGM\Graphics</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

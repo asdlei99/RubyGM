@@ -78,7 +78,7 @@ namespace RubyGM { namespace Helper {
     // type helper for pointer type to obj type
     template<typename T> struct type_helper_ptr<T*> { using type = typename type_helper_ptr<T>::type; };
     // ruby binder
-    auto ruby_binder() noexcept { assert(!"bad overload"); return 0ui32; };
+    static inline auto ruby_binder() noexcept { assert(!"bad overload"); return 0ui32; };
     // ruby arg to c++
     template<typename T> struct ruby_arg { };
     // ruby arg to c++: for void
@@ -162,6 +162,7 @@ namespace RubyGM { namespace Helper {
                     static const auto real_method(method);
                     // define
                     ::mrb_define_class_method(binder.get_mruby(), binder.get_class(), method_name, [](mrb_state* mrb, mrb_value self) noexcept {
+                        (void)self;
                         return ruby_arg<type_helper<T>::result_type>::set(mrb, real_method);
                     }, MRB_ARGS_NONE());
                 }
@@ -176,6 +177,7 @@ namespace RubyGM { namespace Helper {
                     static const auto real_method(method);
                     // define
                     ::mrb_define_class_method(binder.get_mruby(), binder.get_class(), method_name, [](mrb_state* mrb, mrb_value self) noexcept {
+                        (void)self;
                         mrb_value* args; int narg;
                         mrb_get_args(mrb, "*", &args, &narg);
                         // no arg call
@@ -268,17 +270,17 @@ namespace RubyGM { namespace Helper {
         mruby_binder(const mruby_binder& b) noexcept : mstate(b.mstate) { assert(mstate && "bad argument"); };
         // bind class
         template<typename T> inline auto bind_class(const char* class_name, T ctor) noexcept {
-            return this->bind_class(class_name, ctor, mstate->kernel_module);
+            return this->bind_class(class_name, ctor, mstate->kernel_module, mstate->object_class);
         }
-        // bind class with outer
-        template<typename T> inline auto bind_class(const char* class_name, T ctor, RClass* outer) noexcept {
+        // bind class with outer and super and deleter
+        template<typename T> inline auto bind_class(const char* class_name, T ctor, RClass* outer, RClass* super) noexcept {
 #ifdef _DEBUG
             static bool isfirst = true;
             assert(isfirst && "cannot call twice with same template");
             isfirst = false;
 #endif
             // define class
-            auto cla = ::mrb_define_class_under(mstate, outer, class_name, mstate->object_class);
+            auto cla = ::mrb_define_class_under(mstate, outer, class_name, super);
             assert(cla && "error from mruby or bad action");
             MRB_SET_INSTANCE_TT(cla, MRB_TT_DATA);
             using traits = type_helper<T>;
@@ -307,5 +309,5 @@ namespace RubyGM { namespace Helper {
         mrb_state*              mstate = nullptr;
     };
     // overload for mruby binder
-    auto ruby_binder(mrb_state* data) noexcept { return mruby_binder(data); }
+    static inline auto ruby_binder(mrb_state* data) noexcept { return mruby_binder(data); }
 }}

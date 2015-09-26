@@ -24,39 +24,7 @@
 * OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#ifdef _MSC_VER
-// M$
-#pragma warning(disable: 4290)
-#pragma warning(disable: 4200)
-// 无视部分警告等级4
-#pragma warning(disable: 4505) // unused function
-#pragma warning(disable: 4201) // nameless struct/union
-#pragma warning(disable: 4706) // assignment within conditional expression
-#pragma warning(disable: 4127) // assignment within constant expression
-#endif
-
-#ifndef _DEBUG
-#define NDEBUG
-#endif
-
-// C library
-#include <cstddef>
-#include <cstdint>
-#include <cstdlib>
-#include <cstdio>
-#include <cassert>
-
-// C++ library
-#include <new>
-
-// Windows library
-#include <d2d1_1.h>
-
-// MRuby
-#define ENABLE_DEBUG
-#include "mruby/mruby.h"
-
-// RubyGM-Core
-#include "rubybind.h"
-#include <core/graphics/sprite.h>
-#include <core/graphics/graphics.h>
+// rubygm namespace
+namespace RubyGM { 
+    
+}
