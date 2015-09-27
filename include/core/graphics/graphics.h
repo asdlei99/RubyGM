@@ -24,9 +24,14 @@
 * OTHER DEALINGS IN THE SOFTWARE.
 */
 
+// graphics
+#include "sprite.h"
+#include "tiledmap.h"
+
+
 // rubygm namespace
 namespace RubyGM { 
-    // graphics class - rubygm main singleton manager
+    // graphics class 
     class CGMGraphics {
     public:
         // ctor
@@ -37,17 +42,8 @@ namespace RubyGM {
         CGMGraphics(const CGMGraphics&) = delete;
         // copy dtor
         CGMGraphics(CGMGraphics&&) = delete;
-    public:
-        // initialize
-        auto Initialize() noexcept->HRESULT;
-        // uninitialize
-        void Uninitialize() noexcept;
     private:
         // sprite list
         CGMSprite*              m_pHeader = nullptr;
-    public:
-        // singleton instance
-        static  CGMGraphics     s_instance;
     };
 }
-#define GMGraphics (RubyGM::CGMGraphics::s_instance)

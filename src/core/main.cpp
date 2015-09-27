@@ -32,9 +32,6 @@ private:
     size_t data = 0;
 };
 
-
-
-
 // ruby script
 static const char* const rbscript = u8R"rb(
 puts "Hello, World!"
@@ -44,11 +41,17 @@ p Foo.baa.class
 p Foo.baz(9).class
 p a.bar 1,2,3
 a = Foo2.new "sad", 120, 0.0, 0, 1, 3.1416
+puts ""
+puts ""
+rubygm_main {
+  p 987123
+}
 )rb";
 
+// call binder
 auto binder_mruby(mrb_state* mruby) {
     int random_data = 0;
-    auto binder = RubyGM::Helper::ruby_binder(mruby);
+    auto binder = BindER::ruby_binder(mruby);
     {
         // ctor
         auto classbinder = binder.bind_class("Foo", [](int a, int b) {
@@ -71,7 +74,9 @@ auto binder_mruby(mrb_state* mruby) {
 
 // main
 int main(int argc, char* argv[]) {
-    auto mruby = ::mrb_open();
+    RubyGM::CGMSingleton<RubyGM::CGMManager>::s_instance.Create();
+    GMManager.mruby = ::mrb_open();
+    auto mruby = GMManager.mruby;
     if (mruby) {
         binder_mruby(mruby);
         ::mrb_load_string(mruby, rbscript);
@@ -79,5 +84,8 @@ int main(int argc, char* argv[]) {
         mruby = nullptr;
     }
     std::getchar();
+    RubyGM::CGMSingleton<RubyGM::CGMManager>::s_instance.Destory();
     return 0;
 }
+
+RubyGM::CGMSingleton<RubyGM::CGMManager> RubyGM::CGMSingleton<RubyGM::CGMManager>::s_instance;

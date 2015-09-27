@@ -24,45 +24,21 @@
 * OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#ifdef _MSC_VER
-// M$
-#pragma warning(disable: 4290)
-#pragma warning(disable: 4200)
-// 无视部分警告等级4
-#pragma warning(disable: 4505) // unused function
-#pragma warning(disable: 4201) // nameless struct/union
-#pragma warning(disable: 4706) // assignment within conditional expression
-#pragma warning(disable: 4127) // assignment within constant expression
-#endif
-
-#ifndef _DEBUG
-#define NDEBUG
-#endif
-
-// C library
-#include <cstddef>
-#include <cstdint>
-#include <cstdlib>
-#include <cstdio>
-#include <cassert>
-
-// C++ library
-#include <new>
-
-// Windows library
-#include <d2d1_1.h>
-
-// longui
-//#define LONGUI_WITH_DEFAULT_HEADER
-//#include <LongUI.h>
-// MRuby
-#define ENABLE_DEBUG
-#include "mruby/mruby.h"
-
-// BindER
-#include "../../../BindER/bindenvruby.h"
-
-// RubyGM-Core
-#include <core/structure/structure.h>
-#include <core/graphics/graphics.h>
-#include "rubygmmanager.h"
+// rubygm namespace
+namespace RubyGM { 
+    // titled map renderer
+    class CGMTitledMap {
+    public:
+        // ctor
+        CGMTitledMap() noexcept {}
+        // dtor
+        ~CGMTitledMap() noexcept {}
+        // move ctor
+        CGMTitledMap(const CGMTitledMap&) = delete;
+        // copy dtor
+        CGMTitledMap(CGMTitledMap&&) = delete;
+    private:
+        // raw map data
+        RawTitledMap*           m_pRawMapData = nullptr;
+    };
+}

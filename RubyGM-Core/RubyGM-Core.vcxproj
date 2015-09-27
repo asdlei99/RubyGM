@@ -17,10 +17,12 @@
   <ItemGroup>
     <ClInclude Include="..\include\core\graphics\graphics.h" />
     <ClInclude Include="..\include\core\graphics\sprite.h" />
+    <ClInclude Include="..\include\core\graphics\tiledmap.h" />
     <ClInclude Include="..\include\core\mruby\mrbconf.h" />
     <ClInclude Include="..\include\core\mruby\mruby.h" />
-    <ClInclude Include="..\include\core\rubybind.h" />
     <ClInclude Include="..\include\core\rubygm.h" />
+    <ClInclude Include="..\include\core\rubygmmanager.h" />
+    <ClInclude Include="..\include\core\structure\structure.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{DE8D8120-F036-43BC-8CFC-A3B27BC45FFC}</ProjectGuid>

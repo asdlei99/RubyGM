@@ -16,6 +16,9 @@
     <Filter Include="CoreGM\Graphics">
       <UniqueIdentifier>{9b35dec6-ef0c-4b5a-944a-2e4c332d84fa}</UniqueIdentifier>
     </Filter>
+    <Filter Include="CoreGM\DataStructure">
+      <UniqueIdentifier>{18bf0a03-6feb-4e18-be5c-126b387089e3}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\core\main.cpp">
@@ -29,9 +32,6 @@
     <ClInclude Include="..\include\core\rubygm.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\core\rubybind.h">
-      <Filter>CoreGM</Filter>
-    </ClInclude>
     <ClInclude Include="..\include\core\mruby\mruby.h">
       <Filter>CoreGM\mruby</Filter>
     </ClInclude>
@@ -43,6 +43,15 @@
     </ClInclude>
     <ClInclude Include="..\include\core\graphics\graphics.h">
       <Filter>CoreGM\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\core\graphics\tiledmap.h">
+      <Filter>CoreGM\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\core\structure\structure.h">
+      <Filter>CoreGM\DataStructure</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\core\rubygmmanager.h">
+      <Filter>CoreGM</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
