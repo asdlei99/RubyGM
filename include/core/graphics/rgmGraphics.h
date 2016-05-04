@@ -24,25 +24,13 @@
 * OTHER DEALINGS IN THE SOFTWARE.
 */
 
+// graphics
+#include <d2d1_3.h>
+
 // rubygm namespace
-namespace RubyGM { 
-    // sprite, game graphics element
-    class CGMSprite {
-    public:
-        // ctor
-        CGMSprite() noexcept;
-        // dtor
-        ~CGMSprite() noexcept;
-        // copy ctor
-        CGMSprite(const CGMSprite&) =delete;
-        // move ctor
-        CGMSprite(CGMSprite&&) =delete;
-    private:
-        // prev sprite for list
-        CGMSprite*          m_pPrev = nullptr;
-        // next sprite for list
-        CGMSprite*          m_pNext = nullptr;
-        // world transform
-        D2D1_MATRIX_3X2_F   m_matWorld = D2D1::Matrix3x2F::Identity();
-    };
+namespace RubyGM {
+    // render context
+    struct GMRednerContext : ID2D1RenderTarget { using Super = ID2D1RenderTarget; };
+    // brush
+    struct GMBrush : ID2D1Brush { using Super = ID2D1Brush; };
 }

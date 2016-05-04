@@ -24,21 +24,46 @@
 * OTHER DEALINGS IN THE SOFTWARE.
 */
 
+#include "../rgmDrawable.h"
+#include "../../Util/rgmUtil.h"
+#include <utility>
+
 // rubygm namespace
 namespace RubyGM { 
-    // titled map renderer
-    class CGMTitledMap {
-    public:
-        // ctor
-        CGMTitledMap() noexcept {}
-        // dtor
-        ~CGMTitledMap() noexcept {}
-        // move ctor
-        CGMTitledMap(const CGMTitledMap&) = delete;
-        // copy dtor
-        CGMTitledMap(CGMTitledMap&&) = delete;
-    private:
-        // raw map data
-        RawTitledMap*           m_pRawMapData = nullptr;
-    };
+    // Drawable namespace
+    namespace Drawable {
+        // line 
+        class Line : public Base {
+            // super class
+            using Super = Base;
+        public:
+            // create this
+            static auto Create() noexcept ->Line*;
+            // create this
+            static auto CreateSP() noexcept {
+                return std::move(RubyGM::CGMPtr<Drawable::Line>(std::move(Line::Create())));
+            }
+        private:
+            // ctor
+            Line() noexcept;
+            // ctor
+            ~Line() noexcept;
+        public:
+            // render object
+            void Render(GMRednerContext& rc) const noexcept override;
+            // recreate
+            auto Recreate() noexcept -> uint32_t;
+        private:
+            // dispose object
+            void dispose() noexcept override;
+        public:
+            // point 0
+            RubyGM::Point2F         point0;
+            // point 1
+            RubyGM::Point2F         point1;
+            // stroke width
+            float                   stroke_width = 1.f;
+        private:
+        };
+    }
 }

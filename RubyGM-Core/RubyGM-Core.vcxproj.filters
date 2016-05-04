@@ -16,42 +16,66 @@
     <Filter Include="CoreGM\Graphics">
       <UniqueIdentifier>{9b35dec6-ef0c-4b5a-944a-2e4c332d84fa}</UniqueIdentifier>
     </Filter>
-    <Filter Include="CoreGM\DataStructure">
+    <Filter Include="CoreGM\Util">
       <UniqueIdentifier>{18bf0a03-6feb-4e18-be5c-126b387089e3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="CoreGM\Graphics\Drawable">
+      <UniqueIdentifier>{a8fa6730-fe49-462e-8e5e-4e8e77fa65b3}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\core\main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\core\graphics.cpp">
+    <ClCompile Include="..\src\core\rgmGraphics.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\rgmManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\rgmDrawable.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\rgmSprite.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\include\core\rubygm.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\include\core\mruby\mruby.h">
       <Filter>CoreGM\mruby</Filter>
     </ClInclude>
     <ClInclude Include="..\include\core\mruby\mrbconf.h">
       <Filter>CoreGM\mruby</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\core\graphics\sprite.h">
+    <ClInclude Include="..\include\core\graphics\rgmGraphics.h">
       <Filter>CoreGM\Graphics</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\core\graphics\graphics.h">
+    <ClInclude Include="..\include\core\graphics\rgmSprite.h">
       <Filter>CoreGM\Graphics</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\core\graphics\tiledmap.h">
+    <ClInclude Include="..\include\core\graphics\rgmTilemap.h">
       <Filter>CoreGM\Graphics</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\core\structure\structure.h">
-      <Filter>CoreGM\DataStructure</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\core\rubygmmanager.h">
+    <ClInclude Include="..\include\core\rgmmgr.h">
       <Filter>CoreGM</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\core\Util\rgmUtil.h">
+      <Filter>CoreGM\Util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\core\Util\rgmRuby.h">
+      <Filter>CoreGM\Util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\core\graphics\rgmDrawable.h">
+      <Filter>CoreGM\Graphics\Drawable</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\core\graphics\drawable\rgmLine.h">
+      <Filter>CoreGM\Graphics\Drawable</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\core\Util\rgmStruct.h">
+      <Filter>CoreGM\Util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\core\rubygm.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

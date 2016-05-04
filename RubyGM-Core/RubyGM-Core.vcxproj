@@ -11,22 +11,30 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\src\core\graphics.cpp" />
+    <ClCompile Include="..\src\core\rgmDrawable.cpp" />
+    <ClCompile Include="..\src\core\rgmGraphics.cpp" />
     <ClCompile Include="..\src\core\main.cpp" />
+    <ClCompile Include="..\src\core\rgmManager.cpp" />
+    <ClCompile Include="..\src\core\rgmSprite.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\include\core\graphics\graphics.h" />
-    <ClInclude Include="..\include\core\graphics\sprite.h" />
-    <ClInclude Include="..\include\core\graphics\tiledmap.h" />
+    <ClInclude Include="..\include\core\graphics\drawable\rgmLine.h" />
+    <ClInclude Include="..\include\core\graphics\rgmDrawable.h" />
+    <ClInclude Include="..\include\core\graphics\rgmGraphics.h" />
+    <ClInclude Include="..\include\core\graphics\rgmSprite.h" />
+    <ClInclude Include="..\include\core\graphics\rgmTilemap.h" />
     <ClInclude Include="..\include\core\mruby\mrbconf.h" />
     <ClInclude Include="..\include\core\mruby\mruby.h" />
+    <ClInclude Include="..\include\core\rgmmgr.h" />
     <ClInclude Include="..\include\core\rubygm.h" />
-    <ClInclude Include="..\include\core\rubygmmanager.h" />
-    <ClInclude Include="..\include\core\structure\structure.h" />
+    <ClInclude Include="..\include\core\Util\rgmRuby.h" />
+    <ClInclude Include="..\include\core\Util\rgmStruct.h" />
+    <ClInclude Include="..\include\core\Util\rgmUtil.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{DE8D8120-F036-43BC-8CFC-A3B27BC45FFC}</ProjectGuid>
     <RootNamespace>RubyGMCore</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0.10586.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">

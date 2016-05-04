@@ -24,62 +24,46 @@
 * OTHER DEALINGS IN THE SOFTWARE.
 */
 
+#include <Windows.h>
+#include <cstdint>
+#include "graphics/rgmGraphics.h"
+#include "Util/rgmUtil.h"
+#include "Util/rgmRuby.h"
+
 // rubygm namespace
-namespace RubyGM { 
+namespace RubyGM {
+    // Drawable::Base
+    namespace Drawable { class Base; }
     // rubygm manager - rubygm main singleton manager
     class CGMManager {
     public:
         // ctor
-        CGMManager() noexcept {}
+        CGMManager() noexcept;
         // dtor
-        ~CGMManager() noexcept {}
+        ~CGMManager() noexcept;
         // move ctor
         CGMManager(const CGMManager&) = delete;
         // copy dtor
         CGMManager(CGMManager&&) = delete;
     public:
         // initialize
-        auto Initialize() noexcept->HRESULT;
+        auto Initialize() noexcept ->HRESULT;
         // uninitialize
         void Uninitialize() noexcept;
+        // get draw-able objects tail
+        auto GetDrawableTail() const noexcept { return m_pTail; }
     private:
-        // rubygm graphics
-        CGMGraphics             m_oGraphics;
         // mruby state
         mrb_state*              m_pMRuby = nullptr;
+        // head of drawable objects
+        Drawable::Base*         m_pHead = nullptr;
+        // tail of drawable objects
+        Drawable::Base*         m_pTail = nullptr;
     public:
         //
         mrb_state*              mruby = nullptr;
     };
-    // singleton
-    template<typename T>
-    struct CGMSingleton {
-        // ptr
-        auto Ptr() noexcept { return reinterpret_cast<T*>(this->buffer); }
-        // create
-        template<typename ...Args> auto Create(Args... args) {
-#ifdef _DEBUG
-            assert(state == 0 && "create this after destory!");
-            state++;
-#endif
-            return new(this->buffer) T(args...);
-        }
-        // destory
-        auto Destory() noexcept {
-#ifdef _DEBUG
-            assert(state != 0 && "destory this after create!");
-            --state;
-#endif
-            this->Ptr()->~T();
-        }
-        // buffer for  singleton
-        alignas(T)  char    buffer[sizeof(T)];
-#ifdef _DEBUG
-        // state
-        size_t              state = 0;
-#endif
-        // singleton
-        static CGMSingleton<T>      s_instance;
-    };
-#define GMManager (*RubyGM::CGMSingleton<RubyGM::CGMManager>::s_instance.Ptr())
 }
+
+// RubyGM Manager
+#define GMManager (*RubyGM::CGMSingleton<RubyGM::CGMManager>::s_instance.Ptr())

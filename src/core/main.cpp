@@ -1,9 +1,10 @@
-﻿#include <core/rubygm.h>
-#include <mruby/compile.h>
+﻿#pragma warning(disable: 4290)
+#pragma warning(disable: 4200)
 
-__declspec(noinline) auto noinline_check() {
-    std::printf("");
-}
+#include <core/rubygm.h>
+#include <core/rgmmgr.h>
+#include <mruby/compile.h>
+#include "../../../BindER/bindenvruby.h"
 
 class Foo {
 public:
@@ -12,10 +13,10 @@ public:
 public:
     // bar
     auto bar(int a , int b, int c) const {
-        noinline_check(); printf("[%s]%d ? %d\r\n", __FUNCTION__, a, a*b + c); return 0.f;
+        printf("[%s]%d ? %d\r\n", __FUNCTION__, a, a*b + c); return 0.f;
     }// bar
     static auto baz(int a , int b , int c) {
-        noinline_check();  printf("[%s]%d ? %d\r\n", __FUNCTION__, a, a*b + c); return 987;
+        printf("[%s]%d ? %d\r\n", __FUNCTION__, a, a*b + c); return 987;
     }
 private:
     // data
@@ -35,6 +36,7 @@ private:
 // ruby script
 static const char* const rbscript = u8R"rb(
 puts "Hello, World!"
+p Fiber.class
 a = 0
 a = Foo.new 0, 1
 p Foo.baa.class
@@ -47,6 +49,8 @@ rubygm_main {
   p 987123
 }
 )rb";
+
+int test() noexcept;
 
 // call binder
 auto binder_mruby(mrb_state* mruby) {
@@ -65,7 +69,7 @@ auto binder_mruby(mrb_state* mruby) {
         classbinder.bind("baa", [&]() noexcept { return Foo::baz(random_data, 5, 7); });
     }
     {
-        auto classbinder = binder.bind_class("Foo2", [](const char* v, int32_t a, float b, int32_t c, int32_t d, float f) {
+        auto classbinder = binder.bind_class("Foo2", [](const char* , int32_t , float , int32_t , int32_t , float ) {
             return new(std::nothrow) Foo2();
         });
     }
@@ -74,18 +78,25 @@ auto binder_mruby(mrb_state* mruby) {
 
 // main
 int main(int argc, char* argv[]) {
+    // 构造单例
     RubyGM::CGMSingleton<RubyGM::CGMManager>::s_instance.Create();
-    GMManager.mruby = ::mrb_open();
-    auto mruby = GMManager.mruby;
-    if (mruby) {
-        binder_mruby(mruby);
-        ::mrb_load_string(mruby, rbscript);
-        ::mrb_close(mruby);
-        mruby = nullptr;
+    // 初始化
+    if (SUCCEEDED(GMManager.Initialize())) {
+        test();
+        //
+        GMManager.mruby = ::mrb_open();
+        auto& mruby = GMManager.mruby;
+        if (mruby) {
+            binder_mruby(mruby);
+            ::mrb_load_string(mruby, rbscript);
+            ::mrb_close(mruby);
+            mruby = nullptr;
+        }
+        std::getchar();
+        // 反初始化
+        GMManager.Uninitialize();
     }
-    std::getchar();
+    // 析构单例
     RubyGM::CGMSingleton<RubyGM::CGMManager>::s_instance.Destory();
     return 0;
 }
-
-RubyGM::CGMSingleton<RubyGM::CGMManager> RubyGM::CGMSingleton<RubyGM::CGMManager>::s_instance;

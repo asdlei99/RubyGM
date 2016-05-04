@@ -24,26 +24,23 @@
 * OTHER DEALINGS IN THE SOFTWARE.
 */
 
-// graphics
-#include "sprite.h"
-#include "tiledmap.h"
-
+#include "../Util/rgmUtil.h"
 
 // rubygm namespace
 namespace RubyGM { 
-    // graphics class 
-    class CGMGraphics {
+    // titled map renderer
+    class CGMTitledMap {
     public:
         // ctor
-        CGMGraphics() noexcept {}
+        CGMTitledMap() noexcept {}
         // dtor
-        ~CGMGraphics() noexcept {}
+        ~CGMTitledMap() noexcept {}
         // move ctor
-        CGMGraphics(const CGMGraphics&) = delete;
+        CGMTitledMap(const CGMTitledMap&) = delete;
         // copy dtor
-        CGMGraphics(CGMGraphics&&) = delete;
+        CGMTitledMap(CGMTitledMap&&) = delete;
     private:
-        // sprite list
-        CGMSprite*              m_pHeader = nullptr;
+        // raw map data
+        RawTitledMap*           m_pRawMapData = nullptr;
     };
 }

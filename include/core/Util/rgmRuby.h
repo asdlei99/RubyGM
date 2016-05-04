@@ -24,16 +24,18 @@
 * OTHER DEALINGS IN THE SOFTWARE.
 */
 
-// rubygm namespace
-namespace RubyGM { 
-    // release in safe way
-    template<typename T> inline auto SafeRelease(T*& obj) noexcept {
-        if (obj) obj->Release(); obj = nullptr;
-    }
-    // call addref in safe way
-    template<class T> inline auto SafeAcquire(T* obj) {
-        if (obj) obj->AddRef();
-        return obj;
-    }
-}
+#ifdef _MSC_VER
+// 无视部分警告等级4
+#pragma warning(disable: 4505) // unused function
+#pragma warning(disable: 4201) // nameless struct/union
+#pragma warning(disable: 4706) // assignment within conditional expression
+#pragma warning(disable: 4127) // assignment within constant expression
+#endif
 
+#ifndef _DEBUG
+#define NDEBUG
+#endif
+
+// MRuby
+#define ENABLE_DEBUG
+#include "../mruby/mruby.h"

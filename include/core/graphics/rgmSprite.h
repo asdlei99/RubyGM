@@ -24,26 +24,38 @@
 * OTHER DEALINGS IN THE SOFTWARE.
 */
 
+
+#include <cstdint>
+#include "rgmDrawable.h"
+#include "../Util/rgmUtil.h"
+#include "../Util/rgmStruct.h"
+
 // rubygm namespace
-namespace RubyGM {
-#pragma pack(push)
-#pragma pack(1)
-    // raw titled map data
-    struct RawTitledMap {
-        // this data length
-        uint32_t        data_length;
-        // reserved data
-        uint32_t        data_reserved;
-        // width of tile
-        uint16_t        tile_width;
-        // height of tile
-        uint16_t        tile_height;
-        // width of map
-        uint16_t        map_width;
-        // height of map
-        uint16_t        map_height;
-        // map real data
-        uint8_t         map_data[0];
+namespace RubyGM { 
+    // sprite, game graphics element
+    class CGMSprite {
+    public:
+        // set drawable object
+        template<typename T> void SetDrawable(const T& obj) noexcept {
+            m_spDrawable = obj;
+        }
+        // set drawable object
+        template<typename T> void SetDrawable(T&& obj) noexcept {
+            m_spDrawable = std::move(obj);
+        }
+        // ctor
+        CGMSprite() noexcept;
+        // dtor
+        ~CGMSprite() noexcept;
+    protected:
+        // copy ctor
+        CGMSprite(const CGMSprite&) =delete;
+        // move ctor
+        CGMSprite(CGMSprite&&) =delete;
+    protected:
+        // drawable object
+        CGMPtr<Drawable::Base>  m_spDrawable = nullptr;
+        // world transform
+        Matrix3X2F              m_matWorld;
     };
-#pragma pack(pop)
 }
