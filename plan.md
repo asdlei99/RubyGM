@@ -8,6 +8,7 @@
     - Rect 矩形/圆角矩形
     - Ellipse 椭圆
     - Bitmap 位图
+    - Textlayout 文本布局
 
 ----
 

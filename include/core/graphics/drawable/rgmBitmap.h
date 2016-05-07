@@ -24,18 +24,25 @@
 * OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#ifdef _MSC_VER
-// 无视部分警告等级4
-#pragma warning(disable: 4505) // unused function
-#pragma warning(disable: 4201) // nameless struct/union
-#pragma warning(disable: 4706) // assignment within conditional expression
-#pragma warning(disable: 4127) // assignment within constant expression
-#endif
+#include <cstdint>
 
-#ifndef _DEBUG
-#define NDEBUG
-#endif
-
-// MRuby
-#define ENABLE_DEBUG
-#include "../mruby/mruby.h"
+// rubygm namespace
+namespace RubyGM {
+    // resource namespace
+    namespace Resource {
+        // bitmap resource
+        class Bitmap {
+        public:
+            
+            // get width
+            auto GetWidth() const noexcept { return m_uWidth; }
+            // get height
+            auto GetHeight() const noexcept { return m_uHeight; }
+        private:
+            // width of bitmap
+            uint32_t            m_uWidth = 0;
+            // height of bitmap
+            uint32_t            m_uHeight = 0;
+        };
+    }
+}

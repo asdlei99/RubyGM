@@ -22,6 +22,15 @@
     <Filter Include="CoreGM\Graphics\Drawable">
       <UniqueIdentifier>{a8fa6730-fe49-462e-8e5e-4e8e77fa65b3}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Drawable">
+      <UniqueIdentifier>{697872aa-f1f5-4db5-ade5-714aea2dafa9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="CoreGM\Text">
+      <UniqueIdentifier>{f6191e17-4a1d-4bd6-972e-93809e2f3d90}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="CoreGM\Resource">
+      <UniqueIdentifier>{cd95a8dc-0485-4024-89bd-59ceb9710043}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\core\main.cpp">
@@ -30,14 +39,17 @@
     <ClCompile Include="..\src\core\rgmGraphics.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\core\rgmManager.cpp">
+    <ClCompile Include="..\src\core\rgmSprite.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\rgmFramework.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\src\core\rgmDrawable.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Drawable</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\core\rgmSprite.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="..\src\core\rgmTextlayout.cpp">
+      <Filter>Source Files\Drawable</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -56,9 +68,6 @@
     <ClInclude Include="..\include\core\graphics\rgmTilemap.h">
       <Filter>CoreGM\Graphics</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\core\rgmmgr.h">
-      <Filter>CoreGM</Filter>
-    </ClInclude>
     <ClInclude Include="..\include\core\Util\rgmUtil.h">
       <Filter>CoreGM\Util</Filter>
     </ClInclude>
@@ -68,14 +77,29 @@
     <ClInclude Include="..\include\core\graphics\rgmDrawable.h">
       <Filter>CoreGM\Graphics\Drawable</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\core\graphics\drawable\rgmLine.h">
-      <Filter>CoreGM\Graphics\Drawable</Filter>
-    </ClInclude>
     <ClInclude Include="..\include\core\Util\rgmStruct.h">
       <Filter>CoreGM\Util</Filter>
     </ClInclude>
     <ClInclude Include="..\include\core\rubygm.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\core\Util\rgmImpl.h">
+      <Filter>CoreGM\Util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\core\graphics\drawable\rgmTextlayout.h">
+      <Filter>CoreGM\Graphics\Drawable</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\core\graphics\drawable\rgmLine.h">
+      <Filter>CoreGM\Graphics\Drawable</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\core\Text\rgmTextDetail.h">
+      <Filter>CoreGM\Text</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\core\graphics\drawable\rgmBitmap.h">
+      <Filter>CoreGM\Graphics\Drawable</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\core\resource\rgmResource.h">
+      <Filter>CoreGM\Resource</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

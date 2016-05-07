@@ -1,6 +1,6 @@
 ﻿#pragma once
 /**
-* Copyright (c) 2015-2015 dustpg   mailto:dustpg@gmail.com
+* Copyright (c) 2015-2016 dustpg   mailto:dustpg@gmail.com
 *
 * Permission is hereby granted, free of charge, to any person
 * obtaining a copy of this software and associated documentation
@@ -24,7 +24,7 @@
 * OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#include "../Util/rgmUtil.h"
+#include "../Util/rgmStruct.h"
 
 // rubygm namespace
 namespace RubyGM { 

@@ -12,12 +12,15 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\core\rgmDrawable.cpp" />
+    <ClCompile Include="..\src\core\rgmFramework.cpp" />
     <ClCompile Include="..\src\core\rgmGraphics.cpp" />
     <ClCompile Include="..\src\core\main.cpp" />
-    <ClCompile Include="..\src\core\rgmManager.cpp" />
     <ClCompile Include="..\src\core\rgmSprite.cpp" />
+    <ClCompile Include="..\src\core\rgmTextlayout.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\include\core\graphics\drawable\rgmBitmap.h" />
+    <ClInclude Include="..\include\core\graphics\drawable\rgmTextlayout.h" />
     <ClInclude Include="..\include\core\graphics\drawable\rgmLine.h" />
     <ClInclude Include="..\include\core\graphics\rgmDrawable.h" />
     <ClInclude Include="..\include\core\graphics\rgmGraphics.h" />
@@ -25,8 +28,10 @@
     <ClInclude Include="..\include\core\graphics\rgmTilemap.h" />
     <ClInclude Include="..\include\core\mruby\mrbconf.h" />
     <ClInclude Include="..\include\core\mruby\mruby.h" />
-    <ClInclude Include="..\include\core\rgmmgr.h" />
+    <ClInclude Include="..\include\core\resource\rgmResource.h" />
     <ClInclude Include="..\include\core\rubygm.h" />
+    <ClInclude Include="..\include\core\Text\rgmTextDetail.h" />
+    <ClInclude Include="..\include\core\Util\rgmImpl.h" />
     <ClInclude Include="..\include\core\Util\rgmRuby.h" />
     <ClInclude Include="..\include\core\Util\rgmStruct.h" />
     <ClInclude Include="..\include\core\Util\rgmUtil.h" />
@@ -41,14 +46,14 @@
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
-    <CharacterSet>MultiByte</CharacterSet>
+    <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
-    <CharacterSet>MultiByte</CharacterSet>
+    <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -76,10 +81,11 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>libmruby.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -89,12 +95,14 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>libmruby.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

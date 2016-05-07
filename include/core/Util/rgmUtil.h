@@ -1,6 +1,6 @@
 ﻿#pragma once
 /**
-* Copyright (c) 2015-2015 dustpg   mailto:dustpg@gmail.com
+* Copyright (c) 2015-2016 dustpg   mailto:dustpg@gmail.com
 *
 * Permission is hereby granted, free of charge, to any person
 * obtaining a copy of this software and associated documentation
@@ -31,6 +31,36 @@
 
 // rubygm namespace
 namespace RubyGM {
+    // set last error code
+    void SetLastErrorCode(uint32_t code) noexcept;
+    // set last error code
+    auto GetLastErrorCode() noexcept->uint32_t;
+    // Bit Array
+    template<typename T> class CGMBitArray {
+    public:
+        // bit wide
+        enum : size_t { LENGTH = sizeof(T) * CHAR_BIT };
+        // ctor
+        CGMBitArray() noexcept {};
+        // ctor
+        CGMBitArray(T v) noexcept : m_data(v) {};
+        // dtor
+        ~CGMBitArray() noexcept {};
+        // is true or fasle
+        auto Test(uint32_t index) const noexcept { assert(index<LENGTH); return !!(m_data & (1 << index)); }
+        // set to true
+        auto SetTrue(uint32_t index) noexcept { assert(index<LENGTH); m_data |= (1 << index); };
+        // set to false
+        auto SetFalse(uint32_t index) noexcept { assert(index<LENGTH); m_data &= ~(1 << index); };
+        // set to NOT
+        auto SetNot(uint32_t index) noexcept { assert(index<LENGTH); m_data ^= (1 << index); };
+        // set to???
+        template<typename V>
+        auto SetTo(uint32_t index, V value) noexcept { assert(index<LENGTH); this->SetFalse(index); m_data |= (!!(value) << index); }
+    private:
+        // data for bit-array
+        T           m_data = T(0);
+    };
     // singleton
     template<typename T>
     struct CGMSingleton {
@@ -107,6 +137,8 @@ namespace RubyGM {
             obj.m_pObject = nullptr;
             return *this; 
         }
+        // bool
+        operator bool() const noexcept { return m_pObject != nullptr; }
     private:
         // zero
         void zero() noexcept { m_pObject = nullptr; }
@@ -146,6 +178,8 @@ namespace RubyGM {
             this->safe_dispose(); m_pObject = obj.m_pObject; obj.m_pObject = nullptr;
             return *this; 
         }
+        // bool
+        operator bool() const noexcept { return m_pObject != nullptr; }
     private:
         // zero
         void zero() noexcept { m_pObject = nullptr; }

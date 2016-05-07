@@ -2,31 +2,7 @@
 #include <core/graphics/rgmDrawable.h>
 #include <core/graphics/rgmGraphics.h>
 #include <core/graphics/Drawable/rgmLine.h>
-
-// rubygm::impl namespace
-namespace RubyGM { namespace impl {
-    // d2d
-    auto d2d(const RubyGM::Point2F& pt) { return reinterpret_cast<const D2D1_POINT_2F&>(pt); }
-    // rubygm
-    auto rubygm(const D2D1_POINT_2F& pt) { return reinterpret_cast<const RubyGM::Point2F&>(pt); }
-    // d2d
-    auto d2d(const RubyGM::ColorF& c) { return reinterpret_cast<const D2D1_COLOR_F&>(c); }
-    // rubygm
-    auto rubygm(const D2D1_COLOR_F& c) { return reinterpret_cast<const RubyGM::ColorF&>(c); }
-    // ---------------------------
-    template<class T, class Y, class U>
-    auto d2d(Y* obj, const U& iid) noexcept -> T* {
-#ifdef _DEBUG
-        if(obj) {
-            void* brush = nullptr;
-            assert(SUCCEEDED(obj->QueryInterface(iid, &brush)));
-        }
-#endif
-        auto super = static_cast<typename Y::Super*>(obj);
-        return static_cast<T*>(super);
-    }
-}}
-
+#include <core/util/rgmImpl.h>
 
 
 /// <summary>
@@ -48,14 +24,6 @@ auto RubyGM::Drawable::Base::RecreateAll() noexcept ->uint32_t {
 }
 
 /// <summary>
-/// Gets the color brush.
-/// </summary>
-/// <returns></returns>
-auto RubyGM::Drawable::GetColorBrush() noexcept ->GMBrush* {
-    return nullptr;
-}
-
-/// <summary>
 /// Releases ref-count for this instance.
 /// </summary>
 /// <returns></returns>
@@ -71,6 +39,7 @@ auto RubyGM::Drawable::Base::Release() noexcept -> uint32_t {
 /// </summary>
 /// <returns></returns>
 RubyGM::Drawable::Base::~Base() noexcept {
+    // 释放笔刷
     RubyGM::SafeRelease(m_pBrush);
     // 前面链接后面
     m_pPrve->m_pNext = m_pNext;
@@ -115,16 +84,16 @@ void RubyGM::Drawable::Base::SetColor(const RubyGM::ColorF& color) noexcept {
 }
 
 
-
 /// <summary>
 /// Sets the brush.
 /// </summary>
 /// <param name="brush">The brush.</param>
 /// <returns></returns>
-void RubyGM::Drawable::Base::SetBrush(GMBrush* brush) noexcept {
+void RubyGM::Drawable::Base::SetBrush(IGMBrush* brush) noexcept {
     assert(brush && "bad brush");
     RubyGM::SafeRelease(m_pBrush);
     m_pBrush = RubyGM::SafeAcquire(brush);
+    m_modeBrush = BrushMode::Mode_Other;
 }
 
 
@@ -141,12 +110,6 @@ auto RubyGM::Drawable::Base::Recreate() noexcept -> uint32_t {
 void RubyGM::Drawable::Base::before_render() const noexcept {
     // 纯色笔刷
     if (m_modeBrush == BrushMode::Mode_Color) {
-#ifdef _DEBUG
-        {
-            void* brush = nullptr;
-            assert(SUCCEEDED(m_pBrush->QueryInterface(IID_ID2D1SolidColorBrush, &brush)));
-        }
-#endif
         auto brush = impl::d2d<ID2D1SolidColorBrush>(m_pBrush, IID_ID2D1SolidColorBrush);
         brush->SetColor(impl::d2d(m_color));
     }
@@ -193,7 +156,7 @@ void RubyGM::Drawable::Line::dispose() noexcept {
 /// </summary>
 /// <param name="rc">The rc.</param>
 /// <returns></returns>
-void RubyGM::Drawable::Line::Render(GMRednerContext& rc) const noexcept {
+void RubyGM::Drawable::Line::Render(IGMRednerContext& rc) const noexcept {
     assert(m_pBrush && "bad brush");
     this->before_render();
     rc.DrawLine(

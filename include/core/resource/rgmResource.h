@@ -1,6 +1,6 @@
 ﻿#pragma once
 /**
-* Copyright (c) 2015-2015 dustpg   mailto:dustpg@gmail.com
+* Copyright (c) 2015-2016 dustpg   mailto:dustpg@gmail.com
 *
 * Permission is hereby granted, free of charge, to any person
 * obtaining a copy of this software and associated documentation
@@ -59,6 +59,12 @@ namespace RubyGM {
         Drawable::Base*         m_pHead = nullptr;
         // tail of drawable objects
         Drawable::Base*         m_pTail = nullptr;
+    public:
+        // last error code
+        uint32_t                error_code = 0;
+    private:
+        // unused
+        uint32_t                m_unused = 0;
     public:
         //
         mrb_state*              mruby = nullptr;

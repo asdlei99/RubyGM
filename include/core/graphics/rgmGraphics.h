@@ -1,6 +1,6 @@
 ﻿#pragma once
 /**
-* Copyright (c) 2015-2015 dustpg   mailto:dustpg@gmail.com
+* Copyright (c) 2015-2016 dustpg   mailto:dustpg@gmail.com
 *
 * Permission is hereby granted, free of charge, to any person
 * obtaining a copy of this software and associated documentation
@@ -30,7 +30,7 @@
 // rubygm namespace
 namespace RubyGM {
     // render context
-    struct GMRednerContext : ID2D1RenderTarget { using Super = ID2D1RenderTarget; };
+    struct IGMRednerContext : ID2D1RenderTarget { using Super = ID2D1RenderTarget; };
     // brush
-    struct GMBrush : ID2D1Brush { using Super = ID2D1Brush; };
+    struct IGMBrush : ID2D1Brush { using Super = ID2D1Brush; };
 }

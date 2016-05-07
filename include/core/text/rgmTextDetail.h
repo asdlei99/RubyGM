@@ -24,18 +24,18 @@
 * OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#ifdef _MSC_VER
-// 无视部分警告等级4
-#pragma warning(disable: 4505) // unused function
-#pragma warning(disable: 4201) // nameless struct/union
-#pragma warning(disable: 4706) // assignment within conditional expression
-#pragma warning(disable: 4127) // assignment within constant expression
-#endif
+#include <dwrite_1.h>
 
-#ifndef _DEBUG
-#define NDEBUG
-#endif
+// rubygm namespace
+namespace RubyGM { 
+    // text format
+    struct IGMTextFormat : IDWriteTextFormat {};
+    // text layout
+    struct IGMTextlayout : IDWriteTextLayout {};
+}
 
-// MRuby
-#define ENABLE_DEBUG
-#include "../mruby/mruby.h"
+// rubygm::impl namespace
+namespace RubyGM { namespace impl {
+    // TextMetrics
+    inline auto&d2d(TextMetrics& tm) { return reinterpret_cast<DWRITE_TEXT_METRICS&>(tm); }
+}}

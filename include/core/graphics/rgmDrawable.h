@@ -1,6 +1,6 @@
 ﻿#pragma once
 /**
-* Copyright (c) 2015-2015 dustpg   mailto:dustpg@gmail.com
+* Copyright (c) 2015-2016 dustpg   mailto:dustpg@gmail.com
 *
 * Permission is hereby granted, free of charge, to any person
 * obtaining a copy of this software and associated documentation
@@ -30,15 +30,15 @@
 // rubygm namespace
 namespace RubyGM { 
     // render context
-    struct GMRednerContext;
+    struct IGMRednerContext;
     // brush
-    struct GMBrush;
+    struct IGMBrush;
     // manager
-    class CGMManager;
+    class CGMFramework;
     // Drawable namespace
     namespace Drawable {
         // get color brush
-        auto GetColorBrush() noexcept ->GMBrush*;
+        auto GetColorBrush() noexcept ->IGMBrush*;
         // Base class
         class Base;
         // get last Base pointer
@@ -56,7 +56,7 @@ namespace RubyGM {
         // base class
         class Base {
             // friend class
-            friend class CGMManager;
+            friend class CGMFramework;
         public:
             // recreate all object
             static auto RecreateAll() noexcept ->uint32_t;
@@ -68,10 +68,10 @@ namespace RubyGM {
             // set color
             void SetColor(const RubyGM::ColorF& color) noexcept;
             // set brush
-            void SetBrush(GMBrush* brush) noexcept;
+            void SetBrush(IGMBrush* brush) noexcept;
         public:
             // render object
-            virtual void Render(GMRednerContext&) const noexcept = 0;
+            virtual void Render(IGMRednerContext&) const noexcept = 0;
             // recreate
             virtual auto Recreate() noexcept -> uint32_t;
         protected:
@@ -96,7 +96,7 @@ namespace RubyGM {
             // prve
             Base*               m_pNext;
             // brush
-            GMBrush*            m_pBrush = Drawable::GetColorBrush();
+            IGMBrush*            m_pBrush = Drawable::GetColorBrush();
         };
     }
 }

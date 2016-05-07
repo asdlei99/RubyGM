@@ -1,6 +1,6 @@
 ﻿#pragma once
 /**
-* Copyright (c) 2015-2015 dustpg   mailto:dustpg@gmail.com
+* Copyright (c) 2015-2016 dustpg   mailto:dustpg@gmail.com
 *
 * Permission is hereby granted, free of charge, to any person
 * obtaining a copy of this software and associated documentation
@@ -28,6 +28,7 @@
 #include <cassert>
 #include <new>
 
+#pragma warning(disable: 4200)
 // rubygm namespace
 namespace RubyGM {
 #pragma pack(push)
@@ -84,4 +85,12 @@ namespace RubyGM {
     struct Matrix3X2F { float _11, _12, _21, _22, _31, _32; };
     // Ellipse
     struct Ellipse { Point2F point; float radius_x; float radius_y; };
+    // ---------------------------------------------------------------
+    // text range
+    struct TextRange { uint32_t begin; uint32_t length; };
+    // text metrics
+    struct TextMetrics {
+        float left, top, width, width_ex, height, layout_width, layout_height;
+        uint32_t    max_depth, line_count;
+    };
 }

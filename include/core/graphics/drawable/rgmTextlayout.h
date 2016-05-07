@@ -29,41 +29,67 @@
 #include <utility>
 
 // rubygm namespace
-namespace RubyGM {
+namespace RubyGM { 
+    // text format
+    struct IGMTextFormat;
+    // text layout
+    struct IGMTextlayout;
     // Drawable namespace
     namespace Drawable {
-        // line 
-        class Line : public Base {
+        // text layout 
+        class Textlayout : public Base {
             // super class
             using Super = Base;
         public:
             // create this
-            static auto Create() noexcept ->Line*;
+            static auto Create() noexcept->Textlayout*;
             // create this
             static auto CreateSP() noexcept {
-                return std::move(RubyGM::CGMPtr<Drawable::Line>(std::move(Line::Create())));
+                return std::move(RubyGM::CGMPtr<Drawable::Textlayout>(
+                    std::move(Textlayout::Create()))
+                );
             }
         private:
             // ctor
-            Line() noexcept;
+            Textlayout() noexcept;
             // ctor
-            ~Line() noexcept;
+            Textlayout(const Textlayout&) = delete;
+            // ctor
+            ~Textlayout() noexcept;
         public:
             // render object
             void Render(IGMRednerContext& rc) const noexcept override;
             // recreate
-            auto Recreate() noexcept -> uint32_t;
+            auto Recreate() noexcept->uint32_t;
         private:
             // dispose object
             void dispose() noexcept override;
         public:
-            // point 0
-            RubyGM::Point2F         point0;
-            // point 1
-            RubyGM::Point2F         point1;
-            // stroke width
-            float                   stroke_width = 1.f;
-        private:
+            // get text legnth
+            auto GetTextLength() const noexcept { return m_uTextLength; }
+            // set layout size
+            void SetLayoutSize(float w, float h) noexcept;
+            // get text metrics
+            void GetMetrics(TextMetrics&) const noexcept;
+            // set text font size
+            void SetFontSize(TextRange range, float size) noexcept;
+            // set text font color
+            void SetFontColor(TextRange range, const ColorF& color) noexcept;
+            // set text underline
+            void SetUnderline(TextRange range, bool underline) noexcept;
+            // set strikethrough
+            void SetStrikethrough(TextRange range, bool underline) noexcept;
+        protected:
+            // text layout
+            IGMTextlayout*          m_pTextlayout = nullptr;
+            // text layout width
+            float                   m_fWidth = 128.f;
+            // text layout hright
+            float                   m_fHeight = 32.f;
+            // text length
+            uint32_t                m_uTextLength = 0;
+            // unused
+            uint32_t                m_unused = 0;
         };
     }
 }
