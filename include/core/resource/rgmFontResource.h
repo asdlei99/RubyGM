@@ -24,50 +24,43 @@
 * OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#include <cstdint>
+#include "rgmResource.h"
+#include "../text/rgmTextStruct.h"
 
-#ifndef RUBYGM_NOVTABLE
-#ifdef _MSC_VER
-#define RUBYGM_NOVTABLE __declspec(novtable)
-#else
-#define RUBYGM_NOVTABLE
-#endif
-#endif
+#pragma warning(disable: 4200)
 
 // rubygm namespace
 namespace RubyGM {
-    // bitmap
-    struct IGMBitmap;
-    // brush
-    struct IGMBrush;
     // resource namespace
     namespace Resource {
-        // helper for LowOccupancy
-        template<class T> 
-        inline void LowOccupancyHelper(T*& ptr) noexcept {
-            if (ptr) {
-                if (ptr->Release())  ptr->AddRef();
-                else ptr = nullptr;
-            }
-        }
         // base class
-        struct RUBYGM_NOVTABLE Base {
+        class Font final : public Base {
+        public:
+            // create font with FontProperties
+            static auto Create(const FontProperties&) noexcept ->Font&;
+        public:
             // dispose
-            virtual void Dispose() noexcept = 0;
+            virtual void Dispose() noexcept override;
             // recreate
-            virtual auto Recreate() noexcept ->uint32_t = 0;
+            virtual auto Recreate() noexcept ->uint32_t override;
             // set to Low Occupancy to save memory
-            virtual void LowOccupancy() noexcept = 0;
-        };
-        // bitmap resource
-        struct RUBYGM_NOVTABLE Bitmap : Base {
-            // get bitmap
-            virtual auto GetBitmap() noexcept -> IGMBitmap* = 0;
-        };
-        // brush resource
-        struct RUBYGM_NOVTABLE Brush : Base {
-            // get bitmap
-            virtual auto GetBrush() noexcept -> IGMBrush* = 0;
+            virtual void LowOccupancy() noexcept override;
+            // get font
+            auto GetFont() noexcept ->IGMFont*;
+            // ctor
+            Font(const FontProperties& prop, size_t len) noexcept;
+            // ctor
+            ~Font() noexcept;
+        private:
+            // get font prop
+            auto& get_prop() { return *reinterpret_cast<FontProperties*>(m_bufFontProp); }
+        private:
+            // font
+            IGMFont*        m_pTextFormat = nullptr;
+            // buffer for font properties
+            char            m_bufFontProp[sizeof(FontProperties)];
+            // buffer for font name
+            wchar_t         m_bufFontName[0];
         };
     }
 }

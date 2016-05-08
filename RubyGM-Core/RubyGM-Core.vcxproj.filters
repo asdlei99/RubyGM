@@ -28,8 +28,17 @@
     <Filter Include="CoreGM\Text">
       <UniqueIdentifier>{f6191e17-4a1d-4bd6-972e-93809e2f3d90}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Resource">
+      <UniqueIdentifier>{2c4e7a8f-e6dc-4e49-a033-cd8d4d87c0ad}</UniqueIdentifier>
+    </Filter>
     <Filter Include="CoreGM\Resource">
       <UniqueIdentifier>{cd95a8dc-0485-4024-89bd-59ceb9710043}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="LongUIBridge">
+      <UniqueIdentifier>{4b0c14aa-8e3f-4cfd-9371-256e0482ac60}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="LongUIBridge\Header">
+      <UniqueIdentifier>{8492d304-c05c-45cc-9718-e3fafeca2a19}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -42,14 +51,26 @@
     <ClCompile Include="..\src\core\rgmSprite.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\core\rgmFramework.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\core\rgmDrawable.cpp">
       <Filter>Source Files\Drawable</Filter>
     </ClCompile>
     <ClCompile Include="..\src\core\rgmTextlayout.cpp">
       <Filter>Source Files\Drawable</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\rgmResource.cpp">
+      <Filter>Source Files\Resource</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\rgmluiBridge.cpp">
+      <Filter>LongUIBridge</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\rgmluiConfig.cpp">
+      <Filter>LongUIBridge</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\rgmluiGameR.cpp">
+      <Filter>LongUIBridge</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\rgmluiGameL.cpp">
+      <Filter>LongUIBridge</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -100,6 +121,21 @@
     </ClInclude>
     <ClInclude Include="..\include\core\resource\rgmResource.h">
       <Filter>CoreGM\Resource</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\core\text\rgmTextStruct.h">
+      <Filter>CoreGM\Text</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\core\resource\rgmFontResource.h">
+      <Filter>CoreGM\Resource</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\bridge\rgmluiBridge.h">
+      <Filter>LongUIBridge\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\bridge\rgmluiConfig.h">
+      <Filter>LongUIBridge\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\bridge\rgmluiGame.h">
+      <Filter>LongUIBridge\Header</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -12,13 +12,20 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\core\rgmDrawable.cpp" />
-    <ClCompile Include="..\src\core\rgmFramework.cpp" />
     <ClCompile Include="..\src\core\rgmGraphics.cpp" />
     <ClCompile Include="..\src\core\main.cpp" />
+    <ClCompile Include="..\src\core\rgmluiBridge.cpp" />
+    <ClCompile Include="..\src\core\rgmluiConfig.cpp" />
+    <ClCompile Include="..\src\core\rgmluiGameR.cpp" />
+    <ClCompile Include="..\src\core\rgmluiGameL.cpp" />
+    <ClCompile Include="..\src\core\rgmResource.cpp" />
     <ClCompile Include="..\src\core\rgmSprite.cpp" />
     <ClCompile Include="..\src\core\rgmTextlayout.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\include\bridge\rgmluiBridge.h" />
+    <ClInclude Include="..\include\bridge\rgmluiConfig.h" />
+    <ClInclude Include="..\include\bridge\rgmluiGame.h" />
     <ClInclude Include="..\include\core\graphics\drawable\rgmBitmap.h" />
     <ClInclude Include="..\include\core\graphics\drawable\rgmTextlayout.h" />
     <ClInclude Include="..\include\core\graphics\drawable\rgmLine.h" />
@@ -28,9 +35,11 @@
     <ClInclude Include="..\include\core\graphics\rgmTilemap.h" />
     <ClInclude Include="..\include\core\mruby\mrbconf.h" />
     <ClInclude Include="..\include\core\mruby\mruby.h" />
+    <ClInclude Include="..\include\core\resource\rgmFontResource.h" />
     <ClInclude Include="..\include\core\resource\rgmResource.h" />
     <ClInclude Include="..\include\core\rubygm.h" />
     <ClInclude Include="..\include\core\Text\rgmTextDetail.h" />
+    <ClInclude Include="..\include\core\text\rgmTextStruct.h" />
     <ClInclude Include="..\include\core\Util\rgmImpl.h" />
     <ClInclude Include="..\include\core\Util\rgmRuby.h" />
     <ClInclude Include="..\include\core\Util\rgmStruct.h" />
@@ -69,11 +78,11 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <IncludePath>$(SolutionDir)\include\;$(SolutionDir)\include\core\mruby\;$(SolutionDir)..\LongUI\include\;$(IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)$(Configuration)\;$(LibraryPath)</LibraryPath>
+    <LibraryPath>$(SolutionDir)$(Configuration)\;$(SolutionDir)..\LongUI\$(Platform)\$(Configuration)\;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <IncludePath>$(SolutionDir)\include\;$(SolutionDir)\include\core\mruby\;$(IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)$(Configuration)\;$(LibraryPath)</LibraryPath>
+    <LibraryPath>$(SolutionDir)$(Configuration)\;$(SolutionDir)..\LongUI\$(Platform)\$(Configuration)\;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -82,6 +91,7 @@
       <SDLCheck>true</SDLCheck>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>

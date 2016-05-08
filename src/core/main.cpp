@@ -114,7 +114,7 @@ auto binder_mruby(mrb_state* mruby) {
     }
     {
         auto classbinder = binder.bind_class("Foo2", 
-            [](const char* a, int32_t b, float c, int32_t d, int32_t e, float f) {
+            [](const char* , int32_t b, float , int32_t , int32_t , float ) {
             return new(std::nothrow) Foo2(b);
         });
     }
@@ -137,6 +137,7 @@ int main_call() {
 
 #include <core/graphics/rgmSprite.h>
 #include <core/graphics/drawable/rgmLine.h>
+#include <core/graphics/drawable/rgmTextlayout.h>
 
 // RubyGM namespace
 namespace RubyGM {
@@ -145,18 +146,16 @@ namespace RubyGM {
     // update fiber
     void UpdateFiber() {
         main_call();
-        Drawable::Line* line = nullptr;
+        Drawable::Textlayout* drawable = nullptr;
         auto sprite = RubyGM::CGMSprite::AddNew();
-        sprite->SetX(100.f);
-        sprite->SetY(100.f);
+        sprite->SetX(300.f);
+        sprite->SetY(300.f);
         sprite->SetZoomX(2.f);
         sprite->SetZoomY(2.f);
         sprite->SetOX(50.f);
         {
-            auto sp = Drawable::Line::CreateSP();
-            line = sp.Ptr();
-            sp->point1 = { 100.f, 0.f };
-            line->stroke_width = 2.33f;
+            auto sp = Drawable::Textlayout::CreateSP();
+            drawable = sp.Ptr();
             sprite->SetDrawable(std::move(sp));
         }
         float v = 2.f;
@@ -166,8 +165,8 @@ namespace RubyGM {
             sprite->SetRotation(sprite->GetRotation() + 1.f);
             std::printf("%3.3f\r\n", sprite->GetRotation());
             v += s;
-            if (v >= 3.f) s = -0.01f;
-            else if (v <= 0.f) s = 0.01f;
+            if (v >= 4.f) s = -0.03f;
+            else if (v <= 0.f) s = 0.03f;
             sprite->SetZoomX(v);
             sprite->SetZoomY(v);
         }

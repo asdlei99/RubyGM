@@ -26,12 +26,13 @@
 
 #include "../rgmDrawable.h"
 #include "../../Util/rgmUtil.h"
+#include "../../text/rgmTextStruct.h"
 #include <utility>
 
 // rubygm namespace
 namespace RubyGM { 
-    // text format
-    struct IGMTextFormat;
+    // text font
+    struct IGMFont;
     // text layout
     struct IGMTextlayout;
     // Drawable namespace

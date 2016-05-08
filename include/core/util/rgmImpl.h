@@ -29,6 +29,8 @@
 
 // rubygm::impl namespace
 namespace RubyGM { namespace impl {
+    // get time
+    auto get_time() noexcept->uint32_t;
     // d2d
     inline auto&d2d(const RubyGM::Point2F& pt) { return reinterpret_cast<const D2D1_POINT_2F&>(pt); }
     // rubygm

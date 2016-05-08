@@ -27,14 +27,21 @@
 #include <cstdint>
 #include "../Util/rgmStruct.h"
 
+#ifndef RUBYGM_NOVTABLE
+#ifdef _MSC_VER
+#define RUBYGM_NOVTABLE __declspec(novtable)
+#else
+#define RUBYGM_NOVTABLE
+#endif
+#endif
+
+
 // rubygm namespace
 namespace RubyGM { 
     // render context
     struct IGMRednerContext;
     // brush
     struct IGMBrush;
-    // manager
-    class CGMFramework;
     // Drawable namespace
     namespace Drawable {
         // get color brush
@@ -54,9 +61,7 @@ namespace RubyGM {
             Mode_Other,         // other brush
         };
         // base class
-        class Base {
-            // friend class
-            friend class CGMFramework;
+        class RUBYGM_NOVTABLE Base {
         public:
             // recreate all object
             static auto RecreateAll() noexcept ->uint32_t;
@@ -96,7 +101,12 @@ namespace RubyGM {
             // prve
             Base*               m_pNext;
             // brush
-            IGMBrush*            m_pBrush = Drawable::GetColorBrush();
+            IGMBrush*           m_pBrush = Drawable::GetColorBrush();
+        public:
+            // link next
+            void LinkNext(Base* next) noexcept { m_pNext = next; }
+            // link prve
+            void LinkPrve(Base* prve) noexcept { m_pPrve = prve; }
         };
     }
 }

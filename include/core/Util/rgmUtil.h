@@ -35,6 +35,10 @@ namespace RubyGM {
     void SetLastErrorCode(uint32_t code) noexcept;
     // set last error code
     auto GetLastErrorCode() noexcept->uint32_t;
+    // small alloc, alloc for small size, cannot return nullptr, nor std::terminate
+    auto SmallAlloc(size_t len /* < 256*/) noexcept->void*;
+    // small free
+    void SmallFree(void* ptr) noexcept;
     // Bit Array
     template<typename T> class CGMBitArray {
     public:

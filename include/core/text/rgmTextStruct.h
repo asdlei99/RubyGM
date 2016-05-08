@@ -24,18 +24,44 @@
 * OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#include <dwrite_1.h>
+#include <cstdint>
+#pragma warning(disable: 4200)
 
 // rubygm namespace
 namespace RubyGM { 
     // font
-    struct IGMFont : IDWriteTextFormat { using Super = IDWriteTextFormat; };
-    // text layout
-    struct IGMTextlayout : IDWriteTextLayout { using Super = IDWriteTextLayout; };
+    struct IGMFont;
+    // text range
+    struct TextRange { uint32_t begin; uint32_t length; };
+    // text metrics
+    struct TextMetrics {
+        float left, top, width, width_ex, height, layout_width, layout_height;
+        uint32_t    max_depth, line_count;
+    };
+    // properties to creating font
+    struct FontProperties {
+        // text size
+        float           size;
+        // tab width, 0.f for default(size x 4)
+        float           tab;
+        // weight 0~1000 in uint16_t
+        uint16_t        weight;
+        // style 0~x in uint8_t
+        uint8_t         style;
+        // stretch 0~x in uint8_t
+        uint8_t         stretch;
+        // valign 0~x in uint8_t
+        uint8_t         valign;
+        // halign 0~x in uint8_t
+        uint8_t         halign;
+        // flow direction 0~x in uint8_t
+        uint8_t         flow;
+        // reading direction 0~x in uint8_t
+        uint8_t         reading;
+        // word wrapping
+        uint32_t        wrapping;
+        // font name, with null-termxxx character
+        wchar_t         name[0];
+    };
 }
 
-// rubygm::impl namespace
-namespace RubyGM { namespace impl {
-    // TextMetrics
-    inline auto&d2d(TextMetrics& tm) { return reinterpret_cast<DWRITE_TEXT_METRICS&>(tm); }
-}}

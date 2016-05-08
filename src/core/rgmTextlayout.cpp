@@ -32,11 +32,26 @@ void RubyGM::Drawable::Textlayout::dispose() noexcept {
     delete this;
 }
 
+namespace RubyGM {
+    namespace Resource {
+        // create text format
+        auto CreateTextFormat(const wchar_t* name, float size, IDWriteTextFormat** ptr) noexcept->HRESULT;
+        // create text layout
+        auto CreateTextLayout(const wchar_t* n, uint32_t l,IDWriteTextFormat* f, IDWriteTextLayout** ptr)  noexcept->HRESULT;
+    }
+}
 
 /// <summary>
 /// Prevents a default instance of the <see cref="Textlayout"/> class from being created.
 /// </summary>
 RubyGM::Drawable::Textlayout::Textlayout() noexcept {
+    IDWriteTextFormat* format = nullptr;
+    Resource::CreateTextFormat(L"KaiTi", 32.f, &format);
+    if (format) {
+        auto t = L"Hello 世界!";
+        Resource::CreateTextLayout(t, std::wcslen(t), format, (IDWriteTextLayout**)(&m_pTextlayout));;
+    }
+    SafeRelease(format);
 }
 
 /// <summary>
@@ -47,7 +62,6 @@ RubyGM::Drawable::Textlayout::~Textlayout() noexcept {
     RubyGM::SafeRelease(m_pTextlayout);
 }
 
-
 /// <summary>
 /// Renders the specified rc.
 /// </summary>
@@ -55,6 +69,7 @@ RubyGM::Drawable::Textlayout::~Textlayout() noexcept {
 /// <returns></returns>
 void RubyGM::Drawable::Textlayout::Render(IGMRednerContext& rc) const noexcept {
     assert(m_pTextlayout && "bad action");
+    rc.DrawTextLayout(D2D1::Point2F(), m_pTextlayout, m_pBrush);
 }
 
 /// <summary>

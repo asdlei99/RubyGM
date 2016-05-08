@@ -85,8 +85,14 @@ namespace RubyGM {
         CGMSprite(CGMSprite* parent) noexcept;
         // dtor
         ~CGMSprite() noexcept;
+        // copy ctor
+        CGMSprite(const CGMSprite&) noexcept = delete;
+        // move ctor
+        CGMSprite(CGMSprite&&) noexcept = delete;
         // render
         void Render(IGMRednerContext& ) noexcept;
+        // root render
+        void RootRender(IGMRednerContext& ) const noexcept;
         // add child
         auto AddChild() /*throw(std::exception)*/ ->CGMSprite&;
         // get
@@ -97,6 +103,8 @@ namespace RubyGM {
         void SetVisible(bool v) noexcept { this->set_visible(v); }
         // get visible
         bool GetVisible() const noexcept { return this->is_visible(); }
+        // set transform directly, the sprite status will be invalid
+        void SetTransform(const Matrix3X2F&) noexcept;
     public:
         // get x
         auto GetX() const noexcept { return m_status.x; }
@@ -135,22 +143,18 @@ namespace RubyGM {
         // clear clip rect
         void ClearClipRect() noexcept { m_rcClip = { -CLIP_ZONE, -CLIP_ZONE, CLIP_ZONE, CLIP_ZONE }; }
      protected:
-        // copy ctor
-        CGMSprite(const CGMSprite&) =delete;
-        // move ctor
-        CGMSprite(CGMSprite&&) =delete;
         // make the world transform
         void make_transform(/*OUT*/Matrix3X2F& transform) const noexcept;
-    protected:
         // clear world changed
         void clear_world_changed() noexcept { m_baList.SetFalse(Index_WorldChanged); }
         // set world changed
         void set_world_changed() noexcept { m_baList.SetTrue(Index_WorldChanged); }
         // is world changed
         bool is_world_changed() const { return m_baList.Test(Index_WorldChanged); }
-    protected:
         // is visible
         void set_visible(bool v) noexcept { m_baList.SetTo(Index_Visible, v); }
+        // is visible
+        void set_visible() noexcept { m_baList.SetTrue(Index_Visible); }
         // is visible
         bool is_visible() const { return m_baList.Test(Index_Visible); }
     protected:

@@ -24,15 +24,25 @@
 * OTHER DEALINGS IN THE SOFTWARE.
 */
 
-// graphics
-#include <d2d1_3.h>
+#include <LongUI.h>
 
 // rubygm namespace
 namespace RubyGM {
-    // render context
-    struct IGMRednerContext : ID2D1RenderTarget { using Super = ID2D1RenderTarget; };
-    // bitmap
-    struct IGMBitmap : ID2D1Bitmap { using Super = ID2D1Bitmap; };
-    // brush
-    struct IGMBrush : ID2D1Brush { using Super = ID2D1Brush; };
+    // bridge namespace
+    namespace Bridge {
+        // config
+        class Configure final : public LongUI::CUIDefaultConfigure {
+            // super class
+            using Super = LongUI::CUIDefaultConfigure;
+        public:
+            // ctor
+            Configure() noexcept;
+            // get locale name of ui(for text)
+            void GetLocaleName(wchar_t name[/*LOCALE_NAME_MAX_LENGTH*/]) noexcept override;
+            // add custom control class
+            void RegisterSome() noexcept override;
+            // choose
+            auto ChooseAdapter(const DXGI_ADAPTER_DESC1 adapters[], const size_t length) noexcept->size_t override;
+        };
+    }
 }

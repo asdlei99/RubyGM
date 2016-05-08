@@ -24,15 +24,11 @@
 * OTHER DEALINGS IN THE SOFTWARE.
 */
 
-// graphics
-#include <d2d1_3.h>
+
 
 // rubygm namespace
 namespace RubyGM {
-    // render context
-    struct IGMRednerContext : ID2D1RenderTarget { using Super = ID2D1RenderTarget; };
-    // bitmap
-    struct IGMBitmap : ID2D1Bitmap { using Super = ID2D1Bitmap; };
-    // brush
-    struct IGMBrush : ID2D1Brush { using Super = ID2D1Brush; };
+    // bridge namespace
+    namespace Bridge {
+    }
 }
