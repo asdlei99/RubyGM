@@ -24,7 +24,7 @@
 * OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#include "rgmResource.h"
+#include "rgmAsset.h"
 #include "../text/rgmTextStruct.h"
 
 #pragma warning(disable: 4200)
@@ -32,35 +32,40 @@
 // rubygm namespace
 namespace RubyGM {
     // resource namespace
-    namespace Resource {
+    namespace Asset {
         // base class
-        class Font final : public Base {
+        class Font final : public Asset::Object {
+            // super class
+            using Super = Asset::Object;
         public:
             // create font with FontProperties
             static auto Create(const FontProperties&) noexcept ->Font&;
+            // get font
+            auto GetFont() noexcept ->IGMFont*;
+        protected:
+            // ctor
+            Font(const FontProperties& prop, size_t name_len) noexcept;
+            // ctor
+            Font(const Font&) noexcept = delete;
+            // ctor
+            ~Font() noexcept;
+            // get font prop
+            auto&prop() { return *reinterpret_cast<FontProperties*>(m_bufFontProp); }
+        private:
+            // dispose object
+            virtual void dispose() noexcept override;
         public:
-            // dispose
-            virtual void Dispose() noexcept override;
             // recreate
             virtual auto Recreate() noexcept ->uint32_t override;
             // set to Low Occupancy to save memory
             virtual void LowOccupancy() noexcept override;
-            // get font
-            auto GetFont() noexcept ->IGMFont*;
-            // ctor
-            Font(const FontProperties& prop, size_t len) noexcept;
-            // ctor
-            ~Font() noexcept;
-        private:
-            // get font prop
-            auto& get_prop() { return *reinterpret_cast<FontProperties*>(m_bufFontProp); }
         private:
             // font
-            IGMFont*        m_pTextFormat = nullptr;
+            IGMFont*                m_pTextFormat = nullptr;
             // buffer for font properties
-            char            m_bufFontProp[sizeof(FontProperties)];
+            char                    m_bufFontProp[sizeof(FontProperties)];
             // buffer for font name
-            wchar_t         m_bufFontName[0];
+            alignas(wchar_t)wchar_t m_bufFontName[0];
         };
     }
 }

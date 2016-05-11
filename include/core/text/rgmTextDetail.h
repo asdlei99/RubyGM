@@ -24,6 +24,8 @@
 * OTHER DEALINGS IN THE SOFTWARE.
 */
 
+#include <LongUI.h>
+#include <LongUI/luiUiTxtRdr.h>
 #include <dwrite_1.h>
 
 // rubygm namespace
@@ -32,10 +34,14 @@ namespace RubyGM {
     struct IGMFont : IDWriteTextFormat { using Super = IDWriteTextFormat; };
     // text layout
     struct IGMTextlayout : IDWriteTextLayout { using Super = IDWriteTextLayout; };
+    // text renderer
+    struct IGMTextRenderer : LongUI::XUIBasicTextRenderer { using Super = LongUI::XUIBasicTextRenderer; };
 }
 
 // rubygm::impl namespace
 namespace RubyGM { namespace impl {
     // TextMetrics
     inline auto&d2d(TextMetrics& tm) { return reinterpret_cast<DWRITE_TEXT_METRICS&>(tm); }
+    // TextRenderer
+    inline auto rubygm(LongUI::XUIBasicTextRenderer* r) { return reinterpret_cast<IGMTextRenderer*>(r); }
 }}

@@ -26,15 +26,7 @@
 
 #include <cstdint>
 #include "../Util/rgmStruct.h"
-
-#ifndef RUBYGM_NOVTABLE
-#ifdef _MSC_VER
-#define RUBYGM_NOVTABLE __declspec(novtable)
-#else
-#define RUBYGM_NOVTABLE
-#endif
-#endif
-
+#include "../../game/rgmResource.h"
 
 // rubygm namespace
 namespace RubyGM { 
@@ -44,12 +36,24 @@ namespace RubyGM {
     struct IGMBrush;
     // Drawable namespace
     namespace Drawable {
-        // get color brush
-        auto GetColorBrush() noexcept ->IGMBrush*;
-        // Base class
-        class Base;
-        // get last Base pointer
-        auto GetLastDrawableObject() noexcept ->Base*;
+        // Default
+        struct Default {};
+        // status for base
+        struct BaseStatus {
+            // basic color
+            RubyGM::ColorF      color;
+            // default ctor
+            inline BaseStatus() {};
+            // default value
+            inline BaseStatus(Default) {
+                color.b = color.g = color.r = 0.f;
+                color.a = 1.f;
+            }
+        };
+        // alloc for drawable object
+        auto Alloc(size_t) noexcept->void*;
+        // free for drawable object
+        void Free(void*) noexcept;
         // render mode
         enum RenderMode : uint32_t {
             Mode_Fast = 0,      // fast
@@ -60,53 +64,40 @@ namespace RubyGM {
             Mode_Color = 0,     // color brush
             Mode_Other,         // other brush
         };
-        // base class
-        class RUBYGM_NOVTABLE Base {
+    }
+    // Drawable namespace
+    namespace Drawable {
+        // drawable object
+        class RUBYGM_NOVTABLE Object : public Base::Resource {
+            // super class
+            using Super = Base::Resource;
         public:
-            // recreate all object
-            static auto RecreateAll() noexcept ->uint32_t;
-        public:
-            // add ref-count
-            auto AddRef() noexcept ->uint32_t { return ++m_cRef; }
-            // release ref-count
-            auto Release() noexcept ->uint32_t;
             // set color
             void SetColor(const RubyGM::ColorF& color) noexcept;
-            // set brush
+            // set brush asset
             void SetBrush(IGMBrush* brush) noexcept;
         public:
+            // recreate resource
+            virtual auto Recreate() noexcept -> uint32_t override;
             // render object
             virtual void Render(IGMRednerContext&) const noexcept = 0;
-            // recreate
-            virtual auto Recreate() noexcept -> uint32_t;
         protected:
-            // dispose object
-            virtual void dispose() noexcept = 0;
             // before render
             void before_render() const noexcept;
+            // set brush mode
+            void set_brush_mode(BrushMode m) { m_u32Data = uint32_t(m); }
+            // get brush mode
+            auto get_brush_mode() const { return BrushMode(m_u32Data); }
         protected:
             // ctor
-            Base() noexcept;
+            Object(const BaseStatus&) noexcept;
             // dtor
-            ~Base() noexcept;
+            ~Object() noexcept;
         protected:
-            // ref-count
-            uint32_t            m_cRef = 1;
-            // bool set
-            BrushMode           m_modeBrush = BrushMode::Mode_Color;
-            // color
-            ColorF              m_color;
-            // prve
-            Base*               m_pPrve;
-            // prve
-            Base*               m_pNext;
             // brush
-            IGMBrush*           m_pBrush = Drawable::GetColorBrush();
-        public:
-            // link next
-            void LinkNext(Base* next) noexcept { m_pNext = next; }
-            // link prve
-            void LinkPrve(Base* prve) noexcept { m_pPrve = prve; }
+            IGMBrush*               m_pBrush;
+            // color
+            RubyGM::ColorF          m_color;
         };
     }
 }

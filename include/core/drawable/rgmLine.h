@@ -24,38 +24,50 @@
 * OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#include "../rgmDrawable.h"
-#include "../../Util/rgmUtil.h"
+#include "rgmDrawable.h"
+#include "../Util/rgmUtil.h"
 #include <utility>
 
 // rubygm namespace
 namespace RubyGM {
     // Drawable namespace
     namespace Drawable {
-        // line 
-        class Line : public Base {
-            // super class
-            using Super = Base;
-        public:
-            // create this
-            static auto Create() noexcept ->Line*;
-            // create this
-            static auto CreateSP() noexcept {
-                return std::move(RubyGM::CGMPtr<Drawable::Line>(std::move(Line::Create())));
+        // status for line
+        struct LineStatus : BaseStatus {
+            // point 0
+            RubyGM::Point2F         point0;
+            // point 1
+            RubyGM::Point2F         point1;
+            // stroke width
+            float                   stroke_width;
+            // default value
+            inline LineStatus(Default v) : BaseStatus(v) {
+                point0 = { 0.f, 0.f }; point1 = { 0.f, 0.f };
+                stroke_width = 1.f;
             }
-        private:
+        };
+        // line 
+        class Line : public Drawable::Object {
+            // super class
+            using Super = Drawable::Object;
+            // dispose object
+            void dispose() noexcept override;
+        protected:
             // ctor
-            Line() noexcept;
+            Line(const LineStatus&) noexcept;
             // ctor
             ~Line() noexcept;
         public:
+            // create this
+            static auto Create(const LineStatus&) noexcept ->Line*;
+            // create this
+            static auto CreateSP(const LineStatus& ls) noexcept {
+                return std::move(RubyGM::CGMPtr<Drawable::Line>(std::move(Line::Create(ls))));
+            }
             // render object
             void Render(IGMRednerContext& rc) const noexcept override;
             // recreate
-            auto Recreate() noexcept -> uint32_t;
-        private:
-            // dispose object
-            void dispose() noexcept override;
+            //auto Recreate() noexcept -> uint32_t override;
         public:
             // point 0
             RubyGM::Point2F         point0;

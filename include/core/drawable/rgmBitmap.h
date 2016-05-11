@@ -29,7 +29,7 @@
 // rubygm namespace
 namespace RubyGM {
     // resource namespace
-    namespace Resource {
+    namespace Asset {
         // bitmap resource
         class Bitmap {
         public:

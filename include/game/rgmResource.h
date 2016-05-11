@@ -24,28 +24,52 @@
 * OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#include <LongUI.h>
+#include <cstdint>
+
+#ifndef RUBYGM_NOVTABLE
+#ifdef _MSC_VER
+#define RUBYGM_NOVTABLE __declspec(novtable)
+#else
+#define RUBYGM_NOVTABLE
+#endif
+#endif
 
 // rubygm namespace
 namespace RubyGM {
-    // bridge namespace
-    namespace Bridge {
-        // config
-        class Configure final : public LongUI::CUIDefaultConfigure {
-            // super class
-            using Super = LongUI::CUIDefaultConfigure;
+    // bridge::uigame
+    namespace Bridge { class UIGame; }
+    // base namepsace
+    namespace Base {
+        // resource class
+        class RUBYGM_NOVTABLE Resource {
+            // friend
+            friend class Bridge::UIGame;
         public:
+            // add ref-count
+            auto AddRef() noexcept ->uint32_t { return ++m_cRef; }
+            // release ref-count
+            auto Release() noexcept ->uint32_t;
             // ctor
-            Configure() noexcept;
-            // get flags for configure
-            auto GetConfigureFlag() noexcept->ConfigureFlag override;
-            // get locale name , LOCALE_NAME_MAX_LENGTH
-            void GetLocaleName(wchar_t name[]) noexcept override;
-            // add custom control class
-            void RegisterSome() noexcept override;
-            // choose the video adapter
-            auto ChooseAdapter(const DXGI_ADAPTER_DESC1 adapters[], 
-                const size_t length) noexcept->size_t override;
+            Resource() noexcept;
+            // dtor
+            ~Resource() noexcept;
+        private:
+            // dispose object
+            virtual void dispose() noexcept = 0;
+        public:
+            // recreate resource
+            virtual auto Recreate() noexcept -> uint32_t = 0;
+        protected:
+            // ref-count
+            uint32_t            m_cRef = 1;
+            // custom data
+            uint32_t            m_u32Data = 0;
+        public:
+            // prve
+            Resource*           m_pPrve;
+            // next
+            Resource*           m_pNext;
         };
     }
 }
+

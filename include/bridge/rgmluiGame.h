@@ -26,17 +26,27 @@
 
 #include <LongUI.h>
 #include <Control/UIControl.h>
-#include "../core/graphics/rgmDrawable.h"
+#include "../core/drawable/rgmDrawable.h"
 #include "../core/graphics/rgmSprite.h"
+#include "../game/rgmGame.h"
 
-// rubygm namespace
 namespace RubyGM {
+    // resoure index
+    enum AssetIndex : size_t { 
+        Index_Bitmap = 0,   // bitmap asset
+        Index_Font,         // font asset
+        Index_Brush,        // brush asset
+        Index_Stroke,       // skroke style 
+        RESOURCE_COUNT 
+    };
     // bridge namespace
     namespace Bridge {
         // game control
         class UIGame final : public LongUI::UIControl {
             // super class
             using Super = LongUI::UIControl;
+            // res class
+            using Res = Base::Resource;
             // clean this control
             virtual void cleanup() noexcept override;
         public:
@@ -52,13 +62,25 @@ namespace RubyGM {
             virtual auto Recreate() noexcept ->HRESULT override;
         public:
             // add sprite for game
-            auto AddSprite() noexcept->CGMSprite*;
+            auto AddSprite(const SprteStatus& ss) noexcept->CGMSprite*;
+            // get bitmap resource by index, but no add-ref
+            auto RefBitmapAsset(uint32_t index) const noexcept -> Asset::Bitmap&;
+            // get font resource by index, but no add-ref
+            auto RefFontAsset(uint32_t index) const noexcept -> Asset::Font&;
+            // get brush resource by index, but no add-ref
+            auto RefBrushAsset(uint32_t index) const noexcept -> Asset::Brush&;
+            // register a new bitmap resource, return index
+            auto RegisterBitmapAsset() noexcept -> uint32_t;
+            // register a new brush resource, return index
+            auto RegisterBrushAsset(const NBrushProperties&) noexcept -> uint32_t;
+            // register a new font resource, return index
+            auto RegisterFontAsset(const FontProperties&) noexcept -> uint32_t;
             // get common brush for game
             auto GetCommonBrush() noexcept { return LongUI::SafeAcquire(m_pCommonBrush); }
-            // get drawable head for game
-            auto GetDrawableHead() const { return this->get_drawable<Drawable::Base, 0>(); }
-            // get drawable tail for game
-            auto GetDrawableTail() const { return this->get_drawable<Drawable::Base, 1>(); }
+            // get resource head for game
+            auto GetResourceHead() const { return this->get_drawable<Res, 0>(); }
+            // get resource tail for game
+            auto GetResourceTail() const { return this->get_drawable<Res, 1>(); }
         public:
             // ctor
             UIGame(LongUI::UIContainer* cp) noexcept;
@@ -69,7 +91,11 @@ namespace RubyGM {
             // create control event
             static auto CreateControl(LongUI::CreateEventType type, pugi::xml_node node) noexcept->LongUI::UIControl*;
         protected:
-            // release gpu data
+            // init resource
+            void init_resource() noexcept;
+            // release asset
+            void release_asset() noexcept;
+            // release device-dependent resource
             void release_gpu_data() noexcept;
             // something must do before deleted
             void before_deleted() noexcept { Super::before_deleted(); }
@@ -83,6 +109,11 @@ namespace RubyGM {
             void*                       m_pMainFiber = nullptr;
             // sub fiber
             void*                       m_pSubFiber = nullptr;
+        protected:
+            // assert pointers array
+            Asset::Object**             m_appAssetPtr[RESOURCE_COUNT];
+            // count of assert pointer array
+            uint16_t                    m_acAssetPtr[(RESOURCE_COUNT + 3) / 4 * 4];
         protected:
             // common brush
             ID2D1SolidColorBrush*       m_pCommonBrush = nullptr;
@@ -100,15 +131,25 @@ namespace RubyGM {
             // error code
             uint32_t                    error_code = 0;
         protected:
-            // root sprite
-            CGMSprite                   m_sprRoot;
-            // buffer for drawable head and tail
-            char                        m_bufDrawaleHT[sizeof(Drawable::Base) * 2];
 #ifdef LongUIDebugEvent
-        protected:
             // debug infomation
             virtual bool debug_do_event(const LongUI::DebugEventInformation&) const noexcept override;
 #endif
+            // register helper
+            template<size_t INDEX, typename T>
+            auto register_helper(T create) noexcept -> uint32_t {
+                assert(size_t(m_acAssetPtr[INDEX]) <= MAX_SOURCE_EACH);
+                if (m_acAssetPtr[INDEX] == MAX_SOURCE_EACH) return 0;
+                uint32_t index = m_acAssetPtr[INDEX]++;
+                m_appAssetPtr[INDEX][index] = create();
+                return index;
+            }
+        protected:
+            // root sprite
+            CGMSprite                   m_sprRoot;
+            // buffer for drawable head and tail
+            char                        m_bufDrawaleHT[sizeof(Res) * 2];
+
             // single
             static UIGame*              s_pInstance;
         };

@@ -11,8 +11,9 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\src\core\rgmDrawable.cpp" />
-    <ClCompile Include="..\src\core\rgmGraphics.cpp" />
+    <ClCompile Include="..\src\core\rgmAssetBitmap.cpp" />
+    <ClCompile Include="..\src\core\rgmAssetBrush.cpp" />
+    <ClCompile Include="..\src\core\rgmLine.cpp" />
     <ClCompile Include="..\src\core\main.cpp" />
     <ClCompile Include="..\src\core\rgmluiBridge.cpp" />
     <ClCompile Include="..\src\core\rgmluiConfig.cpp" />
@@ -26,17 +27,18 @@
     <ClInclude Include="..\include\bridge\rgmluiBridge.h" />
     <ClInclude Include="..\include\bridge\rgmluiConfig.h" />
     <ClInclude Include="..\include\bridge\rgmluiGame.h" />
-    <ClInclude Include="..\include\core\graphics\drawable\rgmBitmap.h" />
-    <ClInclude Include="..\include\core\graphics\drawable\rgmTextlayout.h" />
-    <ClInclude Include="..\include\core\graphics\drawable\rgmLine.h" />
-    <ClInclude Include="..\include\core\graphics\rgmDrawable.h" />
+    <ClInclude Include="..\include\core\asset\rgmAssetFont.h" />
+    <ClInclude Include="..\include\core\asset\rgmAsset.h" />
+    <ClInclude Include="..\include\core\brush\rgmBrushStruct.h" />
+    <ClInclude Include="..\include\core\drawable\rgmBitmap.h" />
+    <ClInclude Include="..\include\core\drawable\rgmDrawable.h" />
+    <ClInclude Include="..\include\core\drawable\rgmLine.h" />
+    <ClInclude Include="..\include\core\drawable\rgmTextlayout.h" />
     <ClInclude Include="..\include\core\graphics\rgmGraphics.h" />
     <ClInclude Include="..\include\core\graphics\rgmSprite.h" />
     <ClInclude Include="..\include\core\graphics\rgmTilemap.h" />
     <ClInclude Include="..\include\core\mruby\mrbconf.h" />
     <ClInclude Include="..\include\core\mruby\mruby.h" />
-    <ClInclude Include="..\include\core\resource\rgmFontResource.h" />
-    <ClInclude Include="..\include\core\resource\rgmResource.h" />
     <ClInclude Include="..\include\core\rubygm.h" />
     <ClInclude Include="..\include\core\Text\rgmTextDetail.h" />
     <ClInclude Include="..\include\core\text\rgmTextStruct.h" />
@@ -44,6 +46,8 @@
     <ClInclude Include="..\include\core\Util\rgmRuby.h" />
     <ClInclude Include="..\include\core\Util\rgmStruct.h" />
     <ClInclude Include="..\include\core\Util\rgmUtil.h" />
+    <ClInclude Include="..\include\game\rgmResource.h" />
+    <ClInclude Include="..\include\game\rgmGame.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{DE8D8120-F036-43BC-8CFC-A3B27BC45FFC}</ProjectGuid>
@@ -81,7 +85,7 @@
     <LibraryPath>$(SolutionDir)$(Configuration)\;$(SolutionDir)..\LongUI\$(Platform)\$(Configuration)\;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IncludePath>$(SolutionDir)\include\;$(SolutionDir)\include\core\mruby\;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)\include\;$(SolutionDir)\include\core\mruby\;$(SolutionDir)..\LongUI\include\;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)$(Configuration)\;$(SolutionDir)..\LongUI\$(Platform)\$(Configuration)\;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -106,7 +110,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
-      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>

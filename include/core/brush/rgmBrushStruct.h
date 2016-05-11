@@ -1,5 +1,5 @@
-﻿RubyGM-Core License:
-
+﻿#pragma once
+/**
 * Copyright (c) 2015-2016 dustpg   mailto:dustpg@gmail.com
 *
 * Permission is hereby granted, free of charge, to any person
@@ -22,9 +22,46 @@
 * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 * OTHER DEALINGS IN THE SOFTWARE.
+*/
 
+#include <cstdint>
+#include "../util/rgmStruct.h"
 
+// rubygm namespace
+namespace RubyGM { 
+    // brush type
+    enum BrushType:uint32_t{ Type_Color,Type_Linear,Type_Radial,Type_Other };
+    // brush
+    struct IGMBrush;
+    // properties to creating normal brush
+    struct NBrushProperties {
+        // brush type
+        BrushType           type;
+        // brush opacity
+        float               opacity;
+        // union
+        union {
+            //  color
+            ColorF          color;
+        };
+    };
+    // make color brush
+    inline auto MakeColorBrush(
+        NBrushProperties& prop,
+        const RubyGM::ColorF& c,
+        float opcity
+    )->NBrushProperties& {
+        prop.opacity = opcity;
+        prop.type = BrushType::Type_Color;
+        prop.color = c;
+        return prop;
+    }
+    // make color brush
+    inline auto MakeColorBrush(
+        NBrushProperties& prop,
+        const RubyGM::ColorF& c
+    )->NBrushProperties& {
+        return MakeColorBrush(prop, c, 1.f);
+    }
+}
 
- ------------------------------
-| Thanks to 3RD Party Library: |
- ------------------------------

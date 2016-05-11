@@ -24,9 +24,10 @@
 * OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#include "../rgmDrawable.h"
-#include "../../Util/rgmUtil.h"
-#include "../../text/rgmTextStruct.h"
+#include "rgmDrawable.h"
+#include "../Util/rgmUtil.h"
+#include "../text/rgmTextStruct.h"
+#include "../asset/rgmAssetFont.h"
 #include <utility>
 
 // rubygm namespace
@@ -35,24 +36,54 @@ namespace RubyGM {
     struct IGMFont;
     // text layout
     struct IGMTextlayout;
+    // text renderer
+    struct IGMTextRenderer;
     // Drawable namespace
     namespace Drawable {
+        // status for textlauout
+        struct TextStatus : BaseStatus {
+            // text renderer
+            const char*             renderer;
+            // text context
+            const char*             context;
+            // text
+            const wchar_t*          text;
+            // font resource
+            Asset::Font&            font;
+            // layout width
+            float                   width;
+            // layout height
+            float                   height;
+            // text length
+            uint32_t                textlen;
+            // ctor
+            ~TextStatus() noexcept { font.Release(); }
+            // default ctor
+            inline TextStatus(Asset::Font&& f) : font(f) { }
+            // default value
+            inline TextStatus(Asset::Font&& f, Default v) : 
+                BaseStatus(v), font(f) {
+                renderer = ""; context = "";
+                text = L""; textlen = 0;
+                width = 128.f; height = 32.f;
+            }
+        };
         // text layout 
-        class Textlayout : public Base {
+        class Textlayout : public Drawable::Object {
             // super class
-            using Super = Base;
+            using Super = Drawable::Object;
         public:
             // create this
-            static auto Create() noexcept->Textlayout*;
+            static auto Create(const TextStatus&) noexcept->Textlayout*;
             // create this
-            static auto CreateSP() noexcept {
-                return std::move(RubyGM::CGMPtr<Drawable::Textlayout>(
-                    std::move(Textlayout::Create()))
+            static auto CreateSP(const TextStatus& ts) noexcept {
+                return std::move(RubyGM::CGMPtr<RubyGM::Drawable::Textlayout>(
+                    std::move(Textlayout::Create(ts)))
                 );
             }
         private:
             // ctor
-            Textlayout() noexcept;
+            Textlayout(const TextStatus&) noexcept;
             // ctor
             Textlayout(const Textlayout&) = delete;
             // ctor
@@ -68,10 +99,12 @@ namespace RubyGM {
         public:
             // get text legnth
             auto GetTextLength() const noexcept { return m_uTextLength; }
-            // set layout size
-            void SetLayoutSize(float w, float h) noexcept;
+            // set layout width
+            auto SetLayoutWidth(float width) noexcept ->uint32_t;
+            // set layout height
+            auto SetLayoutHeight(float h) noexcept ->uint32_t;
             // get text metrics
-            void GetMetrics(TextMetrics&) const noexcept;
+            auto GetMetrics(TextMetrics&) const noexcept ->uint32_t;
             // set text font size
             void SetFontSize(TextRange range, float size) noexcept;
             // set text font color
@@ -81,6 +114,8 @@ namespace RubyGM {
             // set strikethrough
             void SetStrikethrough(TextRange range, bool underline) noexcept;
         protected:
+            // text renderer
+            IGMTextRenderer*        m_pTextRenderer = nullptr;
             // text layout
             IGMTextlayout*          m_pTextlayout = nullptr;
             // text layout width
@@ -91,6 +126,8 @@ namespace RubyGM {
             uint32_t                m_uTextLength = 0;
             // unused
             uint32_t                m_unused = 0;
+            // draw context
+            alignas(size_t) size_t  m_bufDrawContext[0];
         };
     }
 }

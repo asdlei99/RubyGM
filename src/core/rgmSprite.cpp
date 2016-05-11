@@ -19,11 +19,11 @@ namespace RubyGM {
 /// <summary>
 /// Initializes a new instance of the <see cref="CGMSprite"/> class.
 /// </summary>
-RubyGM::CGMSprite::CGMSprite(CGMSprite* parent) noexcept :m_pParent(parent) {
+RubyGM::CGMSprite::CGMSprite(const SprteStatus& ss, CGMSprite* parent) noexcept
+    :m_pParent(parent), m_status(ss) {
     this->make_transform(m_matWorld);
     this->set_visible();
     this->ClearClipRect();
-    m_status = DEFAULT_STATUS;
 }
 
 /// <summary>
@@ -34,6 +34,14 @@ RubyGM::CGMSprite::~CGMSprite() noexcept {
 
 }
 
+/// <summary>
+/// Clears this instance.
+/// </summary>
+/// <returns></returns>
+void RubyGM::CGMSprite::Clear() noexcept {
+    m_ltChildren.clear();
+    m_spDrawable.Dispose();
+}
 
 
 /// <summary>
@@ -58,11 +66,11 @@ void RubyGM::CGMSprite::Set(const SprteStatus& status) noexcept {
 /// <summary>
 /// Adds the child.
 /// </summary>
+/// <exception cref="std::exception"></exception>
 /// <returns>the new child refence</returns>
-auto RubyGM::CGMSprite::AddChild() /*throw(std::exception)*/ ->CGMSprite& {
-    m_ltChildren.emplace_back(this);
-    using titr = decltype(m_ltChildren)::iterator;
-    using vtype = decltype(m_ltChildren)::value_type;
+auto RubyGM::CGMSprite::AddChild(const SprteStatus& ss) ->CGMSprite& {
+    // throw(std::exception)*
+    m_ltChildren.emplace_back(ss, this);
     return m_ltChildren.back();
 }
 
@@ -86,7 +94,7 @@ void RubyGM::CGMSprite::Render(IGMRednerContext& rc) noexcept {
     rc.SetTransform(mt * impl::d2d(m_matWorld));
     // 设置剪切矩形
     rc.PushAxisAlignedClip(impl::d2d(m_rcClip), D2D1_ANTIALIAS_MODE(this->antialias_mode));
-    // 有效的可刻画物体
+    // 选择本精灵
     if (m_spDrawable) m_spDrawable->Render(rc);
     // 渲染子精灵
     for (auto& child : m_ltChildren) child.Render(rc);

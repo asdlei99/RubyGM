@@ -9,6 +9,15 @@ RubyGM::Bridge::Configure::Configure()noexcept:Super(UIManager, "rubygm.log") {
 
 }
 
+
+/// <summary>
+/// Gets the configure flag.
+/// </summary>
+/// <returns></returns>
+auto RubyGM::Bridge::Configure::GetConfigureFlag() noexcept->ConfigureFlag {
+    return Flag_OutputDebugString | Flag_RenderInAnytime;
+}
+
 /// <summary>
 /// Gets the name of the locale.
 /// </summary>
@@ -36,5 +45,15 @@ void RubyGM::Bridge::Configure::RegisterSome() noexcept {
 auto RubyGM::Bridge::Configure::ChooseAdapter(
     const DXGI_ADAPTER_DESC1 adapters[], 
     const size_t length) noexcept -> size_t {
+    for (size_t i = 0; i < length; ++i) {
+        auto& desc = adapters[i];
+        if (!std::wcsncmp(L"Intel", desc.Description, 5))
+            return i;
+    }
+    for (size_t i = 0; i < length; ++i) {
+        auto& desc = adapters[i];
+        if (!std::wcsncmp(L"NVIDIA", desc.Description, 6))
+            return i;
+    }
     return length;
 }

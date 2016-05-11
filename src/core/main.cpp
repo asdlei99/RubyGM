@@ -120,6 +120,13 @@ auto binder_mruby(mrb_state* mruby) {
     }
 }
 
+int msgbox_error(const char*);
+
+int msgbox_error(mrb_state* mrb) {
+    ::mrb_print_backtrace(mrb);
+    auto obj = ::mrb_funcall(mrb, ::mrb_obj_value(mrb->exc), "inspect", 0);
+    return ::msgbox_error(RSTRING_PTR(obj));
+}
 
 // main
 int main_call() {
@@ -127,7 +134,7 @@ int main_call() {
     if (mruby) {
         binder_mruby(mruby);
         ::mrb_load_string(mruby, rbscript);
-        ::mrb_print_error(mruby);
+        ::msgbox_error(mruby);
         ::mrb_close(mruby);
         mruby = nullptr;
     }
@@ -136,8 +143,9 @@ int main_call() {
 
 
 #include <core/graphics/rgmSprite.h>
-#include <core/graphics/drawable/rgmLine.h>
-#include <core/graphics/drawable/rgmTextlayout.h>
+#include <core/drawable/rgmLine.h>
+#include <core/drawable/rgmTextlayout.h>
+#include <game/rgmGame.h>
 
 // RubyGM namespace
 namespace RubyGM {
@@ -145,30 +153,51 @@ namespace RubyGM {
     void FiberYield();
     // update fiber
     void UpdateFiber() {
-        main_call();
-        Drawable::Textlayout* drawable = nullptr;
-        auto sprite = RubyGM::CGMSprite::AddNew();
+        //main_call();
+        auto sprite = Game::NewSprite(RubyGM::DEFAULT_STATUS);
         sprite->SetX(300.f);
         sprite->SetY(300.f);
         sprite->SetZoomX(2.f);
         sprite->SetZoomY(2.f);
         sprite->SetOX(50.f);
+        SprteStatus ss;
+        sprite->Get(ss);
+        auto sprite1 = Game::NewSprite(ss);
         {
-            auto sp = Drawable::Textlayout::CreateSP();
-            drawable = sp.Ptr();
-            sprite->SetDrawable(std::move(sp));
+            Drawable::Default def;
+            Drawable::TextStatus ts(
+                std::move(Game::GetFontAsset(0)),
+                def
+            );
+            ts.color.b = 1.f;
+            Drawable::LineStatus ls(def);
+            ls.point1 = { 120.f, 30.f };
+            ls.stroke_width = 5.f;
+            ts.text = L"Hello, 世界!";
+            ts.textlen = std::wcslen(ts.text);
+            {
+                auto sp = Drawable::Textlayout::CreateSP(ts);
+                sprite1->SetDrawable(std::move(sp));
+            }
+            {
+                auto sp = Drawable::Line::CreateSP(ls);
+                sprite->SetDrawable(std::move(sp));
+            }
         }
-        float v = 2.f;
+        float v = -1.f;
         float s = .01f;
         while (true) {
             RubyGM::FiberYield();
-            sprite->SetRotation(sprite->GetRotation() + 1.f);
-            std::printf("%3.3f\r\n", sprite->GetRotation());
-            v += s;
-            if (v >= 4.f) s = -0.03f;
-            else if (v <= 0.f) s = 0.03f;
+            auto time = Game::GetDetalTime();
+            sprite->SetRotation(sprite->GetRotation() + time * 60.f);
+            sprite1->SetRotation(sprite->GetRotation());
+            v += s * time * 5.f;
+            if (v >= 4.f) s = -1.f;
+            else if (v <= 0.f) s = 1.f;
             sprite->SetZoomX(v);
             sprite->SetZoomY(v);
+            sprite1->SetZoomX(v);
+            sprite1->SetZoomY(v);
         }
     }
 }

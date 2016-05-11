@@ -26,7 +26,7 @@
 
 
 #include <cstdint>
-#include "rgmDrawable.h"
+#include "../drawable/rgmDrawable.h"
 #include "../Util/rgmUtil.h"
 #include "../Util/rgmStruct.h"
 #include <list>
@@ -60,6 +60,8 @@ namespace RubyGM {
         };
         // frend class for list
         friend List<CGMSprite>;
+        // using class
+        using DrawableSP = CGMPtr<Drawable::Object>;
     public:
         // clip zone
         static constexpr float CLIP_ZONE = 60'000.f;
@@ -79,22 +81,22 @@ namespace RubyGM {
             m_spDrawable = std::move(obj);
         }
     public:
-        // add a new sprite to list
-        static auto AddNew(const SprteStatus& = DEFAULT_STATUS) noexcept ->CGMSprite*;
         // ctor
-        CGMSprite(CGMSprite* parent) noexcept;
+        CGMSprite(const SprteStatus& ss, CGMSprite* parent) noexcept;
         // dtor
         ~CGMSprite() noexcept;
         // copy ctor
         CGMSprite(const CGMSprite&) noexcept = delete;
         // move ctor
         CGMSprite(CGMSprite&&) noexcept = delete;
+        // clear sprite
+        void Clear() noexcept;
         // render
         void Render(IGMRednerContext& ) noexcept;
         // root render
         void RootRender(IGMRednerContext& ) const noexcept;
         // add child
-        auto AddChild() /*throw(std::exception)*/ ->CGMSprite&;
+        auto AddChild(const SprteStatus& ss) /*throw(std::exception)*/ ->CGMSprite&;
         // get
         void Get(SprteStatus&) const noexcept;
         // set
@@ -159,7 +161,7 @@ namespace RubyGM {
         bool is_visible() const { return m_baList.Test(Index_Visible); }
     protected:
         // drawable object
-        CGMPtr<Drawable::Base>  m_spDrawable = nullptr;
+        DrawableSP              m_spDrawable = nullptr;
         // parent
         CGMSprite*              m_pParent = nullptr;
         // children

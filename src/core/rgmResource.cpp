@@ -1,20 +1,148 @@
-﻿#include <core/resource/rgmFontResource.h>
+﻿#define _WIN32_WINNT 0x0A000001
+#include <core/asset/rgmAssetFont.h>
 #include <core/graphics/rgmGraphics.h>
 #include <core/text/rgmTextDetail.h>
 #include <core/util/rgmUtil.h>
+#include <game/rgmGame.h>
 #include <cwchar>
 #include <memory>
 
-// rubygm::resource namespace
-namespace RubyGM { namespace Resource {
+/// <summary>
+/// Initializes a new instance of the <see cref="Resource"/> class.
+/// </summary>
+RubyGM::Base::Resource::Resource() noexcept {
+    // 设置链表指针
+    auto last = Game::GetLastResourceObject();
+    assert(last);
+    // 链接后面
+    m_pNext = last;
+    // 链接前面
+    m_pPrve = last->m_pPrve;
+    // 前面链接自己
+    m_pPrve->m_pNext = this;
+    // 后面链接自己
+    m_pNext->m_pPrve = this;
+}
+
+/// <summary>
+/// Finalizes an instance of the <see cref="Resource"/> class.
+/// </summary>
+/// <returns></returns>
+RubyGM::Base::Resource::~Resource() noexcept {
+    // 前面链接后面
+    m_pPrve->m_pNext = m_pNext;
+    // 后面链接前面
+    m_pNext->m_pPrve = m_pPrve;
+}
+
+/// <summary>
+/// Releases this instance.
+/// </summary>
+/// <returns></returns>
+auto RubyGM::Base::Resource::Release() noexcept -> uint32_t {
+    uint32_t count = --m_cRef; 
+    if (!count) this->dispose(); 
+    return count; 
+}
+
+// drawable
+#include <core/drawable/rgmDrawable.h>
+#include <core/util/rgmImpl.h>
+
+
+/// <summary>
+/// Initializes a new instance of the <see cref="Object"/> class.
+/// </summary>
+/// <param name="">The .</param>
+RubyGM::Drawable::Object::Object(const BaseStatus& bs) noexcept
+: m_color(bs.color), m_pBrush(Game::GetCommonBrush()) { }
+
+
+/// <summary>
+/// Finalizes an instance of the <see cref="Object"/> class.
+/// </summary>
+/// <returns></returns>
+RubyGM::Drawable::Object::~Object() noexcept {
+    // 释放笔刷
+    RubyGM::SafeRelease(m_pBrush);
+}
+
+/// <summary>
+/// Sets the color.
+/// </summary>
+/// <param name="color">The color.</param>
+/// <returns></returns>
+void RubyGM::Drawable::Object::SetColor(const RubyGM::ColorF& color) noexcept {
+    // 非纯色笔刷则释放旧的笔刷
+    if (this->get_brush_mode() != BrushMode::Mode_Color) {
+        RubyGM::SafeRelease(m_pBrush);
+        m_pBrush = Game::GetCommonBrush();
+        this->set_brush_mode(BrushMode::Mode_Color);
+    }
+    // 修改颜色
+    m_color = color;
+}
+
+
+/// <summary>
+/// Sets the brush.
+/// </summary>
+/// <param name="brush">The brush.</param>
+/// <returns></returns>
+void RubyGM::Drawable::Object::SetBrush(IGMBrush* brush) noexcept {
+    assert(brush && "bad brush");
+    RubyGM::SafeRelease(m_pBrush);
+    m_pBrush = RubyGM::SafeAcquire(brush);
+    this->set_brush_mode(BrushMode::Mode_Other);
+}
+
+
+/// <summary>
+/// Before_renders this instance.
+/// </summary>
+/// <returns></returns>
+void RubyGM::Drawable::Object::before_render() const noexcept {
+    // 纯色笔刷
+    if (this->get_brush_mode() == BrushMode::Mode_Color) {
+        auto brush = impl::d2d<ID2D1SolidColorBrush>(m_pBrush, IID_ID2D1SolidColorBrush);
+        brush->SetColor(impl::d2d(m_color));
+    }
+}
+
+/// <summary>
+/// Recreates this instance.
+/// </summary>
+/// <returns></returns>
+auto RubyGM::Drawable::Object::Recreate() noexcept -> uint32_t {
+    // 重建笔刷资源
+    RubyGM::SafeRelease(m_pBrush);
+    m_pBrush = Game::GetCommonBrush();
+    return uint32_t(S_OK);
+}
+
+
+// rubygm::asset namespace
+namespace RubyGM { namespace Asset {
+    /// <summary>
+    /// Create a <see cref="Font"/> object with the specified prop . never 
+    /// </summary>
+    /// <param name="">The .</param>
+    /// <returns></returns>
+    auto Font::Create(const FontProperties& prop) noexcept -> Font& {
+        size_t lenp1 = std::wcslen(prop.name) + 1;
+        auto ptr = RubyGM::SmallAlloc(sizeof(Font) + lenp1 * sizeof(wchar_t));
+        assert(ptr && "RubyGM::SmallAlloc cannot return nullptr");
+        auto obj = new(ptr) Asset::Font(prop, lenp1);
+        return *obj;
+    }
     /// <summary>
     /// Initializes a new instance of the <see cref="Font"/> class.
     /// </summary>
     /// <param name="prop">The property.</param>
-    Font::Font(const FontProperties& prop, size_t len) noexcept {
-        std::memcpy(m_bufFontProp, &prop, len);
+    Font::Font(const FontProperties& prop, size_t name_len) noexcept {
+        std::memcpy(m_bufFontProp, &prop, sizeof(prop));
+        std::memcpy(m_bufFontName, prop.name, name_len * sizeof(prop.name[0]));
     }
-
     /// <summary>
     /// Finalizes an instance of the <see cref="Font"/> class.
     /// </summary>
@@ -22,7 +150,6 @@ namespace RubyGM { namespace Resource {
     Font::~Font() noexcept {
         RubyGM::SafeRelease(m_pTextFormat);
     }
-
     /// <summary>
     /// Recreates this instance.
     /// </summary>
@@ -37,28 +164,13 @@ namespace RubyGM { namespace Resource {
     /// <returns></returns>
     void Font::LowOccupancy() noexcept {
         // 在没有被其他对象引用时候释放
-        Resource::LowOccupancyHelper(m_pTextFormat);
+        this->LowOccupancyHelper(m_pTextFormat);
     }
-
-    /// <summary>
-    /// Create a <see cref="Font"/> object with the specified prop . never 
-    /// </summary>
-    /// <param name="">The .</param>
-    /// <returns></returns>
-    auto Font::Create(const FontProperties& prop) noexcept -> Font& {
-        auto len = std::wcslen(prop.name);
-        size_t size = sizeof(Font) + (len + 1) * sizeof(wchar_t);
-        auto ptr = RubyGM::SmallAlloc(size);
-        assert(ptr && "RubyGM::SmallAlloc cannot return nullptr");
-        auto obj = new(ptr) Resource::Font(prop, size);
-        return *obj;
-    }
-
     /// <summary>
     /// Releases unmanaged and - optionally - managed resources.
     /// </summary>
     /// <returns></returns>
-    void Font::Dispose() noexcept {
+    void Font::dispose() noexcept {
         // 调用析构函数
         this->Font::~Font();
         // 释放数据
@@ -69,16 +181,45 @@ namespace RubyGM { namespace Resource {
     /// </summary>
     /// <returns></returns>
     auto Font::GetFont() noexcept ->IGMFont* {
-        // 拥有直接返回
-        if (m_pTextFormat) {
-            return RubyGM::SafeAcquire(m_pTextFormat);
-        }
         // 没有则创建
-        else {
-            return nullptr;
+        if (!m_pTextFormat) {
+            // 创建
+            auto hr = Game::CreateFontWithProp(this->prop(), &m_pTextFormat);
+            // 检查错误
+            if (!m_pTextFormat) Game::SetLastErrorCode(hr);
         }
+        // 拥有直接返回
+        return RubyGM::SafeAcquire(m_pTextFormat);
     }
 }}
 
 
+/// <summary>
+/// Creates the font asset.
+/// </summary>
+/// <param name="">The .</param>
+/// <returns></returns>
+auto RubyGM::Game::CreateFontAsset(
+    const FontProperties& fp) noexcept -> Asset::Font& {
+    return Asset::Font::Create(fp);
+}
 
+
+
+/// <summary>
+/// Allocs the specified .
+/// </summary>
+/// <param name="">The .</param>
+/// <returns></returns>
+auto RubyGM::Drawable::Alloc(size_t len) noexcept -> void* {
+    return LongUI::NormalAlloc(len);
+}
+
+/// <summary>
+/// Frees the specified .
+/// </summary>
+/// <param name="">The .</param>
+/// <returns></returns>
+void RubyGM::Drawable::Free(void* ptr) noexcept {
+    LongUI::NormalFree(ptr);
+}

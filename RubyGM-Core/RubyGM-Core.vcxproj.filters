@@ -19,20 +19,11 @@
     <Filter Include="CoreGM\Util">
       <UniqueIdentifier>{18bf0a03-6feb-4e18-be5c-126b387089e3}</UniqueIdentifier>
     </Filter>
-    <Filter Include="CoreGM\Graphics\Drawable">
-      <UniqueIdentifier>{a8fa6730-fe49-462e-8e5e-4e8e77fa65b3}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Drawable">
-      <UniqueIdentifier>{697872aa-f1f5-4db5-ade5-714aea2dafa9}</UniqueIdentifier>
-    </Filter>
     <Filter Include="CoreGM\Text">
       <UniqueIdentifier>{f6191e17-4a1d-4bd6-972e-93809e2f3d90}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\Resource">
       <UniqueIdentifier>{2c4e7a8f-e6dc-4e49-a033-cd8d4d87c0ad}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="CoreGM\Resource">
-      <UniqueIdentifier>{cd95a8dc-0485-4024-89bd-59ceb9710043}</UniqueIdentifier>
     </Filter>
     <Filter Include="LongUIBridge">
       <UniqueIdentifier>{4b0c14aa-8e3f-4cfd-9371-256e0482ac60}</UniqueIdentifier>
@@ -40,22 +31,31 @@
     <Filter Include="LongUIBridge\Header">
       <UniqueIdentifier>{8492d304-c05c-45cc-9718-e3fafeca2a19}</UniqueIdentifier>
     </Filter>
+    <Filter Include="CoreGM\Game">
+      <UniqueIdentifier>{6e805363-7b5d-4a7e-b89c-ea382ea5174d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="CoreGM\Asset">
+      <UniqueIdentifier>{cd95a8dc-0485-4024-89bd-59ceb9710043}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="CoreGM\Drawable">
+      <UniqueIdentifier>{a8fa6730-fe49-462e-8e5e-4e8e77fa65b3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Resource\Drawable">
+      <UniqueIdentifier>{697872aa-f1f5-4db5-ade5-714aea2dafa9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="CoreGM\Brush">
+      <UniqueIdentifier>{c1cf1564-f6e9-4066-945d-3d3b240d086d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\core\main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\core\rgmGraphics.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\core\rgmSprite.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\core\rgmDrawable.cpp">
-      <Filter>Source Files\Drawable</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\core\rgmTextlayout.cpp">
-      <Filter>Source Files\Drawable</Filter>
+      <Filter>Source Files\Resource\Drawable</Filter>
     </ClCompile>
     <ClCompile Include="..\src\core\rgmResource.cpp">
       <Filter>Source Files\Resource</Filter>
@@ -71,6 +71,15 @@
     </ClCompile>
     <ClCompile Include="..\src\core\rgmluiGameL.cpp">
       <Filter>LongUIBridge</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\rgmLine.cpp">
+      <Filter>Source Files\Resource\Drawable</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\rgmAssetBrush.cpp">
+      <Filter>Source Files\Resource</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\rgmAssetBitmap.cpp">
+      <Filter>Source Files\Resource</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -95,9 +104,6 @@
     <ClInclude Include="..\include\core\Util\rgmRuby.h">
       <Filter>CoreGM\Util</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\core\graphics\rgmDrawable.h">
-      <Filter>CoreGM\Graphics\Drawable</Filter>
-    </ClInclude>
     <ClInclude Include="..\include\core\Util\rgmStruct.h">
       <Filter>CoreGM\Util</Filter>
     </ClInclude>
@@ -107,26 +113,11 @@
     <ClInclude Include="..\include\core\Util\rgmImpl.h">
       <Filter>CoreGM\Util</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\core\graphics\drawable\rgmTextlayout.h">
-      <Filter>CoreGM\Graphics\Drawable</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\core\graphics\drawable\rgmLine.h">
-      <Filter>CoreGM\Graphics\Drawable</Filter>
-    </ClInclude>
     <ClInclude Include="..\include\core\Text\rgmTextDetail.h">
       <Filter>CoreGM\Text</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\core\graphics\drawable\rgmBitmap.h">
-      <Filter>CoreGM\Graphics\Drawable</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\core\resource\rgmResource.h">
-      <Filter>CoreGM\Resource</Filter>
-    </ClInclude>
     <ClInclude Include="..\include\core\text\rgmTextStruct.h">
       <Filter>CoreGM\Text</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\core\resource\rgmFontResource.h">
-      <Filter>CoreGM\Resource</Filter>
     </ClInclude>
     <ClInclude Include="..\include\bridge\rgmluiBridge.h">
       <Filter>LongUIBridge\Header</Filter>
@@ -136,6 +127,33 @@
     </ClInclude>
     <ClInclude Include="..\include\bridge\rgmluiGame.h">
       <Filter>LongUIBridge\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\game\rgmGame.h">
+      <Filter>CoreGM\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\core\asset\rgmAssetFont.h">
+      <Filter>CoreGM\Asset</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\core\asset\rgmAsset.h">
+      <Filter>CoreGM\Asset</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\game\rgmResource.h">
+      <Filter>CoreGM\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\core\drawable\rgmBitmap.h">
+      <Filter>CoreGM\Drawable</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\core\drawable\rgmDrawable.h">
+      <Filter>CoreGM\Drawable</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\core\drawable\rgmLine.h">
+      <Filter>CoreGM\Drawable</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\core\drawable\rgmTextlayout.h">
+      <Filter>CoreGM\Drawable</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\core\brush\rgmBrushStruct.h">
+      <Filter>CoreGM\Brush</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

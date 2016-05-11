@@ -25,14 +25,7 @@
 */
 
 #include <cstdint>
-
-#ifndef RUBYGM_NOVTABLE
-#ifdef _MSC_VER
-#define RUBYGM_NOVTABLE __declspec(novtable)
-#else
-#define RUBYGM_NOVTABLE
-#endif
-#endif
+#include "../../game/rgmResource.h"
 
 // rubygm namespace
 namespace RubyGM {
@@ -40,33 +33,29 @@ namespace RubyGM {
     struct IGMBitmap;
     // brush
     struct IGMBrush;
-    // resource namespace
-    namespace Resource {
-        // helper for LowOccupancy
-        template<class T> 
-        inline void LowOccupancyHelper(T*& ptr) noexcept {
-            if (ptr) {
-                if (ptr->Release())  ptr->AddRef();
-                else ptr = nullptr;
-            }
-        }
-        // base class
-        struct RUBYGM_NOVTABLE Base {
-            // dispose
-            virtual void Dispose() noexcept = 0;
-            // recreate
-            virtual auto Recreate() noexcept ->uint32_t = 0;
+    // asset namespace
+    namespace Asset {
+        // asset object
+        struct RUBYGM_NOVTABLE Object : RubyGM::Base::Resource {
             // set to Low Occupancy to save memory
             virtual void LowOccupancy() noexcept = 0;
+            // helper for LowOccupancy
+            template<class T> 
+            inline void LowOccupancyHelper(T*& ptr) noexcept {
+                if (ptr) {
+                    if (ptr->Release()) ptr->AddRef();
+                    else ptr = nullptr;
+                }
+            }
         };
         // bitmap resource
-        struct RUBYGM_NOVTABLE Bitmap : Base {
+        struct RUBYGM_NOVTABLE Bitmap : RubyGM::Asset::Object {
             // get bitmap
             virtual auto GetBitmap() noexcept -> IGMBitmap* = 0;
         };
         // brush resource
-        struct RUBYGM_NOVTABLE Brush : Base {
-            // get bitmap
+        struct RUBYGM_NOVTABLE Brush : RubyGM::Asset::Object {
+            // get brush
             virtual auto GetBrush() noexcept -> IGMBrush* = 0;
         };
     }
