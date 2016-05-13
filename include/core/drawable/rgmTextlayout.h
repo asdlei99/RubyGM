@@ -105,14 +105,44 @@ namespace RubyGM {
             auto SetLayoutHeight(float h) noexcept ->uint32_t;
             // get text metrics
             auto GetMetrics(TextMetrics&) const noexcept ->uint32_t;
+            // get line count
+            auto GetLineCount() const noexcept ->uint32_t;
+            // get line count
+            auto GetLineMetrics(uint32_t buflen, LineMetrics* buf) const noexcept ->uint32_t;
+            // set valign
+            auto SetVAlignment(VAlignment va) noexcept->uint32_t;
+            // set halign
+            auto SetHAlignment(HAlignment ha) noexcept->uint32_t;
+            // set reading direction
+            auto SetReadingDirection(ReadDirection reading) noexcept->uint32_t;
+            // set flow direction
+            auto SetFlowDirection(FlowDirection flow) noexcept->uint32_t;
+            // set word
+            auto SetWordWrapping(WordWrapping warp) noexcept->uint32_t;
+            // set text font weight
+            auto SetFontWeight(TextRange range, FontWeight fw) noexcept ->uint32_t;
+            // set text font style
+            auto SetFontStyle(TextRange range, FontStyle fs) noexcept ->uint32_t;
+            // set text font stretch
+            auto SetFontStretch(TextRange range, FontStretch fs) noexcept ->uint32_t;
             // set text font size
-            void SetFontSize(TextRange range, float size) noexcept;
+            auto SetFontSize(TextRange range, float size) noexcept ->uint32_t;
+            // set text font name
+            auto SetFontName(TextRange range, const wchar_t*) noexcept ->uint32_t;
             // set text font color
-            void SetFontColor(TextRange range, const ColorF& color) noexcept;
+            auto SetFontColor(TextRange range, const ColorF& color) noexcept ->uint32_t;
             // set text underline
-            void SetUnderline(TextRange range, bool underline) noexcept;
+            auto SetUnderline(TextRange range, bool underline) noexcept ->uint32_t;
             // set strikethrough
-            void SetStrikethrough(TextRange range, bool underline) noexcept;
+            auto SetStrikethrough(TextRange, bool strike) noexcept ->uint32_t;
+            // hit test from point, output bool : is trailing, is inside
+            auto HittestPoint(Point2F, bool[2], HittestMetrics&) noexcept ->uint32_t;
+            // hit test from text pos
+            auto HittesTextPos(uint32_t, bool trailing, Point2F&, HittestMetrics&) noexcept ->uint32_t;
+            // hit test from text pos
+            auto HittesTextRange(TextRange, uint32_t buflen, HittestMetrics* buf) noexcept ->uint32_t;
+            // hit test from text pos
+            auto HittesTextRangeGetCount(TextRange range) const noexcept ->uint32_t;
         protected:
             // text renderer
             IGMTextRenderer*        m_pTextRenderer = nullptr;

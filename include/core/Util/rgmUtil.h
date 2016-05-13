@@ -47,16 +47,31 @@ namespace RubyGM {
         // dtor
         ~CGMBitArray() noexcept {};
         // is true or fasle
-        auto Test(uint32_t index) const noexcept { assert(index<LENGTH); return !!(m_data & (1 << index)); }
+        template<uint32_t index>  auto Test() const noexcept { 
+            static_assert(index<LENGTH,"bad"); 
+            return !!(m_data & (1 << index));
+        }
         // set to true
-        auto SetTrue(uint32_t index) noexcept { assert(index<LENGTH); m_data |= (1 << index); };
+        template<uint32_t index> auto SetTrue() noexcept { 
+            static_assert(index<LENGTH,"bad"); 
+            m_data |= (1 << index); 
+        };
         // set to false
-        auto SetFalse(uint32_t index) noexcept { assert(index<LENGTH); m_data &= ~(1 << index); };
+        template<uint32_t index> auto SetFalse() noexcept { 
+            static_assert(index<LENGTH,"bad"); 
+            m_data &= ~(1 << index);
+        };
         // set to NOT
-        auto SetNot(uint32_t index) noexcept { assert(index<LENGTH); m_data ^= (1 << index); };
+        template<uint32_t index> auto SetNot() noexcept { 
+            static_assert(index<LENGTH,"bad"); 
+           m_data ^= (1 << index); 
+        };
         // set to???
-        template<typename V>
-        auto SetTo(uint32_t index, V value) noexcept { assert(index<LENGTH); this->SetFalse(index); m_data |= (!!(value) << index); }
+        template<uint32_t index, typename V> auto SetTo(V value) noexcept { 
+            static_assert(index<LENGTH,"bad"); 
+            this->SetFalse<index>(); 
+            m_data |= (!!(value) << index);
+        }
     private:
         // data for bit-array
         T           m_data = T(0);
@@ -119,9 +134,11 @@ namespace RubyGM {
         // ctor with move ptr
         CGMPtrA(T*&& ptr) noexcept : m_pObject(ptr) { ptr = nullptr; }
         // ctor with CGMPtrA
-        CGMPtrA(const CGMPtrA<T>& obj) noexcept : m_pObject(obj.m_pObject) { this->safe_addref(); }
+        template<class U>
+        CGMPtrA(const CGMPtrA<U>& obj) noexcept : m_pObject(obj.m_pObject) { this->safe_addref(); }
         // ctor with move CGMPtrA
-        CGMPtrA(CGMPtrA<T>&& obj) noexcept : m_pObject(obj.m_pObject) { obj.m_pObject = nullptr; }
+        template<class U>
+        CGMPtrA(CGMPtrA<U>&& obj) noexcept : m_pObject(obj.m_pObject) { obj.m_pObject = nullptr; }
         // pointer-like
         auto operator->() noexcept { return m_pObject; }
         // ptr

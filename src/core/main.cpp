@@ -152,17 +152,19 @@ namespace RubyGM {
     // yield
     void FiberYield();
     // update fiber
-    void UpdateFiber() {
+    void impl_update_fiber() {
         //main_call();
+        auto mod = [](float x, float y) { return x - float(int(x / y)); };
         auto sprite = Game::NewSprite(RubyGM::DEFAULT_STATUS);
         sprite->SetX(300.f);
         sprite->SetY(300.f);
         sprite->SetZoomX(2.f);
-        sprite->SetZoomY(2.f);
-        sprite->SetOX(50.f);
-        SprteStatus ss;
-        sprite->Get(ss);
-        auto sprite1 = Game::NewSprite(ss);
+        sprite->SetClipRect(RubyGM::RectF{ 0.f, 0.f, 32.f, 32.f });
+        sprite->SetStrictClip(true);
+        //sprite->SetZoomY(2.f);
+        //sprite->SetOX(50.f);
+        auto sprite1 = sprite->AddChild(DEFAULT_STATUS);
+        auto sprite2 = sprite->AddChild(DEFAULT_STATUS);
         {
             Drawable::Default def;
             Drawable::TextStatus ts(
@@ -170,14 +172,22 @@ namespace RubyGM {
                 def
             );
             ts.color.b = 1.f;
+            ts.width = 64.f;
             Drawable::LineStatus ls(def);
-            ls.point1 = { 120.f, 30.f };
+            ls.point1 = { 100.f, 0.f };
             ls.stroke_width = 5.f;
             ts.text = L"Hello, 世界!";
-            ts.textlen = std::wcslen(ts.text);
+            ts.textlen = uint32_t(std::wcslen(ts.text));
             {
                 auto sp = Drawable::Textlayout::CreateSP(ts);
-                sprite1->SetDrawable(std::move(sp));
+                if (sp) {
+                    TextMetrics ms;
+                    sp->GetMetrics(ms);
+                    sp->SetFontSize(TextRange{ 0, 4 }, 5.f);
+                    sp->SetFontColor(TextRange{ 0, 5 }, ColorF{ 1.f,0.,0.f,1.f });
+                    sprite2->SetDrawable(sp);
+                    sprite1->SetDrawable(std::move(sp));
+                }
             }
             {
                 auto sp = Drawable::Line::CreateSP(ls);
@@ -186,19 +196,24 @@ namespace RubyGM {
         }
         float v = -1.f;
         float s = .01f;
+        sprite->SetRotation(30.f);
         while (true) {
             RubyGM::FiberYield();
-            auto time = Game::GetDetalTime();
-            sprite->SetRotation(sprite->GetRotation() + time * 60.f);
-            sprite1->SetRotation(sprite->GetRotation());
+            auto time = Game::GetDetalTime() * 0.5f;
+            //sprite->SetRotation(sprite->GetRotation() + time * 60.f);
+            sprite1->SetSkewX(sprite1->GetSkewX() + time*60.f);
+            sprite2->SetSkewX(-sprite1->GetSkewX());
             v += s * time * 5.f;
             if (v >= 4.f) s = -1.f;
-            else if (v <= 0.f) s = 1.f;
+            else if (v <= 1.f) s = 1.f;
             sprite->SetZoomX(v);
             sprite->SetZoomY(v);
-            sprite1->SetZoomX(v);
-            sprite1->SetZoomY(v);
         }
+    }
+    // update fiber
+    void UpdateFiber() noexcept {
+        try { impl_update_fiber(); }
+        catch (...) {}
     }
 }
 

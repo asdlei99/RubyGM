@@ -44,8 +44,12 @@ namespace RubyGM {
         float       zoomx, zoomy;
         // origin position
         float       ox, oy;
-        // rotation
+        // skew angle
+        float       skewx, skewy;
+        // rotation angle
         float       rotation;
+        // z postion
+        int32_t     z;
     }; 
     // default status
     const extern SprteStatus DEFAULT_STATUS;
@@ -55,8 +59,12 @@ namespace RubyGM {
         enum BitIndex : size_t {
             // world changed
             Index_WorldChanged = 0,
+            // child z changed
+            Index_ChildZ,
             // visible
             Index_Visible,
+            // strict clip
+            Index_StrictClip,
         };
         // frend class for list
         friend List<CGMSprite>;
@@ -64,7 +72,7 @@ namespace RubyGM {
         using DrawableSP = CGMPtr<Drawable::Object>;
     public:
         // clip zone
-        static constexpr float CLIP_ZONE = 60'000.f;
+        static constexpr float CLIP_ZONE = 600'000.f;
         // antialias-mode
         enum AntialiasMode : uint8_t {
             // The edges of each primitive are antialiased sequentially.
@@ -73,12 +81,12 @@ namespace RubyGM {
             Mode_Aliased = 1,
         };
         // set drawable object
-        template<typename T> void SetDrawable(const T& obj) noexcept {
-            m_spDrawable = obj;
+        void SetDrawable(DrawableSP&& obj) noexcept {
+            m_spDrawable = std::move(obj);
         }
         // set drawable object
-        template<typename T> void SetDrawable(T&& obj) noexcept {
-            m_spDrawable = std::move(obj);
+        void SetDrawable(const DrawableSP& obj) noexcept {
+            m_spDrawable = obj;
         }
     public:
         // ctor
@@ -96,7 +104,7 @@ namespace RubyGM {
         // root render
         void RootRender(IGMRednerContext& ) const noexcept;
         // add child
-        auto AddChild(const SprteStatus& ss) /*throw(std::exception)*/ ->CGMSprite&;
+        auto AddChild(const SprteStatus& ss) noexcept ->CGMSprite*;
         // get
         void Get(SprteStatus&) const noexcept;
         // set
@@ -107,15 +115,23 @@ namespace RubyGM {
         bool GetVisible() const noexcept { return this->is_visible(); }
         // set transform directly, the sprite status will be invalid
         void SetTransform(const Matrix3X2F&) noexcept;
+        // set clip type: strict?
+        void SetStrictClip(bool sc) noexcept { this->set_strict_clip(sc); }
     public:
         // get x
         auto GetX() const noexcept { return m_status.x; }
         // get y
         auto GetY() const noexcept { return m_status.y; }
+        // get z
+        auto GetZ() const noexcept { return m_status.z; }
         // get origin x
         auto GetOX() const noexcept { return m_status.ox; }
         // get origin y
         auto GetOY() const noexcept { return m_status.oy; }
+        // get skew angle x
+        auto GetSkewX() const noexcept { return m_status.skewx; }
+        // get skew angle y
+        auto GetSkewY() const noexcept { return m_status.skewy; }
         // get x-scale
         auto GetZoomX() const noexcept { return m_status.zoomy; }
         // get y-scale
@@ -123,19 +139,25 @@ namespace RubyGM {
         // get rotation
         auto GetRotation() const noexcept { return m_status.rotation; }
     public:
-        // get x
+        // set x
         void SetX(float x) noexcept { m_status.x = x; this->set_world_changed(); }
-        // get y
+        // set y
         void SetY(float y) noexcept { m_status.y = y; this->set_world_changed(); }
-        // get origin x
+        // set z
+        void SetZ(int32_t z) noexcept { m_status.z = z; m_pParent->set_childz_changed(); }
+        // set origin x
         void SetOX(float x) noexcept { m_status.ox = x; this->set_world_changed(); }
-        // get origin y
+        // set origin y
         void SetOY(float y) noexcept { m_status.oy = y; this->set_world_changed(); }
-        // get origin x
+        // set skew x
+        void SetSkewX(float x) noexcept { m_status.skewx = x; this->set_world_changed(); }
+        // set skew y
+        void SetSkewY(float y) noexcept { m_status.skewy = y; this->set_world_changed(); }
+        // set origin x
         void SetZoomX(float x) noexcept { m_status.zoomx = x; this->set_world_changed(); }
-        // get origin y
+        // set origin y
         void SetZoomY(float y) noexcept { m_status.zoomy = y; this->set_world_changed(); }
-        // get rotation
+        // set rotation
         void SetRotation(float r) noexcept { m_status.rotation = r; this->set_world_changed(); }
     public:
         // get clip rect
@@ -144,21 +166,46 @@ namespace RubyGM {
         void SetClipRect(const RectF& rc) noexcept { m_rcClip = rc; }
         // clear clip rect
         void ClearClipRect() noexcept { m_rcClip = { -CLIP_ZONE, -CLIP_ZONE, CLIP_ZONE, CLIP_ZONE }; }
-     protected:
+    protected:
         // make the world transform
         void make_transform(/*OUT*/Matrix3X2F& transform) const noexcept;
         // clear world changed
-        void clear_world_changed() noexcept { m_baList.SetFalse(Index_WorldChanged); }
+        void clear_world_changed() noexcept { m_baList.SetFalse<Index_WorldChanged>(); }
         // set world changed
-        void set_world_changed() noexcept { m_baList.SetTrue(Index_WorldChanged); }
+        void set_world_changed() noexcept { m_baList.SetTrue<Index_WorldChanged>(); }
         // is world changed
-        bool is_world_changed() const { return m_baList.Test(Index_WorldChanged); }
+        bool is_world_changed() const { return m_baList.Test<Index_WorldChanged>(); }
         // is visible
-        void set_visible(bool v) noexcept { m_baList.SetTo(Index_Visible, v); }
+        void set_visible(bool v) noexcept { m_baList.SetTo<Index_Visible>(v); }
         // is visible
-        void set_visible() noexcept { m_baList.SetTrue(Index_Visible); }
+        void set_visible() noexcept { m_baList.SetTrue<Index_Visible>(); }
         // is visible
-        bool is_visible() const { return m_baList.Test(Index_Visible); }
+        bool is_visible() const { return m_baList.Test<Index_Visible>(); }
+        // is visible
+        bool is_childz_changed() const { return m_baList.Test<Index_ChildZ>(); }
+        // set child z changed
+        void set_childz_changed(bool v) { m_baList.SetTo<Index_ChildZ>(v); }
+        // set child z changed
+        void set_childz_changed() { m_baList.SetTrue<Index_ChildZ>(); }
+        // clear child z changed
+        void clear_childz_changed() { m_baList.SetFalse<Index_ChildZ>(); }
+        // clear strict clip
+        void clear_strict_clip() { m_baList.SetFalse<Index_StrictClip>(); }
+        // set strict clip
+        void set_strict_clip() { m_baList.SetTrue<Index_StrictClip>(); }
+        // set strict clip
+        void set_strict_clip(bool b) { m_baList.SetTo<Index_StrictClip>(b); }
+        // set strict clip
+        bool is_strict_clip() const { return m_baList.Test<Index_StrictClip>(); }
+    protected:
+        // sort children
+        void sort_children() noexcept;
+        // push clip
+        void push_clip(IGMRednerContext&)  noexcept;
+        // pop clip
+        void pop_clip(IGMRednerContext& rc)  noexcept;
+        // update
+        void update() noexcept;
     protected:
         // drawable object
         DrawableSP              m_spDrawable = nullptr;
@@ -172,10 +219,12 @@ namespace RubyGM {
         RectF                   m_rcClip;
         // sprte status
         SprteStatus             m_status;
+        // unused
+        uint32_t                m_unused_u32 = 0;
         // bool array
         CGMBitArray<uint16_t>   m_baList;
         // unused
-        uint8_t                 unused = 0;
+        uint8_t                 m_unused_u8 = 0;
     public:
         // antialias-mode
         AntialiasMode           antialias_mode = Mode_PerPrimitive;

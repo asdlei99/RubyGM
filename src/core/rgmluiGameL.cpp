@@ -95,13 +95,13 @@ void RubyGM::Bridge::UIGame::Render() const noexcept {
     // 渲染呈现器目标
     auto rc = UIManager_RenderTarget;
     // 清理颜色
-    rc->Clear(D2D1::ColorF(D2D1::ColorF::White));
+    rc->Clear(D2D1::ColorF(D2D1::ColorF::LightCyan, 0.95f));
     // 渲染根精灵
     m_sprRoot.RootRender(*reinterpret_cast<IGMRednerContext*>(rc));
 }
 
 // rubygm::updatefiber
-namespace RubyGM { void UpdateFiber(); }
+namespace RubyGM { void UpdateFiber() noexcept; }
 
 /// <summary>
 /// Updates this instance.
@@ -298,6 +298,20 @@ namespace RubyGM { namespace Asset {
 }}
 
 
+// rubygm::dx namespace
+namespace RubyGM { namespace DX {
+    /// <summary>
+    /// make skew matrix.
+    /// </summary>
+    /// <param name="x">The x.</param>
+    /// <param name="y">The y.</param>
+    /// <param name="matrix">The matrix.</param>
+    /// <returns></returns>
+    void D2D1MakeSkewMatrix(float x, float y, 
+        D2D1_POINT_2F pt, D2D1_MATRIX_3X2_F& matrix) noexcept {
+        LongUI::Dll::D2D1MakeSkewMatrix(x, y, pt, &matrix);
+    }
+}}
 
 // instance for game
 RubyGM::Bridge::UIGame* RubyGM::Bridge::UIGame::s_pInstance = nullptr;

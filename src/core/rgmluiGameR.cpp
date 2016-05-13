@@ -30,13 +30,7 @@ void RubyGM::Bridge::UIGame::init_resource() noexcept {
 /// </summary>
 /// <returns></returns>
 auto RubyGM::Bridge::UIGame::AddSprite(const SprteStatus& ss) noexcept -> CGMSprite* {
-    try {
-        auto& sprite = m_sprRoot.AddChild(ss);
-        return &sprite;
-    }
-    catch (...) {
-        return nullptr;
-    }
+    return m_sprRoot.AddChild(ss);
 }
 
 
@@ -278,7 +272,9 @@ auto RubyGM::Game::CreateFontWithProp(
     const FontProperties& fp, IGMFont** font) noexcept -> uint32_t {
     auto& prop = reinterpret_cast<const LongUI::DX::TextFormatProperties&>(fp);
     auto* tfmt = reinterpret_cast<IDWriteTextFormat**>(font);
-    return uint32_t(LongUI::DX::CreateTextFormat(prop, tfmt));
+    auto hr = LongUI::DX::CreateTextFormat(prop, tfmt);
+    assert(SUCCEEDED(hr));
+    return uint32_t(hr);
 }
 
 // brush

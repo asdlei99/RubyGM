@@ -47,12 +47,12 @@ auto RubyGM::Bridge::Configure::ChooseAdapter(
     const size_t length) noexcept -> size_t {
     for (size_t i = 0; i < length; ++i) {
         auto& desc = adapters[i];
-        if (!std::wcsncmp(L"Intel", desc.Description, 5))
+        if (!std::wcsncmp(L"NVIDIA", desc.Description, 6))
             return i;
     }
     for (size_t i = 0; i < length; ++i) {
         auto& desc = adapters[i];
-        if (!std::wcsncmp(L"NVIDIA", desc.Description, 6))
+        if (!std::wcsncmp(L"Intel", desc.Description, 5))
             return i;
     }
     return length;

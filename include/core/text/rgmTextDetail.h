@@ -40,8 +40,30 @@ namespace RubyGM {
 
 // rubygm::impl namespace
 namespace RubyGM { namespace impl {
-    // TextMetrics
+    // Font Stretch 
+    inline auto d2d(FontStretch fs) { return static_cast<DWRITE_FONT_STRETCH>(fs); }
+    // Font Style 
+    inline auto d2d(FontStyle fs) { return static_cast<DWRITE_FONT_STYLE>(fs); }
+    // Font Weight 
+    inline auto d2d(FontWeight fw) { return static_cast<DWRITE_FONT_WEIGHT>(fw); }
+    // VAlignment
+    inline auto d2d(VAlignment va) { return static_cast<DWRITE_PARAGRAPH_ALIGNMENT>(va); }
+    // HAlignment
+    inline auto d2d(HAlignment ha) { return static_cast<DWRITE_TEXT_ALIGNMENT>(ha); }
+    // ReadDirection
+    inline auto d2d(ReadDirection rd) { return static_cast<DWRITE_READING_DIRECTION>(rd); }
+    // FlowDirection
+    inline auto d2d(FlowDirection fd) { return static_cast<DWRITE_FLOW_DIRECTION>(fd); }
+    // WordWrapping
+    inline auto d2d(WordWrapping ww) { return static_cast<DWRITE_WORD_WRAPPING>(ww); }
+    // Text Range
+    inline auto&d2d(TextRange& tr) { return reinterpret_cast<DWRITE_TEXT_RANGE&>(tr); }
+    // Text Metrics
     inline auto&d2d(TextMetrics& tm) { return reinterpret_cast<DWRITE_TEXT_METRICS&>(tm); }
+    // HitTest Metrics
+    inline auto d2d(LineMetrics* lm) { return reinterpret_cast<DWRITE_LINE_METRICS*>(lm); }
+    // HitTest Metrics
+    inline auto d2d(HittestMetrics* hm) { return reinterpret_cast<DWRITE_HIT_TEST_METRICS*>(hm); }
     // TextRenderer
     inline auto rubygm(LongUI::XUIBasicTextRenderer* r) { return reinterpret_cast<IGMTextRenderer*>(r); }
 }}
