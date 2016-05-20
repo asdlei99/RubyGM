@@ -109,7 +109,7 @@ RubyGM::Drawable::Glyph::Glyph(const GlyphStatus& gs) noexcept : Super(gs) {
 /// <param name="rc">The rc.</param>
 /// <returns></returns>
 void RubyGM::Drawable::Glyph::Render(IGMRenderContext& rc) const noexcept {
-    rc.DrawGeometry(m_pTextGlyph, m_pGiBrushStroke);
+    rc.DrawGeometry(m_pTextGlyph, m_pGiBrushStroke, 0.2f);
 }
 
 /// <summary>
