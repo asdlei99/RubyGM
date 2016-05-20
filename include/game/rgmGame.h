@@ -25,6 +25,9 @@
 */
 
 #include <cstdint>
+#include <cwchar>
+#include "../rubygm.h"
+#include "../core/util/rgmStruct.h"
 
 // rubygm namespace
 namespace RubyGM {
@@ -32,10 +35,6 @@ namespace RubyGM {
     enum : size_t { MAX_SOURCE_EACH = 1024, };
     // sprite class
     class CGMSprite;
-    // brush
-    struct IGMBrush;
-    // font
-    struct IGMFont;
     // sprte status
     struct SprteStatus;
     // prop for font
@@ -50,6 +49,13 @@ namespace RubyGM { namespace Base {
     class Resource;
 }}
 
+// rubygm::drawable namespace
+namespace RubyGM { namespace Drawable {
+    // object
+    class Object;
+}}
+
+
 // rubygm::resource namespace
 namespace RubyGM { namespace Asset {
     // object, font, bitmap and bursh class
@@ -58,20 +64,20 @@ namespace RubyGM { namespace Asset {
 
 // rubygm::game namespace
 namespace RubyGM { namespace Game {
+    // reset random seed, read from OS
+    //void ResetRandomSeed() noexcept;
+    // get a random data
+    //auto Random() noexcept -> float;
     // get delta time
     auto GetDetalTime() noexcept -> float;
+    // get time scale
+    auto GetTimeScale() noexcept -> float;
+    // set time scale
+    void SetTimeScale(float ts) noexcept;
     // set last error code
-    void SetLastErrorCode(uint32_t code) noexcept;
-    // set last error code
-    auto GetLastErrorCode() noexcept->uint32_t;
-    // get common color brush
-    auto GetCommonBrush() noexcept->IGMBrush*;
-    // create font from font prop
-    auto CreateFontWithProp(const FontProperties&, IGMFont**) noexcept->uint32_t;
-    // create font from font prop
-    auto CreateBrushWithProp(const NBrushProperties&, IGMBrush**) noexcept->uint32_t;
-    // get last resource pointer
-    auto GetLastResourceObject() noexcept ->Base::Resource*;
+    void SetLastErrorCode(Result code) noexcept;
+    // get last error code
+    auto GetLastErrorCode() noexcept->Result;
     // add s sprite to game list
     auto NewSprite(const SprteStatus&) noexcept ->CGMSprite*;
     // ------------------------------------------------------------------------
@@ -97,6 +103,17 @@ namespace RubyGM { namespace Game {
     auto CreateFontAsset(const FontProperties&) noexcept -> Asset::Font&;
     // create normal brush resource, ref-count set -> 1
     auto CreateBrushAsset(const NBrushProperties&) noexcept -> Asset::Brush&;
+    // create bitmap asset from drawable in zoomed size
+    auto CreateBitmapAssetFromDrawable(Drawable::Object*, 
+        SizeF sf, SizeF bs) noexcept->Asset::Bitmap&;
+    // create bitmap asset from file name
+    auto CreateBitmapAssetFromFile(const wchar_t* namebgn, 
+        const wchar_t* nameend) noexcept->Asset::Bitmap&;
+    // create bitmap asser from file name
+    inline auto CreateBitmapAssetFromFile(
+        const wchar_t* name) noexcept->Asset::Bitmap& {
+        return Game::CreateBitmapAssetFromFile(name, name + std::wcslen(name));
+    }
     // ------------------------------------------------------------------------
     // ------------------------------ REGISTER --------------------------------
     // --------- if out of range(MAX_SOURCE_EACH), do nothing, return 0 -------

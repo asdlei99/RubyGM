@@ -42,6 +42,8 @@ namespace RubyGM {
     namespace Drawable {
         // status for textlauout
         struct TextStatus : BaseStatus {
+            // basic color
+            ColorF                  color;
             // text renderer
             const char*             renderer;
             // text context
@@ -66,18 +68,21 @@ namespace RubyGM {
                 renderer = ""; context = "";
                 text = L""; textlen = 0;
                 width = 128.f; height = 32.f;
+                color.r = color.g = color.b = 0.f; color.a = 1.f;
             }
         };
         // text layout 
         class Textlayout : public Drawable::Object {
             // super class
             using Super = Drawable::Object;
+            // frirend
+            friend class Glyph;
         public:
             // create this
             static auto Create(const TextStatus&) noexcept->Textlayout*;
             // create this
             static auto CreateSP(const TextStatus& ts) noexcept {
-                return std::move(RubyGM::CGMPtr<RubyGM::Drawable::Textlayout>(
+                return std::move(RubyGM::CGMPtrA<Drawable::Textlayout>(
                     std::move(Textlayout::Create(ts)))
                 );
             }
@@ -90,59 +95,84 @@ namespace RubyGM {
             ~Textlayout() noexcept;
         public:
             // render object
-            void Render(IGMRednerContext& rc) const noexcept override;
+            void Render(IGMRenderContext& rc) const noexcept override;
+            // Rasterization
+            using Super::Rasterization;
+            // rasterization helper
+            auto Rasterization(float sf) noexcept->Drawable::Bitmap* {
+                return this->Rasterization(sf, this->GetSizeFromMetrics());
+            }
+            // rasterization helper
+            auto Rasterization(SizeF sf) noexcept->Drawable::Bitmap* {
+                return this->Rasterization(sf, this->GetSizeFromMetrics());
+            }
+            // rasterization helper
+            template<typename ...Args>
+            auto RasterizationSP(Args&&... args) noexcept {
+                return std::move(RubyGM::CGMPtrA<Drawable::Bitmap>(
+                    std::move(this->Rasterization(std::forward<Args>(args)...))
+                    ));
+            }
+        protected:
             // recreate
-            auto Recreate() noexcept->uint32_t;
+            auto recreate() noexcept ->Result;
         private:
             // dispose object
             void dispose() noexcept override;
         public:
             // get text legnth
             auto GetTextLength() const noexcept { return m_uTextLength; }
+            // get size from metrics
+            auto GetSizeFromMetrics() const noexcept->SizeF;
             // set layout width
-            auto SetLayoutWidth(float width) noexcept ->uint32_t;
+            auto SetLayoutWidth(float width) noexcept ->Result;
             // set layout height
-            auto SetLayoutHeight(float h) noexcept ->uint32_t;
+            auto SetLayoutHeight(float h) noexcept ->Result;
             // get text metrics
-            auto GetMetrics(TextMetrics&) const noexcept ->uint32_t;
+            auto GetMetrics(TextMetrics&) const noexcept ->Result;
             // get line count
             auto GetLineCount() const noexcept ->uint32_t;
             // get line count
-            auto GetLineMetrics(uint32_t buflen, LineMetrics* buf) const noexcept ->uint32_t;
+            auto GetLineMetrics(uint32_t buflen, LineMetrics* buf) const noexcept ->Result;
             // set valign
-            auto SetVAlignment(VAlignment va) noexcept->uint32_t;
+            auto SetVAlignment(VAlignment va) noexcept->Result;
             // set halign
-            auto SetHAlignment(HAlignment ha) noexcept->uint32_t;
+            auto SetHAlignment(HAlignment ha) noexcept->Result;
             // set reading direction
-            auto SetReadingDirection(ReadDirection reading) noexcept->uint32_t;
+            auto SetReadingDirection(ReadDirection reading) noexcept->Result;
             // set flow direction
-            auto SetFlowDirection(FlowDirection flow) noexcept->uint32_t;
+            auto SetFlowDirection(FlowDirection flow) noexcept->Result;
             // set word
-            auto SetWordWrapping(WordWrapping warp) noexcept->uint32_t;
+            auto SetWordWrapping(WordWrapping warp) noexcept->Result;
             // set text font weight
-            auto SetFontWeight(TextRange range, FontWeight fw) noexcept ->uint32_t;
+            auto SetFontWeight(TextRange range, FontWeight fw) noexcept ->Result;
             // set text font style
-            auto SetFontStyle(TextRange range, FontStyle fs) noexcept ->uint32_t;
+            auto SetFontStyle(TextRange range, FontStyle fs) noexcept ->Result;
             // set text font stretch
-            auto SetFontStretch(TextRange range, FontStretch fs) noexcept ->uint32_t;
+            auto SetFontStretch(TextRange range, FontStretch fs) noexcept ->Result;
             // set text font size
-            auto SetFontSize(TextRange range, float size) noexcept ->uint32_t;
+            auto SetFontSize(TextRange range, float size) noexcept ->Result;
             // set text font name
-            auto SetFontName(TextRange range, const wchar_t*) noexcept ->uint32_t;
+            auto SetFontName(TextRange range, const wchar_t*) noexcept ->Result;
             // set text font color
-            auto SetFontColor(TextRange range, const ColorF& color) noexcept ->uint32_t;
+            auto SetFontColor(TextRange range, const ColorF& color) noexcept ->Result;
             // set text underline
-            auto SetUnderline(TextRange range, bool underline) noexcept ->uint32_t;
+            auto SetUnderline(TextRange range, bool underline) noexcept ->Result;
             // set strikethrough
-            auto SetStrikethrough(TextRange, bool strike) noexcept ->uint32_t;
+            auto SetStrikethrough(TextRange, bool strike) noexcept ->Result;
+            // set font feature(like "smcp" "smcp ruby")
+            auto SetFontFeature(TextRange range, const char* feature) noexcept ->Result;
             // hit test from point, output bool : is trailing, is inside
-            auto HittestPoint(Point2F, bool[2], HittestMetrics&) noexcept ->uint32_t;
+            auto HittestPoint(Point2F, bool[2], HittestMetrics&) noexcept ->Result;
             // hit test from text pos
-            auto HittesTextPos(uint32_t, bool trailing, Point2F&, HittestMetrics&) noexcept ->uint32_t;
+            auto HittesTextPos(uint32_t, bool trailing, Point2F&, HittestMetrics&) noexcept ->Result;
             // hit test from text pos
-            auto HittesTextRange(TextRange, uint32_t buflen, HittestMetrics* buf) noexcept ->uint32_t;
+            auto HittesTextRange(TextRange, uint32_t buflen, HittestMetrics* buf) noexcept ->Result;
             // hit test from text pos
-            auto HittesTextRangeGetCount(TextRange range) const noexcept ->uint32_t;
+            auto HittesTextRangeGetCount(TextRange range) const noexcept ->Result;
+        public:
+            // basic color
+            ColorF                  basic_color;
         protected:
             // text renderer
             IGMTextRenderer*        m_pTextRenderer = nullptr;

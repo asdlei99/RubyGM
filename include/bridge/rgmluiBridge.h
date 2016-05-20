@@ -24,11 +24,55 @@
 * OTHER DEALINGS IN THE SOFTWARE.
 */
 
+#include "../rubygm.h"
+
+// rubygm namespace
+namespace RubyGM {
+    // max resource each
+    //enum : size_t { MAX_SOURCE_EACH = 1024, };
+    // brush
+    struct IGMBrush;
+    // font
+    struct IGMFont;
+    // prop for font
+    struct FontProperties;
+    // prop for nromal brush
+    struct NBrushProperties;
+}
+
+// rubygm::base namespace
+namespace RubyGM { namespace Base {
+    // resource class
+    class Resource;
+}}
+
+// rubygm::drawable namespace
+namespace RubyGM { namespace Drawable {
+    // object
+    class Object;
+}}
+
+
+// rubygm::resource namespace
+namespace RubyGM { namespace Asset {
+    // object, font, bitmap and bursh class
+    struct Object; class Font; struct Bitmap; struct Brush;
+}}
 
 
 // rubygm namespace
 namespace RubyGM {
     // bridge namespace
     namespace Bridge {
+        // get common color brush
+        auto GetCommonBrush() noexcept->IGMBrush*;
+        // get last resource pointer
+        auto GetLastResourceObject() noexcept ->Base::Resource*;
+        // create font-GI with properties
+        auto CreateFontWithProp(const FontProperties& fp, 
+            IGMFont** font) noexcept->Result;
+        // create brush-GI with properties
+        auto CreateBrushWithProp(const NBrushProperties& fp, 
+            IGMBrush** brush) noexcept->Result;
     }
 }

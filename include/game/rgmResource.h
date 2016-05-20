@@ -24,7 +24,7 @@
 * OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#include <cstdint>
+#include "../rubygm.h"
 
 #ifndef RUBYGM_NOVTABLE
 #ifdef _MSC_VER
@@ -46,7 +46,7 @@ namespace RubyGM {
             friend class Bridge::UIGame;
         public:
             // add ref-count
-            auto AddRef() noexcept ->uint32_t { return ++m_cRef; }
+            auto AddRef() noexcept->uint32_t;
             // release ref-count
             auto Release() noexcept ->uint32_t;
             // ctor
@@ -56,14 +56,23 @@ namespace RubyGM {
         private:
             // dispose object
             virtual void dispose() noexcept = 0;
-        public:
+        protected:
             // recreate resource
-            virtual auto Recreate() noexcept -> uint32_t = 0;
+            virtual auto recreate() noexcept -> Result = 0;
+        public:
+            // after recreate:
+            void AfterRecreate() noexcept { m_bCouldRecreate = true; }
+            // recreate:
+            auto Recreate() noexcept->Result;
         protected:
             // ref-count
             uint32_t            m_cRef = 1;
+            // can recreat
+            bool                m_bCouldRecreate = true;
+            // -- nameless
+            bool                m_bUnused = false;
             // custom data
-            uint32_t            m_u32Data = 0;
+            uint16_t            m_u16Data = 0;
         public:
             // prve
             Resource*           m_pPrve;

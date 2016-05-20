@@ -3,6 +3,7 @@
 #include <core/asset/rgmAsset.h>
 #include <core/util/rgmUtil.h>
 #include <core/graphics/rgmGraphics.h>
+#include <bridge/rgmluiBridge.h>
 #include <game/rgmGame.h>
 
 // rubygm::asset namespace
@@ -14,10 +15,11 @@ namespace RubyGM { namespace Asset {
         static auto Create(const NBrushProperties& prop) noexcept ->NormalBrush* ;
         // get brush
         auto GetBrush() noexcept -> IGMBrush* override;
-        // recreate
-        auto Recreate() noexcept->uint32_t override;
         // low occu
         void LowOccupancy() noexcept override;
+    protected:
+        // recreate
+        auto recreate() noexcept->Result override;
     private:
         // ctor
         NormalBrush(const NBrushProperties&) noexcept;
@@ -61,9 +63,10 @@ namespace RubyGM { namespace Asset {
     /// Recreates this instance.
     /// </summary>
     /// <returns></returns>
-    auto NormalBrush::Recreate() noexcept -> uint32_t {
+    auto NormalBrush::recreate() noexcept -> Result {
+        // 释放资源, 等待下一次重建
         RubyGM::SafeRelease(m_pBrush);
-        return uint32_t(S_OK);
+        return Result(S_OK);
     }
     /// <summary>
     /// Lows the occupancy.
@@ -87,7 +90,7 @@ namespace RubyGM { namespace Asset {
     auto NormalBrush::GetBrush() noexcept ->IGMBrush* {
         // 没有笔刷则创建
         if (!m_pBrush) {
-            auto hr = Game::CreateBrushWithProp(m_propBrush, &m_pBrush);
+            auto hr = Bridge::CreateBrushWithProp(m_propBrush, &m_pBrush);
             if (!m_pBrush) Game::SetLastErrorCode(hr);
         }
         // 返回已创建的笔刷

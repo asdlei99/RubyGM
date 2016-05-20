@@ -44,15 +44,17 @@ const char* const RUBYGM_XML = u8R"(xml(<?xml version="1.0" encoding="utf-8"?>
             <Null/>
             <Button name="btnRecreate" text="重建资源" 
                 margin="4,4,4,4" borderwidth="1" size="0, 32"/>
-            <Button text="Button2" 
+            <Button text="----" 
                 margin="4,4,4,4" borderwidth="1" size="0, 32"/>
-            <Button text="Button3" 
+            <Button name="btnPauseResume"   text="暂停恢复" 
                 margin="4,4,4,4" borderwidth="1" size="0, 32"/>
             <Null/>
         </VerticalLayout>
     </HorizontalLayout>
 </Window>
 )xml)";
+
+#include <game/rgmGame.h>
 
 // init window
 void InitWindow(LongUI::XUIBaseWindow* window, int cmd) noexcept {
@@ -65,9 +67,44 @@ void InitWindow(LongUI::XUIBaseWindow* window, int cmd) noexcept {
                 return true;
             }, LongUI::SubEvent::Event_ItemClicked);
         }
+        if (control = (window->FindControl("btnPauseResume"))) {
+            control->AddEventCall([](LongUI::UIControl*) {
+                float ts = RubyGM::Game::GetTimeScale();
+                ts = ts == 0.f ? 1.f : 0.f;
+                RubyGM::Game::SetTimeScale(ts);
+                return true;
+            }, LongUI::SubEvent::Event_ItemClicked);
+        }
         window->ShowWindow(cmd);
     }
 }
+
+// rubygm namespace
+auto drawable_glyph_create_text(ID2D1PathGeometry** p) -> int32_t {
+    char32_t ch[] = U"龍ABC";
+    auto fmt = UIManager.GetTextFormat(0);
+    auto hr = LongUI::DX::CreateTextPathGeometry(
+        ch, std::end(ch) - std::begin(ch) - 1, fmt, UIManager_D2DFactory, nullptr, p
+    );
+    fmt->Release();
+    return hr;
+}
+
+#include <core/graphics/rgmGraphics.h>
+#include <type_traits>
+
+// rubygm::bridge namespace
+namespace RubyGM { namespace Bridge {
+    // create path geo
+    auto CreatePathGeometry(IGMGeometry*& geo) noexcept -> Result {
+        using geotype = typename IGMGeometry::Super;
+        using same = std::is_same<ID2D1PathGeometry, geotype>;
+        static_assert(same::value, "must be same");
+        auto** path = reinterpret_cast<ID2D1PathGeometry**>(&geo);
+        return Result(UIManager_D2DFactory->CreatePathGeometry(path));
+    }
+}}
+
 
 // message box
 int msgbox_error(const char* str) {

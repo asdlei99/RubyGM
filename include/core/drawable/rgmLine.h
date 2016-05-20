@@ -24,7 +24,7 @@
 * OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#include "rgmDrawable.h"
+#include "rgmVector.h"
 #include "../Util/rgmUtil.h"
 #include <utility>
 
@@ -33,23 +33,23 @@ namespace RubyGM {
     // Drawable namespace
     namespace Drawable {
         // status for line
-        struct LineStatus : BaseStatus {
+        struct LineStatus : VectorStatus {
             // point 0
             RubyGM::Point2F         point0;
             // point 1
             RubyGM::Point2F         point1;
-            // stroke width
-            float                   stroke_width;
+            // ctor
+            LineStatus() : VectorStatus() {}
             // default value
-            inline LineStatus(Default v) : BaseStatus(v) {
+            inline LineStatus(Default v) : VectorStatus(v) {
                 point0 = { 0.f, 0.f }; point1 = { 0.f, 0.f };
                 stroke_width = 1.f;
             }
         };
         // line 
-        class Line : public Drawable::Object {
+        class Line : public Drawable::Vector {
             // super class
-            using Super = Drawable::Object;
+            using Super = Drawable::Vector;
             // dispose object
             void dispose() noexcept override;
         protected:
@@ -57,25 +57,24 @@ namespace RubyGM {
             Line(const LineStatus&) noexcept;
             // ctor
             ~Line() noexcept;
+            // recreate
+            //auto recreate() noexcept -> Result override;
         public:
             // create this
             static auto Create(const LineStatus&) noexcept ->Line*;
             // create this
             static auto CreateSP(const LineStatus& ls) noexcept {
-                return std::move(RubyGM::CGMPtr<Drawable::Line>(std::move(Line::Create(ls))));
+                return std::move(RubyGM::CGMPtrA<Drawable::Line>(
+                    std::move(Line::Create(ls)))
+                );
             }
             // render object
-            void Render(IGMRednerContext& rc) const noexcept override;
-            // recreate
-            //auto Recreate() noexcept -> uint32_t override;
+            void Render(IGMRenderContext& rc) const noexcept override;
         public:
             // point 0
             RubyGM::Point2F         point0;
             // point 1
             RubyGM::Point2F         point1;
-            // stroke width
-            float                   stroke_width = 1.f;
-        private:
         };
     }
 }

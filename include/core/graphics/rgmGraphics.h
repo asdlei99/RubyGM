@@ -29,10 +29,14 @@
 
 // rubygm namespace
 namespace RubyGM {
+    // stroke style
+    struct IGMStrokeStyle : ID2D1StrokeStyle { using Super = ID2D1StrokeStyle; };
     // render context
-    struct IGMRednerContext : ID2D1RenderTarget { using Super = ID2D1RenderTarget; };
+    struct IGMRenderContext : ID2D1DeviceContext { using Super = ID2D1DeviceContext; };
     // bitmap
-    struct IGMBitmap : ID2D1Bitmap { using Super = ID2D1Bitmap; };
+    struct IGMBitmap : ID2D1Bitmap1 { using Super = ID2D1Bitmap1; };
+    // geometry
+    struct IGMGeometry : ID2D1PathGeometry { using Super = ID2D1PathGeometry; };
     // brush
     struct IGMBrush : ID2D1Brush { using Super = ID2D1Brush; };
 }

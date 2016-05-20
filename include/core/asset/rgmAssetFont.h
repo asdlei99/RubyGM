@@ -51,12 +51,12 @@ namespace RubyGM {
             ~Font() noexcept;
             // get font prop
             auto&prop() { return *reinterpret_cast<FontProperties*>(m_bufFontProp); }
+            // recreate
+            //virtual auto recreate() noexcept ->uint32_t override;
         private:
             // dispose object
             virtual void dispose() noexcept override;
         public:
-            // recreate
-            virtual auto Recreate() noexcept ->uint32_t override;
             // set to Low Occupancy to save memory
             virtual void LowOccupancy() noexcept override;
         private:

@@ -7,7 +7,36 @@
 #include <core/Text/rgmTextDetail.h>
 #include <core/asset/rgmAssetFont.h>
 #include <game/rgmGame.h>
+#include <bridge/rgmluiBridge.h>
 
+// rubygm::impl 命名空间
+namespace RubyGM { namespace impl {
+    /// <summary>
+    /// Creates the typography.
+    /// </summary>
+    /// <param name="typography">The typography</param>
+    /// <returns></returns>
+    auto create_typography(IDWriteTypography** typography) noexcept->Result;
+
+    /// <summary>
+    /// White spaces?
+    /// </summary>
+    /// <param name="c">The c.</param>
+    /// <returns></returns>
+    template<typename T> inline auto white_space(T c) noexcept {
+        return ((c) == ' ' || (c) == '\t'); 
+    }
+}}
+
+
+/// <summary>
+/// Recreates this instance.
+/// </summary>
+/// <returns></returns>
+auto RubyGM::Drawable::Textlayout::recreate() noexcept -> Result {
+    // 文本布局是设备无关资源, 无需重新创建
+    return Result(S_OK);
+}
 
 /// <summary>
 /// Creates this instance.
@@ -23,7 +52,7 @@ auto RubyGM::Drawable::Textlayout::Create(const TextStatus& ts) noexcept -> Text
     // 释放掉
     renderer->Release();
     // 申请空间
-    auto ptr = Drawable::Alloc(len);
+    auto ptr = RubyGM::NormalAlloc(len);
     // 申请失败
     if (!ptr) return nullptr;
     // 创建对象 不允许创建布局失败
@@ -48,24 +77,23 @@ void RubyGM::Drawable::Textlayout::dispose() noexcept {
     // 手动调用析构函数
     this->Textlayout::~Textlayout();
     // 释放空间
-    Drawable::Free(this);
+    RubyGM::NormalFree(this);
 }
 
 // XXX: 移除
-namespace RubyGM {
-    namespace Asset {
-        // create text format
-        auto CreateTextFormat(const wchar_t* name, float size, IDWriteTextFormat** ptr) noexcept->HRESULT;
-        // create text layout
-        auto CreateTextLayout(const wchar_t* n, uint32_t l,IDWriteTextFormat* f, IDWriteTextLayout** ptr)  noexcept->HRESULT;
-    }
-}
+namespace RubyGM { namespace Asset {
+    // create text format
+    auto CreateTextFormat(const wchar_t* name, float size, IDWriteTextFormat** ptr) noexcept->HRESULT;
+    // create text layout
+    auto CreateTextLayout(const wchar_t* n, uint32_t l,IDWriteTextFormat* f, IDWriteTextLayout** ptr)  noexcept->HRESULT;
+}}
 
 /// <summary>
 /// Prevents a default instance of the <see cref="Textlayout"/> class from being created.
 /// </summary>
 RubyGM::Drawable::Textlayout::Textlayout(const TextStatus& ts) noexcept : Super(ts), 
-m_pTextRenderer(impl::rubygm(UIManager.GetTextRenderer(ts.renderer))) {
+m_pTextRenderer(impl::rubygm(UIManager.GetTextRenderer(ts.renderer))),
+basic_color(ts.color) {
     // 创建文本格式/字体
     auto format = ts.font.GetFont(); if (!format) return;
     // 创建布局
@@ -77,7 +105,7 @@ m_pTextRenderer(impl::rubygm(UIManager.GetTextRenderer(ts.renderer))) {
     format->Release();
     // 记录错误代码
     if (!m_pTextlayout) {
-        Game::SetLastErrorCode(uint32_t(hr));
+        Game::SetLastErrorCode(Result(hr));
     }
     // 创建渲染上下文
     m_pTextRenderer->MakeContextFromString(m_bufDrawContext, ts.context);
@@ -97,11 +125,11 @@ RubyGM::Drawable::Textlayout::~Textlayout() noexcept {
 /// </summary>
 /// <param name="rc">The rc.</param>
 /// <returns></returns>
-void RubyGM::Drawable::Textlayout::Render(IGMRednerContext& rc) const noexcept {
+void RubyGM::Drawable::Textlayout::Render(IGMRenderContext& rc) const noexcept {
     assert(m_pTextRenderer && m_pTextlayout && "bad action");
     // 设置渲染环境
     m_pTextRenderer->target = &rc;
-    m_pTextRenderer->basic_color.color = impl::d2d(m_color);
+    m_pTextRenderer->basic_color.color = impl::d2d(this->basic_color);
     // 刻画文本
     m_pTextlayout->Draw(
         const_cast<size_t*>(m_bufDrawContext),
@@ -116,9 +144,9 @@ void RubyGM::Drawable::Textlayout::Render(IGMRednerContext& rc) const noexcept {
 /// Recreates this instance.
 /// </summary>
 /// <returns></returns>
-auto RubyGM::Drawable::Textlayout::Recreate() noexcept -> uint32_t {
-    return uint32_t(S_OK);
-}
+//auto RubyGM::Drawable::Textlayout::Recreate() noexcept ->Result {
+//    return Super::Recreate();
+//}
 
 /// <summary>
 /// Sets the width of the layout.
@@ -126,9 +154,9 @@ auto RubyGM::Drawable::Textlayout::Recreate() noexcept -> uint32_t {
 /// <param name="width">The width.</param>
 /// <returns>error code</returns>
 auto RubyGM::Drawable::Textlayout::SetLayoutWidth(
-    float width) noexcept ->uint32_t{
+    float width) noexcept ->Result{
     auto hr = m_pTextlayout->SetMaxWidth(width);
-    return uint32_t(hr);
+    return Result(hr);
 }
 
 /// <summary>
@@ -137,9 +165,9 @@ auto RubyGM::Drawable::Textlayout::SetLayoutWidth(
 /// <param name="height">The height.</param>
 /// <returns>error code</returns>
 auto RubyGM::Drawable::Textlayout::SetLayoutHeight(
-    float height) noexcept ->uint32_t {
+    float height) noexcept ->Result {
     auto hr = m_pTextlayout->SetMaxHeight(height);
-    return uint32_t(hr);
+    return Result(hr);
 }
 
 /// <summary>
@@ -148,9 +176,26 @@ auto RubyGM::Drawable::Textlayout::SetLayoutHeight(
 /// <param name="">The .</param>
 /// <returns>error code</returns>
 auto RubyGM::Drawable::Textlayout::GetMetrics(
-    RubyGM::TextMetrics& metrics) const noexcept ->uint32_t {
+    RubyGM::TextMetrics& metrics) const noexcept ->Result {
     auto hr = m_pTextlayout->GetMetrics(&impl::d2d(metrics));
-    return uint32_t(hr);
+    return Result(hr);
+}
+
+/// <summary>
+/// Gets the size from metrics.
+/// </summary>
+/// <returns></returns>
+auto RubyGM::Drawable::Textlayout::GetSizeFromMetrics(
+) const noexcept -> SizeF {
+    TextMetrics tm; auto hr = this->GetMetrics(tm);
+    // 成功 -> 实际大小
+    if (SUCCEEDED(hr)) {
+        return{ tm.width, tm.height };
+    }
+    // 失败 -> 布局大小
+    else {
+        return{ this->m_fWidth, m_fHeight };
+    }
 }
 
 /// <summary>
@@ -158,7 +203,7 @@ auto RubyGM::Drawable::Textlayout::GetMetrics(
 /// </summary>
 /// <returns>count of line</returns>
 auto RubyGM::Drawable::Textlayout::GetLineCount(
-) const noexcept -> uint32_t {
+) const noexcept ->uint32_t {
     uint32_t count = 0;
     m_pTextlayout->GetLineMetrics(nullptr, 0, &count);
     return count;
@@ -171,7 +216,7 @@ auto RubyGM::Drawable::Textlayout::GetLineCount(
 /// <param name="buf">The buf.</param>
 /// <returns></returns>
 auto RubyGM::Drawable::Textlayout::GetLineMetrics(
-    uint32_t buflen, LineMetrics* buf) const noexcept -> uint32_t {
+    uint32_t buflen, LineMetrics* buf) const noexcept ->Result {
     uint32_t count = 0;
     auto hr = m_pTextlayout->GetLineMetrics(
         impl::d2d(buf), buflen, &count
@@ -186,9 +231,9 @@ auto RubyGM::Drawable::Textlayout::GetLineMetrics(
 /// <param name="va">The va.</param>
 /// <returns></returns>
 auto RubyGM::Drawable::Textlayout::SetVAlignment(
-    VAlignment va) noexcept -> uint32_t {
+    VAlignment va) noexcept ->Result {
     auto hr = m_pTextlayout->SetParagraphAlignment(impl::d2d(va));
-    return uint32_t(hr);
+    return Result(hr);
 }
 
 /// <summary>
@@ -197,9 +242,9 @@ auto RubyGM::Drawable::Textlayout::SetVAlignment(
 /// <param name="ha">The ha.</param>
 /// <returns></returns>
 auto RubyGM::Drawable::Textlayout::SetHAlignment(
-    HAlignment ha) noexcept -> uint32_t {
+    HAlignment ha) noexcept ->Result {
     auto hr = m_pTextlayout->SetTextAlignment(impl::d2d(ha));
-    return uint32_t(hr);
+    return Result(hr);
 }
 
 /// <summary>
@@ -208,9 +253,9 @@ auto RubyGM::Drawable::Textlayout::SetHAlignment(
 /// <param name="reading">The reading.</param>
 /// <returns></returns>
 auto RubyGM::Drawable::Textlayout::SetReadingDirection(
-    ReadDirection reading) noexcept -> uint32_t {
+    ReadDirection reading) noexcept ->Result {
     auto hr = m_pTextlayout->SetReadingDirection(impl::d2d(reading));
-    return uint32_t(hr);
+    return Result(hr);
 }
 
 /// <summary>
@@ -219,9 +264,9 @@ auto RubyGM::Drawable::Textlayout::SetReadingDirection(
 /// <param name="flow">The flow.</param>
 /// <returns></returns>
 auto RubyGM::Drawable::Textlayout::SetFlowDirection(
-    FlowDirection flow) noexcept -> uint32_t {
+    FlowDirection flow) noexcept ->Result {
     auto hr = m_pTextlayout->SetFlowDirection(impl::d2d(flow));
-    return uint32_t(hr);
+    return Result(hr);
 }
 
 /// <summary>
@@ -230,9 +275,9 @@ auto RubyGM::Drawable::Textlayout::SetFlowDirection(
 /// <param name="warp">The warp.</param>
 /// <returns></returns>
 auto RubyGM::Drawable::Textlayout::SetWordWrapping(
-    WordWrapping warp) noexcept -> uint32_t {
+    WordWrapping warp) noexcept ->Result {
     auto hr = m_pTextlayout->SetWordWrapping(impl::d2d(warp));
-    return uint32_t(hr);
+    return Result(hr);
 }
 
 /// <summary>
@@ -242,11 +287,11 @@ auto RubyGM::Drawable::Textlayout::SetWordWrapping(
 /// <param name="fw">The fw.</param>
 /// <returns></returns>
 auto RubyGM::Drawable::Textlayout::SetFontWeight(
-    TextRange range, FontWeight fw) noexcept -> uint32_t {
+    TextRange range, FontWeight fw) noexcept ->Result {
     auto hr = m_pTextlayout->SetFontWeight(
         impl::d2d(fw), impl::d2d(range)
     );
-    return uint32_t(hr);
+    return Result(hr);
 }
 
 /// <summary>
@@ -256,11 +301,11 @@ auto RubyGM::Drawable::Textlayout::SetFontWeight(
 /// <param name="fs">The fs.</param>
 /// <returns></returns>
 auto RubyGM::Drawable::Textlayout::SetFontStyle(
-    TextRange range, FontStyle fs) noexcept -> uint32_t {
+    TextRange range, FontStyle fs) noexcept ->Result {
     auto hr = m_pTextlayout->SetFontStyle(
         impl::d2d(fs), impl::d2d(range)
     );
-    return uint32_t(hr);
+    return Result(hr);
 }
 
 /// <summary>
@@ -270,11 +315,11 @@ auto RubyGM::Drawable::Textlayout::SetFontStyle(
 /// <param name="fs">The fs.</param>
 /// <returns></returns>
 auto RubyGM::Drawable::Textlayout::SetFontStretch(
-    TextRange range, FontStretch fs) noexcept -> uint32_t {
+    TextRange range, FontStretch fs) noexcept ->Result {
     auto hr = m_pTextlayout->SetFontStretch(
         impl::d2d(fs), impl::d2d(range)
     );
-    return uint32_t(hr);
+    return Result(hr);
 }
 
 
@@ -285,9 +330,9 @@ auto RubyGM::Drawable::Textlayout::SetFontStretch(
 /// <param name="size">The size.</param>
 /// <returns>error code</returns>
 auto RubyGM::Drawable::Textlayout::SetFontSize(
-    TextRange range, float size) noexcept ->uint32_t {
+    TextRange range, float size) noexcept ->Result {
     auto hr = m_pTextlayout->SetFontSize(size, impl::d2d(range));
-    return uint32_t(hr);
+    return Result(hr);
 }
 
 /// <summary>
@@ -297,9 +342,9 @@ auto RubyGM::Drawable::Textlayout::SetFontSize(
 /// <param name="">The .</param>
 /// <returns></returns>
 auto RubyGM::Drawable::Textlayout::SetFontName(
-    TextRange range, const wchar_t* name) noexcept -> uint32_t {
+    TextRange range, const wchar_t* name) noexcept ->Result {
     auto hr = m_pTextlayout->SetFontFamilyName(name, impl::d2d(range));
-    return uint32_t(hr);
+    return Result(hr);
 }
 
 /// <summary>
@@ -309,9 +354,9 @@ auto RubyGM::Drawable::Textlayout::SetFontName(
 /// <param name="underline">if set to <c>true</c> [underline].</param>
 /// <returns>error code</returns>
 auto RubyGM::Drawable::Textlayout::SetUnderline(
-    TextRange range, bool underline) noexcept -> uint32_t {
+    TextRange range, bool underline) noexcept ->Result {
     auto hr = m_pTextlayout->SetUnderline(underline, impl::d2d(range));
-    return uint32_t(hr);
+    return Result(hr);
 }
 
 /// <summary>
@@ -321,9 +366,50 @@ auto RubyGM::Drawable::Textlayout::SetUnderline(
 /// <param name="underline">if set to <c>true</c> [underline].</param>
 /// <returns>error code</returns>
 auto RubyGM::Drawable::Textlayout::SetStrikethrough(
-    TextRange range, bool strike) noexcept -> uint32_t {
+    TextRange range, bool strike) noexcept ->Result {
     auto hr = m_pTextlayout->SetStrikethrough(strike, impl::d2d(range));
-    return uint32_t(hr);
+    return Result(hr);
+}
+
+/// <summary>
+/// Sets the font feature.
+/// </summary>
+/// <param name="range">The range.</param>
+/// <param name="feature">The feature.</param>
+/// <returns></returns>
+auto RubyGM::Drawable::Textlayout::SetFontFeature(
+    TextRange range, const char* feature) noexcept ->Result {
+    assert(feature && "bad argument");
+    if (!feature) return Result(E_INVALIDARG);
+    IDWriteTypography* typography = nullptr;
+    auto hr = impl::create_typography(&typography);
+    if (!typography) return Result(hr);
+    // 创建
+    union {
+        char                    buffer[4];
+        DWRITE_FONT_FEATURE_TAG tag;
+    };
+    // 遍历字符串
+    auto itr = feature;
+    while (*itr) {
+        // 有效
+        if (!impl::white_space(*itr)) {
+            std::strncpy(buffer, itr, 4);
+            itr += 4;
+            hr = Result(typography->AddFontFeature(DWRITE_FONT_FEATURE{tag, 1}));
+            if (FAILED(hr)) break;
+        }
+        else {
+            itr += 1;
+        }
+    }
+    // 设置
+    if (SUCCEEDED(hr)) {
+        hr = m_pTextlayout->SetTypography(typography, impl::d2d(range));
+    }
+    // 释放数据
+    typography->Release();
+    return Result(hr);
 }
 
 /// <summary>
@@ -333,15 +419,15 @@ auto RubyGM::Drawable::Textlayout::SetStrikethrough(
 /// <param name="color">The color.</param>
 /// <returns>error code</returns>
 auto RubyGM::Drawable::Textlayout::SetFontColor(
-    TextRange range, const ColorF& color) noexcept -> uint32_t {
+    TextRange range, const ColorF& color) noexcept ->Result {
     auto ce = LongUI::CUIColorEffect::Create(impl::d2d(color));
     if (ce) {
         auto hr = m_pTextlayout->SetDrawingEffect(ce, impl::d2d(range));
         ce->Release();
-        return uint32_t(hr);
+        return Result(hr);
     }
     else {
-        return uint32_t(E_OUTOFMEMORY);
+        return Result(E_OUTOFMEMORY);
     }
 }
 
@@ -354,7 +440,7 @@ auto RubyGM::Drawable::Textlayout::SetFontColor(
 /// <returns>error code</returns>
 auto RubyGM::Drawable::Textlayout::HittestPoint(
     Point2F pt, bool trailing_and_inside[2], 
-    HittestMetrics& htm) noexcept -> uint32_t {
+    HittestMetrics& htm) noexcept ->Result {
     BOOL bool_trailing_and_inside[2];
     auto hr = m_pTextlayout->HitTestPoint(
         pt.x, pt.y,
@@ -364,7 +450,7 @@ auto RubyGM::Drawable::Textlayout::HittestPoint(
     );
     trailing_and_inside[0] = !!bool_trailing_and_inside[0];
     trailing_and_inside[1] = !!bool_trailing_and_inside[1];
-    return uint32_t(hr);
+    return Result(hr);
 }
 
 
@@ -378,11 +464,11 @@ auto RubyGM::Drawable::Textlayout::HittestPoint(
 /// <returns>error code</returns>
 auto RubyGM::Drawable::Textlayout::HittesTextPos(
     uint32_t pos, bool trailing, Point2F& pt, 
-    HittestMetrics& htm) noexcept -> uint32_t {
+    HittestMetrics& htm) noexcept ->Result {
     auto hr = m_pTextlayout->HitTestTextPosition(
         pos, trailing, &pt.x, &pt.y, impl::d2d(&htm)
     );
-    return uint32_t(hr);
+    return Result(hr);
 }
 
 
@@ -392,7 +478,7 @@ auto RubyGM::Drawable::Textlayout::HittesTextPos(
 /// <param name="range">The range.</param>
 /// <returns>count of metrice </returns>
 auto RubyGM::Drawable::Textlayout::HittesTextRangeGetCount(
-    TextRange range) const noexcept -> uint32_t {
+    TextRange range) const noexcept ->Result {
     uint32_t count = 0;
     m_pTextlayout->HitTestTextRange(
         range.begin, range.length,
@@ -413,7 +499,7 @@ auto RubyGM::Drawable::Textlayout::HittesTextRangeGetCount(
 /// <returns>error code</returns>
 auto RubyGM::Drawable::Textlayout::HittesTextRange(
     TextRange range, uint32_t buflen, 
-    HittestMetrics* buf) noexcept -> uint32_t {
+    HittestMetrics* buf) noexcept ->Result {
     uint32_t count = 0;
     auto hr = m_pTextlayout->HitTestTextRange(
         range.begin, range.length,
@@ -422,6 +508,6 @@ auto RubyGM::Drawable::Textlayout::HittesTextRange(
         &count
     );
     assert(count == buflen);
-    return uint32_t(hr);
+    return Result(hr);
 
 }

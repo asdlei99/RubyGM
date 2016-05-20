@@ -1,7 +1,46 @@
 ﻿#include <bridge/rgmluiGame.h>
+#include <bridge/rgmluiBridge.h>
 #include <core/asset/rgmAssetFont.h>
 #include <core/brush/rgmBrushStruct.h>
 #include <core/util/rgmImpl.h>
+#include <algorithm>
+#undef min
+#undef max
+
+// rubygm::asset namespace
+namespace RubyGM { namespace Asset {
+    // null bitmap, return this object if OOM
+    class NullBitmap final : public Bitmap {
+    public:
+        // get bitmap
+        auto GetBitmap() noexcept -> IGMBitmap* override { return nullptr; }
+        // low occu
+        void LowOccupancy() noexcept override {}
+    public:
+        // ctor
+        NullBitmap() noexcept {}
+        // dtor
+        ~NullBitmap() noexcept {}
+    protected:
+        // recreate
+        //auto recreate() noexcept->uint32_t override { return 0; }
+    private:
+        // dispose
+        void dispose() noexcept override {}
+    };
+    // bufer
+    size_t s_bufNullBitmap[RubyGM::AlignedSizeTLen(sizeof(NullBitmap))];
+    // get null bitmap object
+    auto GetNullBitmapAsset() noexcept -> Bitmap& {
+        auto& obj = *reinterpret_cast<NullBitmap*>(s_bufNullBitmap);
+        obj.AddRef();
+        return obj;
+    }
+    // get null bitmap object - ex
+    static inline auto RefNullBitmapAssetEx() noexcept -> NullBitmap& {
+        return *reinterpret_cast<NullBitmap*>(s_bufNullBitmap);
+    }
+}}
 
 /// <summary>
 /// Initializes the resource.
@@ -9,30 +48,60 @@
 /// <returns></returns>
 void RubyGM::Bridge::UIGame::init_resource() noexcept {
     //assert(!"NOIMPL");
+    // 创建
+    Asset::RefNullBitmapAssetEx().Asset::NullBitmap::NullBitmap();
     // 添加默认资源 - 字体
     {
-        alignas(void*) char buffer[sizeof(RubyGM::FontProperties) + sizeof(wchar_t) * MAX_PATH];
-        auto& luidxtfprop = *reinterpret_cast<LongUI::DX::TextFormatProperties*>(buffer);
-        auto& rgmfontprop = reinterpret_cast<RubyGM::FontProperties&>(luidxtfprop);
+
+        constexpr size_t len1 = sizeof(RubyGM::FontProperties);
+        constexpr size_t len2 = sizeof(wchar_t) * MAX_PATH;
+        alignas(void*) char buffer[len1 + len2];
+        using tfp = LongUI::DX::TextFormatProperties*;
+        auto& luidxtfprop = *reinterpret_cast<tfp>(buffer);
+        auto& rgmfontprop = reinterpret_cast<FontProperties&>(luidxtfprop);
         LongUI::DX::InitTextFormatProperties(luidxtfprop, MAX_PATH);
         this->RegisterFontAsset(rgmfontprop);
     }
     // 添加默认资源 - 笔刷
     {
         RubyGM::NBrushProperties bnprop;
-        RubyGM::MakeColorBrush(bnprop, impl::rubygm(D2D1::ColorF(D2D1::ColorF::Black)));
+        RubyGM::MakeColorBrush(
+            bnprop, 
+            impl::rubygm(D2D1::ColorF(D2D1::ColorF::Black))
+        );
         this->RegisterBrushAsset(bnprop);
     }
 }
+
+
+/// <summary>
+/// Release_assets this instance.
+/// </summary>
+/// <returns></returns>
+void RubyGM::Bridge::UIGame::release_asset() noexcept {
+    // 释放所有资源
+    for (size_t i = 0; i < RESOURCE_COUNT; ++i) {
+        assert(m_appAssetPtr[i] && "bad action");
+        auto begin = m_appAssetPtr[i];
+        auto end = m_appAssetPtr[i] + m_acAssetPtr[i];
+        // 释放每部分资源
+        std::for_each(begin, end, [](Asset::Object* obj) {
+            obj->Release();
+        });
+    }
+    // 释放
+    Asset::RefNullBitmapAssetEx().Asset::NullBitmap::~NullBitmap();
+}
+
 
 /// <summary>
 /// Adds the sprite.
 /// </summary>
 /// <returns></returns>
-auto RubyGM::Bridge::UIGame::AddSprite(const SprteStatus& ss) noexcept -> CGMSprite* {
+auto RubyGM::Bridge::UIGame::AddSprite(
+    const SprteStatus& ss) noexcept -> CGMSprite* {
     return m_sprRoot.AddChild(ss);
 }
-
 
 
 /// <summary>
@@ -44,43 +113,21 @@ auto RubyGM::Game::NewSprite(const SprteStatus& ss) noexcept -> CGMSprite* {
     return RubyGM::Bridge::UIGame::GetInstance().AddSprite(ss);
 }
 
-/// <summary>
-/// Sets the last error code.
-/// </summary>
-/// <param name="code">The code.</param>
-/// <returns></returns>
-void RubyGM::Game::SetLastErrorCode(uint32_t code) noexcept {
-#ifdef _DEBUG
-    HRESULT hr(code);
-    assert(SUCCEEDED(hr) && "ERROR WITH HRESULT");
-    hr = S_OK;
-#endif
-    RubyGM::Bridge::UIGame::GetInstance().error_code = code;
-}
 
-
-/// <summary>
-/// Gets the detal time.
-/// </summary>
-/// <returns></returns>
-auto RubyGM::Game::GetDetalTime() noexcept -> float {
-    return UIManager.GetDeltaTime();
-}
 
 /// <summary>
 /// Gets the last error code.
 /// </summary>
 /// <returns></returns>
-auto RubyGM::Game::GetLastErrorCode() noexcept->uint32_t {
+auto RubyGM::Game::GetLastErrorCode() noexcept->Result {
     return RubyGM::Bridge::UIGame::GetInstance().error_code;
 }
-
 
 /// <summary>
 /// Gets the last resource object.
 /// </summary>
 /// <returns></returns>
-auto RubyGM::Game::GetLastResourceObject() noexcept -> Base::Resource* {
+auto RubyGM::Bridge::GetLastResourceObject() noexcept -> Base::Resource* {
     return RubyGM::Bridge::UIGame::GetInstance().GetResourceTail();
 }
 
@@ -88,16 +135,38 @@ auto RubyGM::Game::GetLastResourceObject() noexcept -> Base::Resource* {
 /// Gets the color brush.
 /// </summary>
 /// <returns></returns>
-auto RubyGM::Game::GetCommonBrush() noexcept ->IGMBrush* {
+auto RubyGM::Bridge::GetCommonBrush() noexcept ->IGMBrush* {
     auto brush = RubyGM::Bridge::UIGame::GetInstance().GetCommonBrush();
     return reinterpret_cast<IGMBrush*>(brush);
 }
 
 
+/// <summary>
+/// Gets the time scale.
+/// </summary>
+/// <returns></returns>
+auto RubyGM::Game::GetTimeScale() noexcept -> float {
+    return RubyGM::Bridge::UIGame::GetInstance().time_scale;
+}
+
+/// <summary>
+/// Sets the time scale.
+/// </summary>
+/// <param name="ts">The ts.</param>
+/// <returns></returns>
+void RubyGM::Game::SetTimeScale(float ts) noexcept {
+    ts = std::max(std::min(ts, 100.f), 0.f);
+    RubyGM::Bridge::UIGame::GetInstance().time_scale = ts;
+}
+
 // rubygm::impl namespace
 namespace RubyGM { namespace impl {
     // get now time
     auto get_time() noexcept -> uint32_t { return ::timeGetTime(); }
+    // get root transform
+    auto get_root_transform() noexcept -> const Matrix3X2F& {
+        return Bridge::UIGame::GetInstance().GetRootTransform();
+    };
 }}
 
 
@@ -170,8 +239,8 @@ const noexcept -> Asset::Brush& {
 /// </summary>
 /// <param name="index">The index.</param>
 /// <returns></returns>
-auto RubyGM::Game::RefBitmapAsset(uint32_t index) 
-noexcept -> Asset::Bitmap & {
+auto RubyGM::Game::RefBitmapAsset(
+    uint32_t index) noexcept -> Asset::Bitmap & {
     return Bridge::UIGame::GetInstance().RefBitmapAsset(index);
 }
 
@@ -181,8 +250,8 @@ noexcept -> Asset::Bitmap & {
 /// </summary>
 /// <param name="index">The index.</param>
 /// <returns></returns>
-auto RubyGM::Game::RefFontAsset(uint32_t index) 
-noexcept -> Asset::Font & {
+auto RubyGM::Game::RefFontAsset(
+    uint32_t index) noexcept -> Asset::Font & {
     return Bridge::UIGame::GetInstance().RefFontAsset(index);
 }
 
@@ -191,8 +260,8 @@ noexcept -> Asset::Font & {
 /// </summary>
 /// <param name="index">The index.</param>
 /// <returns></returns>
-auto RubyGM::Game::RefBrushAsset(uint32_t index) 
-noexcept -> Asset::Brush & {
+auto RubyGM::Game::RefBrushAsset(
+    uint32_t index) noexcept -> Asset::Brush & {
     return Bridge::UIGame::GetInstance().RefBrushAsset(index);
 }
 
@@ -201,8 +270,8 @@ noexcept -> Asset::Brush & {
 /// </summary>
 /// <param name="index">The index.</param>
 /// <returns></returns>
-auto RubyGM::Game::GetBitmapAsset(uint32_t index) 
-noexcept -> Asset::Bitmap & {
+auto RubyGM::Game::GetBitmapAsset(
+    uint32_t index) noexcept -> Asset::Bitmap & {
     auto& asset = Bridge::UIGame::GetInstance().RefBitmapAsset(index);
     asset.AddRef();
     return asset;
@@ -214,8 +283,8 @@ noexcept -> Asset::Bitmap & {
 /// </summary>
 /// <param name="index">The index.</param>
 /// <returns></returns>
-auto RubyGM::Game::GetFontAsset(uint32_t index) 
-noexcept -> Asset::Font & {
+auto RubyGM::Game::GetFontAsset(
+    uint32_t index) noexcept -> Asset::Font & {
     auto& asset = Bridge::UIGame::GetInstance().RefFontAsset(index);
     asset.AddRef();
     return asset;
@@ -247,7 +316,8 @@ auto RubyGM::Game::RegisterBitmapAsset() noexcept -> uint32_t {
 /// Adds the resource brush.
 /// </summary>
 /// <returns></returns>
-auto RubyGM::Game::RegisterBrushAsset(const NBrushProperties& bnp) noexcept -> uint32_t {
+auto RubyGM::Game::RegisterBrushAsset
+(const NBrushProperties& bnp) noexcept -> uint32_t {
     return Bridge::UIGame::GetInstance().RegisterBrushAsset(bnp);
 }
 
@@ -268,13 +338,13 @@ auto RubyGM::Game::RegisterFontAsset(
 /// <param name="">The .</param>
 /// <param name="">The .</param>
 /// <returns></returns>
-auto RubyGM::Game::CreateFontWithProp(
-    const FontProperties& fp, IGMFont** font) noexcept -> uint32_t {
+auto RubyGM::Bridge::CreateFontWithProp(
+    const FontProperties& fp, IGMFont** font) noexcept -> Result {
     auto& prop = reinterpret_cast<const LongUI::DX::TextFormatProperties&>(fp);
     auto* tfmt = reinterpret_cast<IDWriteTextFormat**>(font);
     auto hr = LongUI::DX::CreateTextFormat(prop, tfmt);
     assert(SUCCEEDED(hr));
-    return uint32_t(hr);
+    return Result(hr);
 }
 
 // brush
@@ -287,15 +357,15 @@ auto RubyGM::Game::CreateFontWithProp(
 /// <param name="">The .</param>
 /// <param name="">The .</param>
 /// <returns></returns>
-auto RubyGM::Game::CreateBrushWithProp(
-    const NBrushProperties& prop, IGMBrush** brush) noexcept -> uint32_t {
+auto RubyGM::Bridge::CreateBrushWithProp(
+    const NBrushProperties& prop, IGMBrush** brush) noexcept -> Result {
     D2D1_BRUSH_PROPERTIES d2d1bprop;
     d2d1bprop.opacity = prop.opacity;
     d2d1bprop.transform = D2D1::Matrix3x2F::Identity();
     switch (prop.type)
     {
     case RubyGM::Type_Color:
-        return uint32_t(UIManager_RenderTarget->CreateSolidColorBrush(
+        return Result(UIManager_RenderTarget->CreateSolidColorBrush(
             &impl::d2d(prop.color),
             &d2d1bprop,
             reinterpret_cast<ID2D1SolidColorBrush**>(brush)
@@ -308,7 +378,7 @@ auto RubyGM::Game::CreateBrushWithProp(
         break;*/
     default:
         assert(!"NOIMPL");
-        return uint32_t(E_NOTIMPL);
+        return Result(E_NOTIMPL);
         break;
     }
 }
@@ -347,3 +417,4 @@ auto RubyGM::Bridge::UIGame::RegisterBrushAsset(
         return &Game::CreateBrushAsset(bnp);
     });
 }
+

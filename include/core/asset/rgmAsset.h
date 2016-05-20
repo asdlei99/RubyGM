@@ -33,6 +33,8 @@ namespace RubyGM {
     struct IGMBitmap;
     // brush
     struct IGMBrush;
+    // stroke style
+    struct IGMStrokeStyle;
     // asset namespace
     namespace Asset {
         // asset object
@@ -47,16 +49,25 @@ namespace RubyGM {
                     else ptr = nullptr;
                 }
             }
-        };
-        // bitmap resource
-        struct RUBYGM_NOVTABLE Bitmap : RubyGM::Asset::Object {
-            // get bitmap
-            virtual auto GetBitmap() noexcept -> IGMBitmap* = 0;
+        protected:
+            // set to Low Occupancy to save memory
+            virtual auto recreate() noexcept ->Result { return 0; };
         };
         // brush resource
         struct RUBYGM_NOVTABLE Brush : RubyGM::Asset::Object {
             // get brush
             virtual auto GetBrush() noexcept -> IGMBrush* = 0;
+        };
+        // bitmap resource
+        struct RUBYGM_NOVTABLE Bitmap : RubyGM::Asset::Object {
+            // get bitmap
+            virtual auto GetBitmap() noexcept -> IGMBitmap* = 0;
+            // redraw the content if self is RasterBitmap
+            virtual auto Redraw() noexcept ->Result { return Result(0); };
+        };
+        // raster bitmap
+        struct RUBYGM_NOVTABLE RasterBitmap : Asset::Bitmap {
+
         };
     }
 }

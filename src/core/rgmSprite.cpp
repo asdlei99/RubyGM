@@ -18,6 +18,24 @@ namespace RubyGM {
 }
 
 /// <summary>
+/// Sets the drawable.
+/// </summary>
+/// <param name="obj">The object.</param>
+/// <returns></returns>
+void RubyGM::CGMSprite::SetDrawable(CGMPtrA<Drawable::Object>&& obj) noexcept {
+    m_spDrawable = std::move(obj);
+}
+
+/// <summary>
+/// Sets the drawable.
+/// </summary>
+/// <param name="obj">The object.</param>
+/// <returns></returns>
+void RubyGM::CGMSprite::SetDrawable(const CGMPtrA<Drawable::Object>& obj) noexcept {
+    m_spDrawable = obj;
+}
+
+/// <summary>
 /// Initializes a new instance of the <see cref="CGMSprite"/> class.
 /// </summary>
 RubyGM::CGMSprite::CGMSprite(const SprteStatus& ss, CGMSprite* parent) noexcept
@@ -33,6 +51,69 @@ RubyGM::CGMSprite::CGMSprite(const SprteStatus& ss, CGMSprite* parent) noexcept
 /// <returns></returns>
 RubyGM::CGMSprite::~CGMSprite() noexcept {
 
+}
+
+/// <summary>
+/// Computes the scale factor1 .
+/// </summary>
+/// <returns></returns>
+auto RubyGM::CGMSprite::ComputeScaleFactorEz1() const noexcept -> float {
+    auto sf = this->ComputeScaleFactorEz2();
+    return (sf.width + sf.height) * 0.5f;
+}
+
+/// <summary>
+/// Computes the scale factor ex1.
+/// </summary>
+/// <returns></returns>
+auto RubyGM::CGMSprite::ComputeScaleFactorEx1() const noexcept -> float {
+    auto sf = this->ComputeScaleFactorEx2();
+    return (sf.width + sf.height) * 0.5f;
+}
+
+
+/// <summary>
+/// Computes the scale factor2.
+/// </summary>
+/// <returns></returns>
+auto RubyGM::CGMSprite::ComputeScaleFactorEz2() const noexcept -> SizeF {
+    constexpr float pi = 3.141592654f;
+    auto sprite = this;
+    SizeF sf{ 1.f, 1.f };
+    // 遍历节点
+    while (sprite) {
+        sf.width *= sprite->GetZoomX();
+        sf.height *= sprite->GetZoomY();
+        sprite = sprite->m_pParent;
+    }
+    // 返回结果
+    return sf;
+}
+
+/// <summary>
+/// Computes the scale factor ex2.
+/// </summary>
+/// <returns></returns>
+auto RubyGM::CGMSprite::ComputeScaleFactorEx2() const noexcept -> SizeF {
+    constexpr float pi = 3.141592654f;
+    auto sprite = this;
+    SizeF sf{ 1.f, 1.f };
+    // 遍历节点
+    while (sprite) {
+        sf.width *= sprite->GetZoomX();
+        sf.height *= sprite->GetZoomY();
+        if (sprite->GetSkewX() != 0.f) {
+            float theta = sprite->GetSkewX() * (pi / 180.0f);
+            sf.width *= std::tan(theta) / theta;
+        }
+        if (sprite->GetSkewY() != 0.f) {
+            float theta = sprite->GetSkewY() * (pi / 180.0f);
+            sf.height *= std::tan(theta) / theta;
+        }
+        sprite = sprite->m_pParent;
+    }
+    // 返回结果
+    return sf;
 }
 
 /// <summary>
@@ -97,7 +178,15 @@ auto RubyGM::CGMSprite::AddChild(const SprteStatus& ss) noexcept ->CGMSprite* {
 /// Renders this instance.
 /// </summary>
 /// <returns></returns>
-void RubyGM::CGMSprite::Render(IGMRednerContext& rc) noexcept {
+void RubyGM::CGMSprite::Render(IGMRenderContext& rc) noexcept {
+#ifdef _DEBUG
+    {
+        ID2D1DeviceContext* dc = nullptr;
+        rc.QueryInterface(IID_ID2D1DeviceContext, reinterpret_cast<void**>(&dc));
+        assert(dc && "bad interface!");
+        RubyGM::SafeRelease(dc);
+    }
+#endif
     // 不可见
     if (!this->is_visible()) return;
     // 刷新
@@ -118,18 +207,10 @@ void RubyGM::CGMSprite::Render(IGMRednerContext& rc) noexcept {
 /// <summary>
 /// push clip rect for this instance.
 /// </summary>
-void RubyGM::CGMSprite::push_clip(IGMRednerContext& rc) noexcept {
+void RubyGM::CGMSprite::push_clip(IGMRenderContext& rc) noexcept {
     // 设置剪切矩形
-    auto&dc = reinterpret_cast<ID2D1DeviceContext&>(rc);
     if (this->is_strict_clip()) {
-        ID2D1DeviceContext* test = nullptr;
-        rc.QueryInterface(
-            IID_ID2D1DeviceContext,
-            reinterpret_cast<void**>(&test)
-        );
-        assert(test && "bad device context");
-        RubyGM::SafeRelease(test);
-        dc.PushLayer(
+        rc.PushLayer(
             D2D1::LayerParameters1(
                 impl::d2d(m_rcClip),
                 nullptr,
@@ -149,7 +230,7 @@ void RubyGM::CGMSprite::push_clip(IGMRednerContext& rc) noexcept {
 /// <summary>
 /// pop clip rect for this instance.
 /// </summary>
-void RubyGM::CGMSprite::pop_clip(IGMRednerContext& rc) noexcept {
+void RubyGM::CGMSprite::pop_clip(IGMRenderContext& rc) noexcept {
     // 弹出剪切矩形
     if (this->is_strict_clip()) rc.PopLayer();
     else rc.PopAxisAlignedClip();
@@ -187,7 +268,7 @@ void RubyGM::CGMSprite::update() noexcept {
 /// </summary>
 /// <param name="">The .</param>
 /// <returns></returns>
-void RubyGM::CGMSprite::RootRender(IGMRednerContext& rc) const noexcept {
+void RubyGM::CGMSprite::RootRender(IGMRenderContext& rc) const noexcept {
     // 设置转变
     //rc.SetTransform(&impl::d2d(m_matWorld));
     // 设置剪切矩形
@@ -210,7 +291,7 @@ namespace RubyGM { namespace DX{
     /// <param name="center">The center.</param>
     /// <param name="matrix">The matrix.</param>
     /// <returns></returns>
-    void D2D1MakeRotateMatrix(float angle, D2D1_POINT_2F center, D2D1_MATRIX_3X2_F& matrix) noexcept {
+    inline void D2D1MakeRotateMatrix(float angle, D2D1_POINT_2F center, D2D1_MATRIX_3X2_F& matrix) noexcept {
         constexpr float pi = 3.141592654f;
         float theta = angle * (pi / 180.0f);
         float sin_theta = std::sin(theta);
@@ -223,7 +304,17 @@ namespace RubyGM { namespace DX{
         matrix._32 = center.y - center.x * sin_theta - center.y * cos_theta;
     }
     // make skew
-    void D2D1MakeSkewMatrix(float x, float y, D2D1_POINT_2F, D2D1_MATRIX_3X2_F&);
+    inline void D2D1MakeSkewMatrix(
+        float x, float y, 
+        D2D1_POINT_2F center,
+        D2D1_MATRIX_3X2_F& matrix) noexcept {
+        constexpr float pi = 3.141592654f;
+        float theta_x = x * (pi / 180.0f), tan_x = std::tan(theta_x);
+        float theta_y = y * (pi / 180.0f), tan_y = std::tan(theta_y);
+        matrix._11 = 1.f;              matrix._12 = tan_y;
+        matrix._21 = tan_x;            matrix._22 = 1.f;
+        matrix._31 =-center.y * tan_x; matrix._32 = center.x * tan_y;
+    }
 }}
 
 /// <summary>
@@ -240,7 +331,7 @@ void RubyGM::CGMSprite::make_transform(Matrix3X2F& transform) const noexcept {
     matrix = D2D1::Matrix3x2F::Translation(D2D1_SIZE_F{ m_status.x, m_status.y })
         * D2D1::Matrix3x2F::Scale(D2D1_SIZE_F{m_status.zoomx, m_status.zoomy}, center)
         * romt;
-    // 倾斜转变
+    // 倾斜转变 -- 不常用....
     if (m_status.skewx != 0.f || m_status.skewy != 0.f) {
         DX::D2D1MakeSkewMatrix(m_status.skewx, m_status.skewy, center, romt);
         matrix = matrix * romt;

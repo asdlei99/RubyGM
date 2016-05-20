@@ -25,6 +25,7 @@
 */
 
 #include <LongUI.h>
+#include <LongUI/luiUiDConf.h>
 
 // rubygm namespace
 namespace RubyGM {
@@ -37,6 +38,10 @@ namespace RubyGM {
         public:
             // ctor
             Configure() noexcept;
+            // add ref-count
+            auto STDMETHODCALLTYPE AddRef() noexcept->ULONG override final;
+            // release ref-count
+            auto STDMETHODCALLTYPE Release() noexcept->ULONG override final;
             // get flags for configure
             auto GetConfigureFlag() noexcept->ConfigureFlag override;
             // get locale name , LOCALE_NAME_MAX_LENGTH

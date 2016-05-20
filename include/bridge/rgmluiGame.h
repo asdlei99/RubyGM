@@ -30,6 +30,10 @@
 #include "../core/graphics/rgmSprite.h"
 #include "../game/rgmGame.h"
 
+// wic factory
+struct IWICImagingFactory2;
+
+// rubygm namespace
 namespace RubyGM {
     // resoure index
     enum AssetIndex : size_t { 
@@ -63,6 +67,8 @@ namespace RubyGM {
         public:
             // add sprite for game
             auto AddSprite(const SprteStatus& ss) noexcept->CGMSprite*;
+            // get root transform
+            auto&GetRootTransform() const noexcept { return m_sprRoot.GetTransform(); }
             // get bitmap resource by index, but no add-ref
             auto RefBitmapAsset(uint32_t index) const noexcept -> Asset::Bitmap&;
             // get font resource by index, but no add-ref
@@ -81,11 +87,15 @@ namespace RubyGM {
             auto GetResourceHead() const { return this->get_drawable<Res, 0>(); }
             // get resource tail for game
             auto GetResourceTail() const { return this->get_drawable<Res, 1>(); }
+            // get wic factory
+            auto&RefWicFactory() const noexcept { return *m_pWicFactory; }
         public:
             // ctor
             UIGame(LongUI::UIContainer* cp) noexcept;
             // ctor
             ~UIGame() noexcept;
+            // get cahce dir
+            auto&GetCacheDir() noexcept { return m_strCacheDir; }
             // set
             static auto& GetInstance() noexcept { assert(s_pInstance); return *s_pInstance; }
             // create control event
@@ -109,6 +119,8 @@ namespace RubyGM {
             void*                       m_pMainFiber = nullptr;
             // sub fiber
             void*                       m_pSubFiber = nullptr;
+            // wic factory
+            IWICImagingFactory2*        m_pWicFactory = nullptr;
         protected:
             // assert pointers array
             Asset::Object**             m_appAssetPtr[RESOURCE_COUNT];
@@ -125,11 +137,11 @@ namespace RubyGM {
             uint32_t                    m_uLastFrameTime;
             // now fps
             float                       m_fps = 0.f;
-            // unused
-            uint32_t                    unused = 0;
         public:
+            // time scale
+            float                       time_scale = 1.f;
             // error code
-            uint32_t                    error_code = 0;
+            Result                      error_code = 0;
         protected:
 #ifdef LongUIDebugEvent
             // debug infomation
@@ -147,9 +159,10 @@ namespace RubyGM {
         protected:
             // root sprite
             CGMSprite                   m_sprRoot;
+            // cache directory
+            LongUI::CUIString           m_strCacheDir;
             // buffer for drawable head and tail
             char                        m_bufDrawaleHT[sizeof(Res) * 2];
-
             // single
             static UIGame*              s_pInstance;
         };

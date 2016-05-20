@@ -31,10 +31,6 @@
 
 // rubygm namespace
 namespace RubyGM {
-    // small alloc, alloc for small size, cannot return nullptr, nor std::terminate
-    auto SmallAlloc(size_t len /* < 256*/) noexcept->void*;
-    // small free
-    void SmallFree(void* ptr) noexcept;
     // Bit Array
     template<typename T> class CGMBitArray {
     public:
@@ -106,21 +102,7 @@ namespace RubyGM {
         // singleton
         static CGMSingleton<T>      s_instance;
     };
-    // impl namespace
-    namespace impl {
-        // sfinae
-        template<class> struct sfinae_true : std::true_type{};
-        // test if has AddRef member funtion
-        template<class T>
-        static auto test_addref(int) -> sfinae_true<decltype(std::declval<T>().AddRef())>;
-        // test if has AddRef member funtion
-        template<class>
-        static auto test_addref(long) -> std::false_type;
-        // has addref
-        template<class T>
-        struct has_addref : decltype(impl::test_addref<T>(0)){};
-    }
-    // refcounted smart pointer
+    // refcounted smart pointer, type A
     template<class T> class CGMPtrA {
         // friend
         template<typename U> friend class CGMPtrA;
@@ -145,11 +127,26 @@ namespace RubyGM {
         auto Ptr() const noexcept -> T* { return m_pObject; }
         // operator =
         template<class U> auto& operator=(const CGMPtrA<U>& obj) noexcept { 
+            assert(this != &obj);
             this->safe_release(); m_pObject = obj.m_pObject; this->safe_addref();
             return *this; 
         }
         // operator =
         template<class U> auto& operator=(CGMPtrA<U>&& obj) noexcept { 
+            assert(this != &obj);
+            this->safe_release(); m_pObject = obj.m_pObject; 
+            obj.m_pObject = nullptr;
+            return *this; 
+        }
+        // operator =
+        auto& operator=(const CGMPtrA<T>& obj) noexcept { 
+            assert(this != &obj);
+            this->safe_release(); m_pObject = obj.m_pObject; this->safe_addref();
+            return *this; 
+        }
+        // operator =
+        auto& operator=(CGMPtrA<T>&& obj) noexcept { 
+            assert(this != &obj);
             this->safe_release(); m_pObject = obj.m_pObject; 
             obj.m_pObject = nullptr;
             return *this; 
@@ -167,7 +164,7 @@ namespace RubyGM {
         // pointer to object
         T*              m_pObject;
     };
-    // dispose smart pointer
+    // dispose smart pointer, type B
     template<class T> class CGMPtrB {
         // friend
         template<typename U> friend class CGMPtrB;
@@ -192,6 +189,15 @@ namespace RubyGM {
         template<class U> auto& operator=(const CGMPtrB<U>& obj) noexcept = delete;
         // operator =
         template<class U> auto& operator=(CGMPtrB<U>&& obj) noexcept { 
+            assert(this != &obj);
+            this->safe_dispose(); m_pObject = obj.m_pObject; obj.m_pObject = nullptr;
+            return *this; 
+        }
+        // operator =
+        auto& operator=(const CGMPtrB<T>& obj) noexcept = delete;
+        // operator =
+        auto& operator=(CGMPtrB<T>&& obj) noexcept { 
+            assert(this != &obj);
             this->safe_dispose(); m_pObject = obj.m_pObject; obj.m_pObject = nullptr;
             return *this; 
         }
@@ -206,16 +212,4 @@ namespace RubyGM {
         // pointer to object
         T*              m_pObject;
     };
-    // impl
-    namespace impl {
-        // sp helper
-        template<class T, bool U> struct sp_helper;
-        // has AddRef
-        template<class T> struct sp_helper<T, true> { using Class = CGMPtrA<T>; };
-        // no AddRef
-        template<class T> struct sp_helper<T, false> { using Class = CGMPtrB<T>; };
-    }
-    // normal pointer
-    template<typename T>
-    using CGMPtr = typename impl::sp_helper<T, impl::has_addref<T>::value>::Class;
 }

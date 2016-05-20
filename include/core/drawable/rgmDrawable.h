@@ -31,73 +31,54 @@
 // rubygm namespace
 namespace RubyGM { 
     // render context
-    struct IGMRednerContext;
-    // brush
-    struct IGMBrush;
+    struct IGMRenderContext;
     // Drawable namespace
     namespace Drawable {
         // Default
         struct Default {};
         // status for base
         struct BaseStatus {
-            // basic color
-            RubyGM::ColorF      color;
             // default ctor
             inline BaseStatus() {};
             // default value
-            inline BaseStatus(Default) {
-                color.b = color.g = color.r = 0.f;
-                color.a = 1.f;
-            }
-        };
-        // alloc for drawable object
-        auto Alloc(size_t) noexcept->void*;
-        // free for drawable object
-        void Free(void*) noexcept;
-        // render mode
-        enum RenderMode : uint32_t {
-            Mode_Fast = 0,      // fast
-            Mode_SaveMemory,    // save memory
-        };
-        // bursh mode
-        enum BrushMode : uint32_t {
-            Mode_Color = 0,     // color brush
-            Mode_Other,         // other brush
+            inline BaseStatus(Default) {}
         };
     }
     // Drawable namespace
     namespace Drawable {
+        // drawable bitmap class 
+        class Bitmap;
         // drawable object
         class RUBYGM_NOVTABLE Object : public Base::Resource {
             // super class
             using Super = Base::Resource;
         public:
-            // set color
-            void SetColor(const RubyGM::ColorF& color) noexcept;
-            // set brush asset
-            void SetBrush(IGMBrush* brush) noexcept;
-        public:
-            // recreate resource
-            virtual auto Recreate() noexcept -> uint32_t override;
             // render object
-            virtual void Render(IGMRednerContext&) const noexcept = 0;
+            virtual void Render(IGMRenderContext&) const noexcept = 0;
+            // rasterization, to Drawable::Bitmap, bs = basic_size
+            auto Rasterization(SizeF sf, SizeF bs) noexcept->Drawable::Bitmap*;
+            // rasterization, to Drawable::Bitmap, sf = scale_factor
+            auto Rasterization(float sf, SizeF basic_size) noexcept {
+                return this->Rasterization({ sf, sf }, basic_size);
+            }
+            // rasterization, to Drawable::Bitmap smart ptr
+            template<typename ...Args>
+            auto RasterizationSP(Args&&... args) noexcept {
+                return std::move(RubyGM::CGMPtrA<Drawable::Bitmap>(
+                    std::move(this->Rasterization(std::forward<Args>(args)...))
+                    ));
+            }
         protected:
-            // before render
-            void before_render() const noexcept;
-            // set brush mode
-            void set_brush_mode(BrushMode m) { m_u32Data = uint32_t(m); }
-            // get brush mode
-            auto get_brush_mode() const { return BrushMode(m_u32Data); }
+            // recreate resource
+            inline virtual auto recreate() noexcept -> Result override {
+                return Result(0);
+            }
         protected:
             // ctor
-            Object(const BaseStatus&) noexcept;
+            Object(const BaseStatus&) noexcept {}
             // dtor
-            ~Object() noexcept;
+            ~Object() noexcept {}
         protected:
-            // brush
-            IGMBrush*               m_pBrush;
-            // color
-            RubyGM::ColorF          m_color;
         };
     }
 }

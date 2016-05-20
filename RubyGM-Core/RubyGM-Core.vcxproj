@@ -21,7 +21,10 @@
   <ItemGroup>
     <ClCompile Include="..\src\core\rgmAssetBitmap.cpp" />
     <ClCompile Include="..\src\core\rgmAssetBrush.cpp" />
-    <ClCompile Include="..\src\core\rgmLine.cpp" />
+    <ClCompile Include="..\src\core\rgmCache.cpp" />
+    <ClCompile Include="..\src\core\rgmDrawableBitmap.cpp" />
+    <ClCompile Include="..\src\core\rgmGlyph.cpp" />
+    <ClCompile Include="..\src\core\rgmVector.cpp" />
     <ClCompile Include="..\src\core\main.cpp" />
     <ClCompile Include="..\src\core\rgmluiBridge.cpp" />
     <ClCompile Include="..\src\core\rgmluiConfig.cpp" />
@@ -37,11 +40,15 @@
     <ClInclude Include="..\include\bridge\rgmluiGame.h" />
     <ClInclude Include="..\include\core\asset\rgmAssetFont.h" />
     <ClInclude Include="..\include\core\asset\rgmAsset.h" />
+    <ClInclude Include="..\include\core\asset\rgmAssetStroke.h" />
     <ClInclude Include="..\include\core\brush\rgmBrushStruct.h" />
+    <ClInclude Include="..\include\core\cache\rgmCache.h" />
     <ClInclude Include="..\include\core\drawable\rgmBitmap.h" />
     <ClInclude Include="..\include\core\drawable\rgmDrawable.h" />
+    <ClInclude Include="..\include\core\drawable\rgmGlyph.h" />
     <ClInclude Include="..\include\core\drawable\rgmLine.h" />
     <ClInclude Include="..\include\core\drawable\rgmTextlayout.h" />
+    <ClInclude Include="..\include\core\drawable\rgmVector.h" />
     <ClInclude Include="..\include\core\graphics\rgmGraphics.h" />
     <ClInclude Include="..\include\core\graphics\rgmSprite.h" />
     <ClInclude Include="..\include\core\graphics\rgmTilemap.h" />

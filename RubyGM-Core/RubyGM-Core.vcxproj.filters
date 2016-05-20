@@ -46,6 +46,12 @@
     <Filter Include="CoreGM\Brush">
       <UniqueIdentifier>{c1cf1564-f6e9-4066-945d-3d3b240d086d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="CoreGM\Cache">
+      <UniqueIdentifier>{2d46762c-9774-4703-91a0-36587445696b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="CoreGM\Drawable\Vector">
+      <UniqueIdentifier>{e162f1dc-2ab5-4b7a-ac49-b26f40ffa6eb}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\core\main.cpp">
@@ -72,14 +78,23 @@
     <ClCompile Include="..\src\core\rgmluiGameL.cpp">
       <Filter>LongUIBridge</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\core\rgmLine.cpp">
-      <Filter>Source Files\Resource\Drawable</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\core\rgmAssetBrush.cpp">
       <Filter>Source Files\Resource</Filter>
     </ClCompile>
     <ClCompile Include="..\src\core\rgmAssetBitmap.cpp">
       <Filter>Source Files\Resource</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\rgmDrawableBitmap.cpp">
+      <Filter>Source Files\Resource\Drawable</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\rgmCache.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\rgmVector.cpp">
+      <Filter>Source Files\Resource\Drawable</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\rgmGlyph.cpp">
+      <Filter>Source Files\Resource\Drawable</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -146,14 +161,26 @@
     <ClInclude Include="..\include\core\drawable\rgmDrawable.h">
       <Filter>CoreGM\Drawable</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\core\drawable\rgmLine.h">
-      <Filter>CoreGM\Drawable</Filter>
-    </ClInclude>
     <ClInclude Include="..\include\core\drawable\rgmTextlayout.h">
       <Filter>CoreGM\Drawable</Filter>
     </ClInclude>
     <ClInclude Include="..\include\core\brush\rgmBrushStruct.h">
       <Filter>CoreGM\Brush</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\core\cache\rgmCache.h">
+      <Filter>CoreGM\Cache</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\core\drawable\rgmVector.h">
+      <Filter>CoreGM\Drawable\Vector</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\core\drawable\rgmLine.h">
+      <Filter>CoreGM\Drawable\Vector</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\core\asset\rgmAssetStroke.h">
+      <Filter>CoreGM\Asset</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\core\drawable\rgmGlyph.h">
+      <Filter>CoreGM\Drawable\Vector</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

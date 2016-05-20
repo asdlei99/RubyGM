@@ -68,8 +68,6 @@ namespace RubyGM {
         };
         // frend class for list
         friend List<CGMSprite>;
-        // using class
-        using DrawableSP = CGMPtr<Drawable::Object>;
     public:
         // clip zone
         static constexpr float CLIP_ZONE = 600'000.f;
@@ -81,13 +79,9 @@ namespace RubyGM {
             Mode_Aliased = 1,
         };
         // set drawable object
-        void SetDrawable(DrawableSP&& obj) noexcept {
-            m_spDrawable = std::move(obj);
-        }
+        void SetDrawable(CGMPtrA<Drawable::Object>&& obj) noexcept;
         // set drawable object
-        void SetDrawable(const DrawableSP& obj) noexcept {
-            m_spDrawable = obj;
-        }
+        void SetDrawable(const CGMPtrA<Drawable::Object>& obj) noexcept;
     public:
         // ctor
         CGMSprite(const SprteStatus& ss, CGMSprite* parent) noexcept;
@@ -100,9 +94,9 @@ namespace RubyGM {
         // clear sprite
         void Clear() noexcept;
         // render
-        void Render(IGMRednerContext& ) noexcept;
+        void Render(IGMRenderContext& ) noexcept;
         // root render
-        void RootRender(IGMRednerContext& ) const noexcept;
+        void RootRender(IGMRenderContext& ) const noexcept;
         // add child
         auto AddChild(const SprteStatus& ss) noexcept ->CGMSprite*;
         // get
@@ -115,8 +109,18 @@ namespace RubyGM {
         bool GetVisible() const noexcept { return this->is_visible(); }
         // set transform directly, the sprite status will be invalid
         void SetTransform(const Matrix3X2F&) noexcept;
+        // get world transform
+        auto&GetTransform() const noexcept { return m_matWorld; }
         // set clip type: strict?
         void SetStrictClip(bool sc) noexcept { this->set_strict_clip(sc); }
+        // compute normal scale factor, without skew
+        auto ComputeScaleFactorEz1() const noexcept ->float;
+        // compute normal scale factor, without skew
+        auto ComputeScaleFactorEz2() const noexcept ->SizeF;
+        // compute complete scale factor, with skew
+        auto ComputeScaleFactorEx1() const noexcept ->float;
+        // compute complete scale factor, with skew
+        auto ComputeScaleFactorEx2() const noexcept ->SizeF;
     public:
         // get x
         auto GetX() const noexcept { return m_status.x; }
@@ -201,14 +205,14 @@ namespace RubyGM {
         // sort children
         void sort_children() noexcept;
         // push clip
-        void push_clip(IGMRednerContext&)  noexcept;
+        void push_clip(IGMRenderContext&)  noexcept;
         // pop clip
-        void pop_clip(IGMRednerContext& rc)  noexcept;
+        void pop_clip(IGMRenderContext& rc)  noexcept;
         // update
         void update() noexcept;
     protected:
         // drawable object
-        DrawableSP              m_spDrawable = nullptr;
+        CGMPtrA<Drawable::Object>   m_spDrawable = nullptr;
         // parent
         CGMSprite*              m_pParent = nullptr;
         // children

@@ -1,11 +1,13 @@
 ﻿#include <bridge/rgmluiConfig.h>
 #include <bridge/rgmluiGame.h>
 
+// log name
+namespace RubyGM { static const char* log = "rubygm.log"; }
 
 /// <summary>
 /// Initializes a new instance of the <see cref="Configure"/> class.
 /// </summary>
-RubyGM::Bridge::Configure::Configure()noexcept:Super(UIManager, "rubygm.log") {
+RubyGM::Bridge::Configure::Configure() noexcept : Super(UIManager, log) {
 
 }
 
@@ -47,13 +49,30 @@ auto RubyGM::Bridge::Configure::ChooseAdapter(
     const size_t length) noexcept -> size_t {
     for (size_t i = 0; i < length; ++i) {
         auto& desc = adapters[i];
-        if (!std::wcsncmp(L"NVIDIA", desc.Description, 6))
+        if (!std::wcsncmp(L"Intel", desc.Description, 5))
             return i;
     }
     for (size_t i = 0; i < length; ++i) {
         auto& desc = adapters[i];
-        if (!std::wcsncmp(L"Intel", desc.Description, 5))
+        if (!std::wcsncmp(L"NVIDIA", desc.Description, 6))
             return i;
     }
     return length;
 }
+
+/// <summary>
+/// Adds the reference.
+/// </summary>
+/// <returns></returns>
+auto RubyGM::Bridge::Configure::AddRef() noexcept->ULONG {
+    return 2;
+}
+
+/// <summary>
+/// Releases this instance.
+/// </summary>
+/// <returns></returns>
+auto RubyGM::Bridge::Configure::Release() noexcept->ULONG {
+    return 1;
+}
+

@@ -25,24 +25,89 @@
 */
 
 #include <cstdint>
+#include "rgmDrawable.h"
+#include "../Util/rgmUtil.h"
+#include "../asset/rgmAsset.h"
+#include <utility>
 
 // rubygm namespace
 namespace RubyGM {
     // resource namespace
-    namespace Asset {
-        // bitmap resource
-        class Bitmap {
+    namespace Drawable {
+        // status for bitmap
+        struct BitmapStatus : BaseStatus {
+            // bitmap asset
+            Asset::Bitmap&      bitmap;
+            // src clip
+            RectF               src;
+            // display rect
+            RectF               des;
+            // ctor
+            ~BitmapStatus() noexcept { bitmap.Release(); }
+            // default ctor
+            inline BitmapStatus(Asset::Bitmap&& b) : bitmap(b) { }
+            // default value
+            inline BitmapStatus(Asset::Bitmap&& b, Default v) : 
+                BaseStatus(v), bitmap(b) {
+                src = { 0.f }; des = { 0.f };
+            }
+        };
+        // drawable bitmap 
+        class Bitmap : public Drawable::Object {
+            // super class
+            using Super = Drawable::Object;
         public:
-            
-            // get width
-            auto GetWidth() const noexcept { return m_uWidth; }
-            // get height
-            auto GetHeight() const noexcept { return m_uHeight; }
+            // create this
+            static auto Create(const BitmapStatus&) noexcept->Bitmap*;
+            // create this
+            static auto CreateSP(const BitmapStatus& ts) noexcept {
+                return std::move(RubyGM::CGMPtrA<Drawable::Bitmap>(
+                    std::move(Bitmap::Create(ts)))
+                );
+            }
         private:
+            // ctor
+            Bitmap(const BitmapStatus&) noexcept;
+            // ctor
+            Bitmap(const Bitmap&) = delete;
+            // ctor
+            ~Bitmap() noexcept;
+        public:
+            // render object
+            void Render(IGMRenderContext& rc) const noexcept override;
+            // redraw bitmap if bitmap is RasterBitmap
+            auto RedrawBitmap() noexcept { return m_refBitmap.Redraw(); }
+        protected:
+            // recreate resource
+            virtual auto recreate() noexcept -> Result override;
+        private:
+            // dispose object
+            void dispose() noexcept override;
+            // reset bitmap size
+            void reset_bitmap_size() noexcept;
+        public:
+            // get width
+            auto GetWidth() const noexcept { return m_fWidth; }
+            // get height
+            auto GetHeight() const noexcept { return m_fHeight; }
+        private:
+            // bitmap asset
+            Asset::Bitmap&      m_refBitmap;
+            // bitmap data
+            IGMBitmap*          m_pBitmap = nullptr;
             // width of bitmap
-            uint32_t            m_uWidth = 0;
+            float               m_fWidth = 1.f;
             // height of bitmap
-            uint32_t            m_uHeight = 0;
+            float               m_fHeight = 1.f;
+            // interpolation mode
+            uint32_t            m_modeInter;
+        public:
+            // opacity
+            float               opacity = 1.f;
+            // src clip rect
+            RectF               src_rect{ 0.f };
+            // display rect
+            RectF               des_rect{ 0.f };
         };
     }
 }

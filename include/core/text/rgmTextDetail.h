@@ -27,6 +27,7 @@
 #include <LongUI.h>
 #include <LongUI/luiUiTxtRdr.h>
 #include <dwrite_1.h>
+#include "rgmTextStruct.h"
 
 // rubygm namespace
 namespace RubyGM { 

@@ -1,18 +1,40 @@
 ﻿#define _WIN32_WINNT 0x0A000001
+#include <core/drawable/rgmBitmap.h>
 #include <core/asset/rgmAssetFont.h>
 #include <core/graphics/rgmGraphics.h>
 #include <core/text/rgmTextDetail.h>
 #include <core/util/rgmUtil.h>
 #include <game/rgmGame.h>
+#include <bridge/rgmluiBridge.h>
 #include <cwchar>
 #include <memory>
+
+
+/// <summary>
+/// Rasterizations the specified sf.
+/// </summary>
+/// <param name="sf">The scale factor.</param>
+/// <param name="bs">The basic size.</param>
+/// <returns></returns>
+auto RubyGM::Drawable::Object::Rasterization(
+    SizeF sf, SizeF bs) noexcept -> Drawable::Bitmap* {
+    auto&ast = Game::CreateBitmapAssetFromDrawable(this, sf, bs);
+    Drawable::BitmapStatus bst(std::move(ast), Drawable::Default());
+    // 创建成功
+    if (const auto bsp = Drawable::Bitmap::Create(bst)) {
+        bsp->des_rect.right = bs.width;
+        bsp->des_rect.bottom = bs.height;
+        return bsp;
+    }
+    return nullptr;
+}
 
 /// <summary>
 /// Initializes a new instance of the <see cref="Resource"/> class.
 /// </summary>
 RubyGM::Base::Resource::Resource() noexcept {
     // 设置链表指针
-    auto last = Game::GetLastResourceObject();
+    auto last = Bridge::GetLastResourceObject();
     assert(last);
     // 链接后面
     m_pNext = last;
@@ -22,6 +44,22 @@ RubyGM::Base::Resource::Resource() noexcept {
     m_pPrve->m_pNext = this;
     // 后面链接自己
     m_pNext->m_pPrve = this;
+}
+
+/// <summary>
+/// Recreates this instance.
+/// </summary>
+/// <returns></returns>
+auto RubyGM::Base::Resource::Recreate() noexcept -> Result {
+    // 可以重建
+    if (m_bCouldRecreate) {
+        m_bCouldRecreate = false;
+        return this->recreate();
+    } 
+    // 已经重建完毕
+    else {
+        return Result(S_OK);
+    }
 }
 
 /// <summary>
@@ -35,6 +73,11 @@ RubyGM::Base::Resource::~Resource() noexcept {
     m_pNext->m_pPrve = m_pPrve;
 }
 
+auto RubyGM::Base::Resource::AddRef() noexcept -> uint32_t {
+    assert(m_cRef < 1024 && "high ref-count");
+    return ++m_cRef;
+}
+
 /// <summary>
 /// Releases this instance.
 /// </summary>
@@ -46,9 +89,10 @@ auto RubyGM::Base::Resource::Release() noexcept -> uint32_t {
 }
 
 // drawable
-#include <core/drawable/rgmDrawable.h>
-#include <core/util/rgmImpl.h>
+//#include <core/drawable/rgmDrawable.h>
+//#include <core/util/rgmImpl.h>
 
+#if 0
 
 /// <summary>
 /// Initializes a new instance of the <see cref="Object"/> class.
@@ -113,13 +157,13 @@ void RubyGM::Drawable::Object::before_render() const noexcept {
 /// Recreates this instance.
 /// </summary>
 /// <returns></returns>
-auto RubyGM::Drawable::Object::Recreate() noexcept -> uint32_t {
+auto RubyGM::Drawable::Object::recreate() noexcept -> Result {
     // 重建笔刷资源
     RubyGM::SafeRelease(m_pBrush);
     m_pBrush = Game::GetCommonBrush();
-    return uint32_t(S_OK);
+    return Result(S_OK);
 }
-
+#endif
 
 // rubygm::asset namespace
 namespace RubyGM { namespace Asset {
@@ -154,10 +198,10 @@ namespace RubyGM { namespace Asset {
     /// Recreates this instance.
     /// </summary>
     /// <returns></returns>
-    auto Font::Recreate() noexcept -> uint32_t {
+    /*auto Font::recreate() noexcept -> Result {
         // 文本格式是CPU资源, 没有有必要重建
-        return uint32_t(S_OK);
-    }
+        return Result(S_OK);
+    }*/
     /// <summary>
     /// Lows the occupancy.
     /// </summary>
@@ -184,7 +228,7 @@ namespace RubyGM { namespace Asset {
         // 没有则创建
         if (!m_pTextFormat) {
             // 创建
-            auto hr = Game::CreateFontWithProp(this->prop(), &m_pTextFormat);
+            auto hr = Bridge::CreateFontWithProp(this->prop(), &m_pTextFormat);
             // 检查错误
             if (!m_pTextFormat) Game::SetLastErrorCode(hr);
         }
@@ -202,24 +246,4 @@ namespace RubyGM { namespace Asset {
 auto RubyGM::Game::CreateFontAsset(
     const FontProperties& fp) noexcept -> Asset::Font& {
     return Asset::Font::Create(fp);
-}
-
-
-
-/// <summary>
-/// Allocs the specified .
-/// </summary>
-/// <param name="">The .</param>
-/// <returns></returns>
-auto RubyGM::Drawable::Alloc(size_t len) noexcept -> void* {
-    return LongUI::NormalAlloc(len);
-}
-
-/// <summary>
-/// Frees the specified .
-/// </summary>
-/// <param name="">The .</param>
-/// <returns></returns>
-void RubyGM::Drawable::Free(void* ptr) noexcept {
-    LongUI::NormalFree(ptr);
 }
