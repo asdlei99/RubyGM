@@ -52,7 +52,6 @@ void RubyGM::Bridge::UIGame::init_resource() noexcept {
     Asset::RefNullBitmapAssetEx().Asset::NullBitmap::NullBitmap();
     // 添加默认资源 - 字体
     {
-
         constexpr size_t len1 = sizeof(RubyGM::FontProperties);
         constexpr size_t len2 = sizeof(wchar_t) * MAX_PATH;
         alignas(void*) char buffer[len1 + len2];

@@ -30,7 +30,7 @@
 #include "../Util/rgmUtil.h"
 #include "../Util/rgmStruct.h"
 #include <list>
-
+#include "../../test/rgmTest.h"
 
 // rubygm namespace
 namespace RubyGM { 
@@ -54,7 +54,7 @@ namespace RubyGM {
     // default status
     const extern SprteStatus DEFAULT_STATUS;
     // sprite, game graphics element
-    class CGMSprite {
+    class CGMSprite : public CGMTestModule {
         // bit list
         enum BitIndex : size_t {
             // world changed
@@ -73,6 +73,8 @@ namespace RubyGM {
         static constexpr float CLIP_ZONE = 600'000.f;
         // antialias-mode
         enum AntialiasMode : uint8_t {
+            // same as prev sprite
+            Mode_None = 255ui8,
             // The edges of each primitive are antialiased sequentially.
             Mode_PerPrimitive = 0,
             // Each pixel is rendered if its pixel center is contained by the geometry.
@@ -82,6 +84,10 @@ namespace RubyGM {
         void SetDrawable(CGMPtrA<Drawable::Object>&& obj) noexcept;
         // set drawable object
         void SetDrawable(const CGMPtrA<Drawable::Object>& obj) noexcept;
+        // get drawable, will add ref-count
+        auto GetDrawable() const noexcept { return m_spDrawable; }
+        // ref drawable, won't add ref-count
+        auto&RefDrawable() const noexcept { return m_spDrawable; }
     public:
         // ctor
         CGMSprite(const SprteStatus& ss, CGMSprite* parent) noexcept;
@@ -214,23 +220,27 @@ namespace RubyGM {
         // drawable object
         CGMPtrA<Drawable::Object>   m_spDrawable = nullptr;
         // parent
-        CGMSprite*              m_pParent = nullptr;
+        CGMSprite*                  m_pParent = nullptr;
+#ifdef RUBYGM_TEST_MODE
+        // testing name
+        void*                       m_pName_test = nullptr;
+#endif
         // children
-        List<CGMSprite>         m_ltChildren;
+        List<CGMSprite>             m_ltChildren;
         // world transform
-        Matrix3X2F              m_matWorld;
+        Matrix3X2F                  m_matWorld;
         // clip rect
-        RectF                   m_rcClip;
+        RectF                       m_rcClip;
         // sprte status
-        SprteStatus             m_status;
+        SprteStatus                 m_status;
         // unused
-        uint32_t                m_unused_u32 = 0;
+        uint32_t                    m_unused_u32 = 233;
         // bool array
-        CGMBitArray<uint16_t>   m_baList;
+        CGMBitArray<uint16_t>       m_baList;
         // unused
-        uint8_t                 m_unused_u8 = 0;
+        uint8_t                     m_unused_u8 = 233;
     public:
         // antialias-mode
-        AntialiasMode           antialias_mode = Mode_PerPrimitive;
+        AntialiasMode               antialias_mode = Mode_None;
     };
 }

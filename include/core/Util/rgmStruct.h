@@ -51,6 +51,15 @@ namespace RubyGM {
         uint8_t         map_data[0];
     };
 #pragma pack(pop)
+    // InterpolationMode
+    enum InterpolationMode : uint32_t {
+        Mode_NearestNeighbor = 0,
+        Mode_Linear,
+        Mode_Cubic,
+        Mode_MultiSampleLinear,
+        Mode_Anisotropic,
+        Mode_HighQqualityCubic,
+    };
     // point
     template<typename T> struct Point { T x; T y; };
     // rect

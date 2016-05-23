@@ -17,7 +17,7 @@ RubyGM::Bridge::Configure::Configure() noexcept : Super(UIManager, log) {
 /// </summary>
 /// <returns></returns>
 auto RubyGM::Bridge::Configure::GetConfigureFlag() noexcept->ConfigureFlag {
-    return Flag_OutputDebugString | Flag_RenderInAnytime;
+    return Flag_OutputDebugString /*| Flag_RenderByCPU | Flag_RenderInAnytime*/;
 }
 
 /// <summary>
@@ -47,14 +47,12 @@ void RubyGM::Bridge::Configure::RegisterSome() noexcept {
 auto RubyGM::Bridge::Configure::ChooseAdapter(
     const DXGI_ADAPTER_DESC1 adapters[], 
     const size_t length) noexcept -> size_t {
+    //const wchar_t* name = L"NVIDIA";
+    const wchar_t* name = L"Intel";
+    const size_t len = std::wcslen(name);
     for (size_t i = 0; i < length; ++i) {
         auto& desc = adapters[i];
-        if (!std::wcsncmp(L"Intel", desc.Description, 5))
-            return i;
-    }
-    for (size_t i = 0; i < length; ++i) {
-        auto& desc = adapters[i];
-        if (!std::wcsncmp(L"NVIDIA", desc.Description, 6))
+        if (!std::wcsncmp(name, desc.Description, len))
             return i;
     }
     return length;

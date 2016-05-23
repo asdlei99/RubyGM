@@ -5,6 +5,7 @@
 #include <core/cache/rgmCache.h>
 #include <core/graphics/rgmGraphics.h>
 #include <LongUI/luiUiHlper.h>
+#include <Graphics/luiGrWic.h>
 #include <wincodec.h>
 
 /// <summary>
@@ -84,7 +85,7 @@ RubyGM::Bridge::UIGame::~UIGame() noexcept {
 #ifdef _DEBUG
     auto head = this->GetResourceHead();
     auto tail = this->GetResourceTail();
-    assert(head->m_pNext == tail && "bad object relesing");
+    assert(head->m_pNext == tail && "bad object releasing");
     assert(tail->m_pPrve == head && "bad node linking");
 #endif
     // 检查资源释放情况
@@ -125,15 +126,21 @@ void RubyGM::Bridge::UIGame::Update() noexcept {
         m_pMainFiber = ::ConvertThreadToFiberEx(nullptr, FIBER_FLAG_FLOAT_SWITCH);
         m_pSubFiber = ::CreateFiberEx(0, 0, FIBER_FLAG_FLOAT_SWITCH, update_fiber, m_pMainFiber);
     }
+    // 刷新转换矩阵
+    if (this->world._11 != m_sprRoot.GetTransform()._11) {
+        m_sprRoot.SetZoomX(this->world._11);
+        m_sprRoot.SetZoomY(this->world._22);
+        m_sprRoot.SetTransform(impl::rubygm(this->world));
+        UIManager << DL_Log
+            << L"Root Sprite : SetTransform"
+            << LongUI::endl;
+    }
     // 切换到子纤程
     if (m_pSubFiber) { ::SwitchToFiber(m_pSubFiber); }
     // 其他操作
     this->InvalidateThis();
+    //m_pWindow->InvalidateWindow();
     // 适配
-    m_sprRoot.SetZoomX(this->world._11);
-    m_sprRoot.SetZoomY(this->world._22);
-    assert(this->world._12 == 0.f && this->world._21 == 0.f);
-    m_sprRoot.SetTransform(impl::rubygm(this->world));
     return Super::Update();
 }
 
@@ -205,6 +212,16 @@ auto RubyGM::Bridge::UIGame::Recreate() noexcept -> HRESULT {
         hr = Super::Recreate();
     }
     return hr;
+}
+
+/// <summary>
+/// Before_deleteds this instance.
+/// </summary>
+void RubyGM::Bridge::UIGame::before_deleted() noexcept { 
+    // 清除缓存
+    Cache::RemoveAllFiles();
+    // 链式调用
+    Super::before_deleted(); 
 }
 
 /// <summary>
@@ -472,6 +489,50 @@ namespace RubyGM { namespace DX {
     }
 }}
 
+
+/// <summary>
+/// Saves as PNG.
+/// </summary>
+/// <param name="file_name">The file_name.</param>
+/// <returns></returns>
+auto RubyGM::Asset::Bitmap::SaveAsPng(
+    const wchar_t* file_name) noexcept ->Result {
+    // 先决错误处理
+    if (!(file_name && *file_name)) return Result(E_INVALIDARG);
+    auto bitmap = this->GetBitmap();
+    if (!bitmap) return Result(E_FAIL);
+    // 保存数据
+    auto hr = LongUI::DX::SaveAsImageFile(
+        bitmap, 
+        &Bridge::UIGame::GetInstance().GetInstance().RefWicFactory(), 
+        file_name,
+        &GUID_ContainerFormatPng
+    );
+    // 释放位图
+    bitmap->Release();
+    return Result(hr);
+}
+
+/// <summary>
+/// Saves as PNG.
+/// </summary>
+/// <param name="file_name">The file_name.</param>
+/// <returns></returns>
+auto RubyGM::Asset::Bitmap::SaveAsPng(
+    const char* file_name) noexcept -> Result {
+    // 没有调用只有一种情况就是内存不足
+    Result hr = E_OUTOFMEMORY;
+    auto ptr = this;
+    // 安全转换字符串
+    LongUI::SafeUTF8toWideChar(file_name, 
+        [ptr, &hr](const wchar_t* bgn, const wchar_t* end) noexcept {
+        hr = ptr->SaveAsPng(bgn);
+    });
+    // 返回结果
+    return hr;
+}
+
+
 // instance for game
 RubyGM::Bridge::UIGame* RubyGM::Bridge::UIGame::s_pInstance = nullptr;
 
@@ -479,13 +540,22 @@ RubyGM::Bridge::UIGame* RubyGM::Bridge::UIGame::s_pInstance = nullptr;
 // rubygm namespace
 namespace RubyGM {
     // yield for fiber
-    void FiberYield() {
-        auto data = ::GetFiberData();
-        if (data) {
-            ::SwitchToFiber(data);
+    void FiberYieldBasic() noexcept {
+        if (const auto ctx = ::GetFiberData()) 
+            ::SwitchToFiber(ctx);
+    }
+    // da
+    struct exit_exp { const char* info; SSIZE_T code; };
+    // yield for fiber
+    void FiberYield() throw(exit_exp) {
+        if (UIManager.IsExit()) { 
+            throw(exit_exp{"exit", 0});
+        }
+        if (const auto ctx = ::GetFiberData()) {
+            ::SwitchToFiber(ctx);
         }
         else {
-            assert(!"NOIMPL");
+            throw(exit_exp{"bad ctx", 1});
         }
     }
 }

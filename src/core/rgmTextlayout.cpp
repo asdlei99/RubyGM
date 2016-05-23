@@ -42,7 +42,8 @@ auto RubyGM::Drawable::Textlayout::recreate() noexcept -> Result {
 /// Creates this instance.
 /// </summary>
 /// <returns></returns>
-auto RubyGM::Drawable::Textlayout::Create(const TextStatus& ts) noexcept -> Textlayout* {
+auto RubyGM::Drawable::Textlayout::Create(
+    const TextlayoutStatus& ts) noexcept -> Textlayout* {
     // 获取渲染器
     auto renderer = UIManager.GetTextRenderer(ts.renderer);
     // 不可能出错，否则进不到这一步
@@ -91,7 +92,8 @@ namespace RubyGM { namespace Asset {
 /// <summary>
 /// Prevents a default instance of the <see cref="Textlayout"/> class from being created.
 /// </summary>
-RubyGM::Drawable::Textlayout::Textlayout(const TextStatus& ts) noexcept : Super(ts), 
+RubyGM::Drawable::Textlayout::Textlayout(
+    const TextlayoutStatus& ts) noexcept : Super(ts), 
 m_pTextRenderer(impl::rubygm(UIManager.GetTextRenderer(ts.renderer))),
 basic_color(ts.color) {
     // 创建文本格式/字体

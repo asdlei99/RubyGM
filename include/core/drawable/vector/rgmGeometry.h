@@ -24,21 +24,44 @@
 * OTHER DEALINGS IN THE SOFTWARE.
 */
 
-// graphics
-#include <d2d1_3.h>
+#include "rgmVector.h"
+#include "../../Util/rgmUtil.h"
+#include <utility>
 
 // rubygm namespace
 namespace RubyGM {
-    // stroke style
-    struct IGMStrokeStyle : ID2D1StrokeStyle { using Super = ID2D1StrokeStyle; };
-    // render context
-    struct IGMRenderContext : ID2D1DeviceContext { using Super = ID2D1DeviceContext; };
-    // bitmap
-    struct IGMBitmap : ID2D1Bitmap1 { using Super = ID2D1Bitmap1; };
-    // geometry
-    struct IGMGeometry : ID2D1Geometry { using Super = ID2D1Geometry; };
-    // path geometry
-    struct IGMPath : ID2D1PathGeometry { using Super = ID2D1PathGeometry; };
-    // brush
-    struct IGMBrush : ID2D1Brush { using Super = ID2D1Brush; };
+    // graphics interface for geometry
+    struct IGMGeometry;
+    // Drawable namespace
+    namespace Drawable {
+        // status for Geometry
+        struct GeometryStatus : VectorStatus {
+            // ctor
+            GeometryStatus() : VectorStatus() {}
+            // default value
+            inline GeometryStatus(Default v) : VectorStatus(v) {
+
+            }
+        };
+        // geometry 
+        class Geometry : public Drawable::Vector {
+            // super class
+            using Super = Drawable::Vector;
+            // dispose object
+            void dispose() noexcept = 0;
+        protected:
+            // ctor
+            Geometry(const GeometryStatus& gs) noexcept : Super(gs) {};
+            // ctor
+            ~Geometry() noexcept;
+            // is ok?
+            bool is_ok() const noexcept { return !!m_pGiGeometry; }
+        public:
+            // render object
+            void Render(IGMRenderContext& rc) const noexcept override;
+        protected:
+            // geometry interface
+            IGMGeometry*        m_pGiGeometry = nullptr;
+        };
+    }
 }

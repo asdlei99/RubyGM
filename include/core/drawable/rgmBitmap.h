@@ -60,9 +60,9 @@ namespace RubyGM {
             // create this
             static auto Create(const BitmapStatus&) noexcept->Bitmap*;
             // create this
-            static auto CreateSP(const BitmapStatus& ts) noexcept {
+            static auto CreateSP(const BitmapStatus& bs) noexcept {
                 return std::move(RubyGM::CGMPtrA<Drawable::Bitmap>(
-                    std::move(Bitmap::Create(ts)))
+                    std::move(Bitmap::Create(bs)))
                 );
             }
         private:
@@ -70,7 +70,7 @@ namespace RubyGM {
             Bitmap(const BitmapStatus&) noexcept;
             // ctor
             Bitmap(const Bitmap&) = delete;
-            // ctor
+            // dtor
             ~Bitmap() noexcept;
         public:
             // render object
@@ -86,10 +86,18 @@ namespace RubyGM {
             // reset bitmap size
             void reset_bitmap_size() noexcept;
         public:
+            // save as png file, will save total file
+            auto SaveAsPng(const wchar_t* file_name) noexcept ->Result;
+            // save as png file with utf8
+            auto SaveAsPng(const char* file_name) noexcept ->Result;
             // get width
             auto GetWidth() const noexcept { return m_fWidth; }
             // get height
             auto GetHeight() const noexcept { return m_fHeight; }
+            // get interpolation mode
+            auto GetInterpolationMode() const noexcept { return m_modeInter; }
+            // set interpolation mode
+            void SetInterpolationMode(InterpolationMode mode) noexcept;
         private:
             // bitmap asset
             Asset::Bitmap&      m_refBitmap;
@@ -100,7 +108,7 @@ namespace RubyGM {
             // height of bitmap
             float               m_fHeight = 1.f;
             // interpolation mode
-            uint32_t            m_modeInter;
+            InterpolationMode   m_modeInter;
         public:
             // opacity
             float               opacity = 1.f;

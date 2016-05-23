@@ -121,6 +121,10 @@ namespace RubyGM {
         // ctor with move CGMPtrA
         template<class U>
         CGMPtrA(CGMPtrA<U>&& obj) noexcept : m_pObject(obj.m_pObject) { obj.m_pObject = nullptr; }
+        // ctor with CGMPtrA
+        CGMPtrA(const CGMPtrA<T>& obj) noexcept : m_pObject(obj.m_pObject) { this->safe_addref(); }
+        // ctor with move CGMPtrA
+        CGMPtrA(CGMPtrA<T>&& obj) noexcept : m_pObject(obj.m_pObject) { obj.m_pObject = nullptr; }
         // pointer-like
         auto operator->() noexcept { return m_pObject; }
         // ptr

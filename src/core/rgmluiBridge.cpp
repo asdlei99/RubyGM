@@ -44,10 +44,12 @@ const char* const RUBYGM_XML = u8R"(xml(<?xml version="1.0" encoding="utf-8"?>
             <Null/>
             <Button name="btnRecreate" text="重建资源" 
                 margin="4,4,4,4" borderwidth="1" size="0, 32"/>
-            <Button text="----" 
+            <Button name="btnFullDraw" text="完全刷新" 
                 margin="4,4,4,4" borderwidth="1" size="0, 32"/>
             <Button name="btnPauseResume"   text="暂停恢复" 
                 margin="4,4,4,4" borderwidth="1" size="0, 32"/>
+            <Slider name="sldTimeScale"     value="1"
+                margin="4,4,4,4" size="0, 32"/>
             <Null/>
         </VerticalLayout>
     </HorizontalLayout>
@@ -60,48 +62,64 @@ const char* const RUBYGM_XML = u8R"(xml(<?xml version="1.0" encoding="utf-8"?>
 void InitWindow(LongUI::XUIBaseWindow* window, int cmd) noexcept {
     if (window) {
         using LongUI::longui_cast;
-        LongUI::UIControl* control = nullptr;;
-        if (control = (window->FindControl("btnRecreate"))) {
+        if (const auto control = (window->FindControl("btnRecreate"))) {
             control->AddEventCall([](LongUI::UIControl*) {
                 UIManager.RecreateResources();
                 return true;
             }, LongUI::SubEvent::Event_ItemClicked);
         }
-        if (control = (window->FindControl("btnPauseResume"))) {
-            control->AddEventCall([](LongUI::UIControl*) {
+        if (const auto control = (window->FindControl("btnFullDraw"))) {
+            control->AddEventCall([window](LongUI::UIControl*) {
+                window->InvalidateWindow();
+                return true;
+            }, LongUI::SubEvent::Event_ItemClicked);
+        }
+        if (const auto control = (window->FindControl("btnPauseResume"))) {
+            const auto slider = window->FindControl("sldTimeScale");
+            control->AddEventCall([slider](LongUI::UIControl*) {
                 float ts = RubyGM::Game::GetTimeScale();
                 ts = ts == 0.f ? 1.f : 0.f;
+                slider->SetFloat(ts);
                 RubyGM::Game::SetTimeScale(ts);
                 return true;
             }, LongUI::SubEvent::Event_ItemClicked);
+        }
+        if (const auto control = (window->FindControl("sldTimeScale"))) {
+            control->AddEventCall([](LongUI::UIControl* sld) {
+                RubyGM::Game::SetTimeScale(sld->GetFloat());
+                return true;
+            }, LongUI::SubEvent::Event_ValueChanged);
         }
         window->ShowWindow(cmd);
     }
 }
 
-// rubygm namespace
-auto drawable_glyph_create_text(ID2D1PathGeometry** p) -> int32_t {
-    char32_t ch[] = U"龍ABC";
-    auto fmt = UIManager.GetTextFormat(0);
-    auto hr = LongUI::DX::CreateTextPathGeometry(
-        ch, std::end(ch) - std::begin(ch) - 1, fmt, UIManager_D2DFactory, nullptr, p
-    );
-    fmt->Release();
-    return hr;
-}
 
 #include <core/graphics/rgmGraphics.h>
-#include <type_traits>
+
+// rubygm namespace
+namespace RubyGM {
+    // effect
+    struct IGMEffect;
+}
 
 // rubygm::bridge namespace
 namespace RubyGM { namespace Bridge {
     // create path geo
-    auto CreatePathGeometry(IGMGeometry*& geo) noexcept -> Result {
-        using geotype = typename IGMGeometry::Super;
+    auto CreatePathGeometry(IGMPath*& geo) noexcept -> Result {
+#if 0
+        using geotype = typename IGMPath::Super;
         using same = std::is_same<ID2D1PathGeometry, geotype>;
         static_assert(same::value, "must be same");
+#endif
         auto** path = reinterpret_cast<ID2D1PathGeometry**>(&geo);
         return Result(UIManager_D2DFactory->CreatePathGeometry(path));
+    }
+    // create effect from guid
+    auto EffectFrom(const GUID& id) noexcept->IGMEffect* {
+        ID2D1Effect* effect = nullptr;
+        UIManager_RenderTarget->CreateEffect(id, &effect);
+        return reinterpret_cast<IGMEffect*>(effect);
     }
 }}
 

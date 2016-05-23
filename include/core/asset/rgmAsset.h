@@ -64,6 +64,10 @@ namespace RubyGM {
             virtual auto GetBitmap() noexcept -> IGMBitmap* = 0;
             // redraw the content if self is RasterBitmap
             virtual auto Redraw() noexcept ->Result { return Result(0); };
+            // save as png file
+            auto SaveAsPng(const wchar_t* file_name) noexcept ->Result;
+            // save as png file, width utf-8 string
+            auto SaveAsPng(const char* file_name) noexcept ->Result;
         };
         // raster bitmap
         struct RUBYGM_NOVTABLE RasterBitmap : Asset::Bitmap {

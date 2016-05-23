@@ -4,6 +4,7 @@
 #include <windows.h>
 #include <cwchar>
 
+
 /// <summary>
 /// Removes all files.
 /// </summary>
@@ -66,7 +67,8 @@ namespace RubyGM { namespace impl {
             ::CreateDirectoryW(path, nullptr);
             // 匹配对应文件名
             const size_t remain = BUFLEN - (buf - path) - 1;
-            auto c = std::swprintf(buf, remain, L"f_%p.dat", reinterpret_cast<void*>(id));
+            void* ptr = reinterpret_cast<void*>(id);
+            auto c = std::swprintf(buf, remain, L"f_%p.cache", ptr);
             // 缓存有效
             if (c < int(remain) && c > 0) {
                 return call(path);
@@ -86,12 +88,13 @@ namespace RubyGM { namespace impl {
 auto RubyGM::Cache::WriteData(
     size_t id, void * data, size_t len) noexcept -> Result {
     return impl::get_file_name(id, [=](const wchar_t* path) noexcept {
-        LongUI::CUIFile* tmp;
-        auto flag = tmp->Flag_Write | tmp->Flag_CreateNew;
+        uint32_t len32 = static_cast<uint32_t>(len);
+        using OF = LongUI::CUIFile::OpenFlag;
+        auto flag = OF::Flag_Write | OF::Flag_CreateNew;
         LongUI::CUIFile file(path, flag);
         if (file.IsOk()) {
-            auto l = file.Write(data, len);
-            return Result((l == len) ? S_OK : E_FAIL);
+            auto l = file.Write(data, len32);
+            return Result((l == len32) ? S_OK : E_FAIL);
         }
         else {
             return Result(E_NOT_SET);
@@ -109,10 +112,11 @@ auto RubyGM::Cache::WriteData(
 auto RubyGM::Cache::ReadData(
     size_t id, void* data, size_t len) noexcept -> Result {
     return impl::get_file_name(id, [=](const wchar_t* path) noexcept {
+        uint32_t len32 = static_cast<uint32_t>(len);
         LongUI::CUIFile file(path, LongUI::CUIFile::Flag_Read);
         if (file.IsOk()) {
-            auto l = file.Read(data, len);
-            return Result((l == len) ? S_OK : E_FAIL);
+            auto l = file.Read(data, len32);
+            return Result((l == len32) ? S_OK : E_FAIL);
         }
         else {
             return Result(E_NOT_SET);

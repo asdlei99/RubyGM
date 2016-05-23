@@ -24,21 +24,42 @@
 * OTHER DEALINGS IN THE SOFTWARE.
 */
 
-// graphics
-#include <d2d1_3.h>
+#include <cstdint>
 
 // rubygm namespace
-namespace RubyGM {
-    // stroke style
-    struct IGMStrokeStyle : ID2D1StrokeStyle { using Super = ID2D1StrokeStyle; };
-    // render context
-    struct IGMRenderContext : ID2D1DeviceContext { using Super = ID2D1DeviceContext; };
-    // bitmap
-    struct IGMBitmap : ID2D1Bitmap1 { using Super = ID2D1Bitmap1; };
-    // geometry
-    struct IGMGeometry : ID2D1Geometry { using Super = ID2D1Geometry; };
-    // path geometry
-    struct IGMPath : ID2D1PathGeometry { using Super = ID2D1PathGeometry; };
-    // brush
-    struct IGMBrush : ID2D1Brush { using Super = ID2D1Brush; };
+namespace RubyGM { 
+#ifdef RUBYGM_TEST_MODE
+    // test class
+    class CGMTestModule {
+    public:
+        // ctor
+        CGMTestModule() noexcept {}
+        // dtor
+        ~CGMTestModule() noexcept;
+        // init
+        void Init_test(const wchar_t* name, int id, void* ptr) noexcept;
+        // set name
+        void SetName_test(const wchar_t*) noexcept;
+        // set name from utf-8
+        void SetName_test(const char*) noexcept;
+        // get name
+        auto GetName_test() const noexcept -> const wchar_t*;
+    private:
+        // check name
+        bool check_name__test() noexcept;
+    private:
+        // test name
+        void*           m_pName_test = nullptr;
+    };
+#else
+    // test class
+    class CGMTestModule {
+    public:
+        // ctor
+        CGMTestModule() noexcept = default;
+        // dtor
+        ~CGMTestModule() noexcept = default;
+    };
+#endif
 }
+

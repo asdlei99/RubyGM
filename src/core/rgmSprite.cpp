@@ -40,6 +40,11 @@ void RubyGM::CGMSprite::SetDrawable(const CGMPtrA<Drawable::Object>& obj) noexce
 /// </summary>
 RubyGM::CGMSprite::CGMSprite(const SprteStatus& ss, CGMSprite* parent) noexcept
     :m_pParent(parent), m_status(ss) {
+#ifdef RUBYGM_TEST_MODE
+    static int spid = 0;
+    this->Init_test(L"sprite", spid, this);
+    spid++;
+#endif
     this->make_transform(m_matWorld);
     this->set_visible();
     this->ClearClipRect();
@@ -195,6 +200,10 @@ void RubyGM::CGMSprite::Render(IGMRenderContext& rc) noexcept {
     rc.SetTransform(&impl::d2d(m_matWorld));
     // 裁剪
     this->push_clip(rc);
+    // 抗锯齿模式
+    if (this->antialias_mode != Mode_None) {
+        rc.SetAntialiasMode(D2D1_ANTIALIAS_MODE(this->antialias_mode));
+    }
     // 选择本精灵
     if (m_spDrawable) m_spDrawable->Render(rc);
     // 渲染子精灵
@@ -214,7 +223,7 @@ void RubyGM::CGMSprite::push_clip(IGMRenderContext& rc) noexcept {
             D2D1::LayerParameters1(
                 impl::d2d(m_rcClip),
                 nullptr,
-                D2D1_ANTIALIAS_MODE(this->antialias_mode)
+                D2D1_ANTIALIAS_MODE_PER_PRIMITIVE
             ), 
             nullptr
         );
@@ -222,7 +231,7 @@ void RubyGM::CGMSprite::push_clip(IGMRenderContext& rc) noexcept {
     else {
         rc.PushAxisAlignedClip(
             impl::d2d(m_rcClip), 
-            D2D1_ANTIALIAS_MODE(this->antialias_mode)
+            D2D1_ANTIALIAS_MODE_ALIASED
         );
     }
 }
@@ -273,6 +282,8 @@ void RubyGM::CGMSprite::RootRender(IGMRenderContext& rc) const noexcept {
     //rc.SetTransform(&impl::d2d(m_matWorld));
     // 设置剪切矩形
     //rc.PushAxisAlignedClip(impl::d2d(m_rcClip), D2D1_ANTIALIAS_MODE(this->antialias_mode));
+    // 抗锯齿
+    rc.SetAntialiasMode(D2D1_ANTIALIAS_MODE_PER_PRIMITIVE);
     // 渲染子精灵
     for (const auto& child : m_ltChildren) {
         // XXX: UNLEGAL
@@ -313,7 +324,7 @@ namespace RubyGM { namespace DX{
         float theta_y = y * (pi / 180.0f), tan_y = std::tan(theta_y);
         matrix._11 = 1.f;              matrix._12 = tan_y;
         matrix._21 = tan_x;            matrix._22 = 1.f;
-        matrix._31 =-center.y * tan_x; matrix._32 = center.x * tan_y;
+        matrix._31 =-center.y * tan_x; matrix._32 =-center.x * tan_y;
     }
 }}
 
@@ -343,7 +354,7 @@ void RubyGM::CGMSprite::make_transform(Matrix3X2F& transform) const noexcept {
 /// </summary>
 /// <returns></returns>
 void RubyGM::CGMSprite::sort_children() noexcept {
-    // 在移动的时候发生异常时会抛出
+    // 在移动(move)的时候发生异常时会接力抛出
     m_ltChildren.sort([](const CGMSprite& a, const CGMSprite& b) noexcept {
         return a.m_status.z < b.m_status.z;
     });
@@ -357,4 +368,5 @@ void RubyGM::CGMSprite::sort_children() noexcept {
 void RubyGM::CGMSprite::SetTransform(const Matrix3X2F& transform) noexcept {
     m_matWorld = transform;
     this->clear_world_changed();
+    for (auto& child : m_ltChildren) child.set_world_changed();
 }

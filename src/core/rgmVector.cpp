@@ -1,11 +1,14 @@
 ﻿#include <core/asset/rgmAssetStroke.h>
 #include <core/graphics/rgmGraphics.h>
-#include <core/Drawable/rgmVector.h>
+#include <core/drawable/vector/rgmVector.h>
 #include <core/util/rgmImpl.h>
 #include <core/rubygm.h>
 #include <game/rgmGame.h>
 #include <bridge/rgmluiBridge.h>
 
+// ============================================================================
+// =============================== Vector =====================================
+// ============================================================================
 
 /// <summary>
 /// Initializes a new instance of the <see cref="Vector"/> class.
@@ -14,7 +17,7 @@
 RubyGM::Drawable::Vector::Vector(const VectorStatus& vs) noexcept:
 Super(vs),
 stroke_color(vs.stroke_color),
-fill_color(vs.stroke_color),
+fill_color(vs.fill_color),
 m_pAsStrokeStyle(vs.stroke_style),
 m_pAsBrushStroke(vs.stroke_brush),
 m_pAsBrushFill(vs.fill_brush),
@@ -129,8 +132,11 @@ RubyGM::Drawable::Vector::~Vector() noexcept {
     RubyGM::SafeRelease(m_pGiBrushFill);
 }
 
-// LINE
-#include <core/drawable/rgmLine.h>
+// ============================================================================
+// ================================ Line ======================================
+// ============================================================================
+
+#include <core/drawable/vector/rgmLine.h>
 
 /// <summary>
 /// Initializes a new instance of the <see cref="Line"/> class.
@@ -190,4 +196,263 @@ void RubyGM::Drawable::Line::Render(IGMRenderContext& rc) const noexcept {
         );
     }
     // 线段不支持填充
+}
+
+
+// ============================================================================
+// ================================ Rect ======================================
+// ============================================================================
+
+#include <core/drawable/vector/rgmRect.h>
+
+// rubygm::drawable namespace
+namespace RubyGM { namespace Drawable {
+    // always right angle
+    struct RtRect final : Rect {
+        // super class
+        using Super = Rect;
+        // ctor
+        RtRect(const RectStatus& rs) noexcept : Super(rs) {}
+        // render object
+        void Render(IGMRenderContext& rc) const noexcept override;
+    };
+}}
+
+/// <summary>
+/// Initializes a new instance of the <see cref="Rect"/> class.
+/// </summary>
+/// <param name="rs">The ls.</param>
+RubyGM::Drawable::Rect::Rect(const RectStatus& rs) noexcept:
+Super(rs), rd_rect(rs.rd_rect) {
+
+}
+
+/// <summary>
+/// Finalizes an instance of the <see cref="Rect"/> class.
+/// </summary>
+/// <returns></returns>
+RubyGM::Drawable::Rect::~Rect() noexcept {
+
+}
+
+/// <summary>
+/// Disposes this instance.
+/// </summary>
+/// <returns></returns>
+void RubyGM::Drawable::Rect::dispose() noexcept {
+    this->Rect::~Rect();
+    RubyGM::NormalFree(this);
+}
+
+/// <summary>
+/// Creates the specified ls.
+/// </summary>
+/// <param name="ls">The ls.</param>
+/// <returns></returns>
+auto RubyGM::Drawable::Rect::Create(const RectStatus& rs) noexcept ->Rect* {
+    auto ptr = RubyGM::NormalAlloc(sizeof(Rect));
+    if(!ptr) nullptr;
+    // 圆角矩形任意半径 < 0 -> 直角矩形
+    if (rs.rd_rect.rx < 0.f || rs.rd_rect.ry < 0.f) {
+        return new(ptr) RtRect(rs);
+    }
+    else {
+        return new(ptr) Rect(rs);
+    }
+}
+
+/// <summary>
+/// Renders the specified rc.
+/// </summary>
+/// <param name="rc">The rc.</param>
+/// <returns></returns>
+void RubyGM::Drawable::Rect::Render(IGMRenderContext& rc) const noexcept {
+    const auto rrc = reinterpret_cast<const D2D1_ROUNDED_RECT*>(&rd_rect);
+    // 笔触
+    if (this->is_draw_stroke()) {
+        this->set_stroke_brush();
+        rc.DrawRoundedRectangle(
+            rrc,
+            m_pGiBrushStroke,
+            this->stroke_width,
+            m_pGiStrokeStyle
+        );
+    }
+    // 填充
+    if (this->is_draw_fill()) {
+        this->set_fill_brush();
+        rc.FillRoundedRectangle(rrc, m_pGiBrushFill);
+    }
+}
+
+/// <summary>
+/// Renders the specified rc.
+/// </summary>
+/// <param name="rc">The rc.</param>
+/// <returns></returns>
+void RubyGM::Drawable::RtRect::Render(IGMRenderContext& rc) const noexcept {
+    // 笔触
+    if (this->is_draw_stroke()) {
+        this->set_stroke_brush();
+        rc.DrawRectangle(
+            &impl::d2d(rd_rect.rect),
+            m_pGiBrushStroke,
+            this->stroke_width,
+            m_pGiStrokeStyle
+        );
+    }
+    // 填充
+    if (this->is_draw_fill()) {
+        this->set_fill_brush();
+        rc.FillRectangle(&impl::d2d(rd_rect.rect), m_pGiBrushFill);
+    }
+}
+
+// ============================================================================
+// =============================== Ellipse ====================================
+// ============================================================================
+
+#include <core/drawable/vector/rgmEllipse.h>
+
+// rubygm::drawable namespace
+namespace RubyGM { namespace Drawable {
+    // always right angle
+    struct Circle final : Ellipse {
+        // super class
+        using Super = Ellipse;
+        // ctor
+        Circle(const EllipseStatus& es) noexcept : Super(es) {}
+        // render object
+        void Render(IGMRenderContext& rc) const noexcept override;
+    };
+}}
+
+/// <summary>
+/// Initializes a new instance of the <see cref="Ellipse"/> class.
+/// </summary>
+/// <param name="es">The ls.</param>
+RubyGM::Drawable::Ellipse::Ellipse(const EllipseStatus& es) noexcept:
+Super(es), ellipse(es.ellipse) {
+
+}
+
+/// <summary>
+/// Finalizes an instance of the <see cref="Ellipse"/> class.
+/// </summary>
+/// <returns></returns>
+RubyGM::Drawable::Ellipse::~Ellipse() noexcept {
+
+}
+
+/// <summary>
+/// Disposes this instance.
+/// </summary>
+/// <returns></returns>
+void RubyGM::Drawable::Ellipse::dispose() noexcept {
+    this->Ellipse::~Ellipse();
+    RubyGM::NormalFree(this);
+}
+
+/// <summary>
+/// Creates the specified ls.
+/// </summary>
+/// <param name="ls">The ls.</param>
+/// <returns></returns>
+auto RubyGM::Drawable::Ellipse::Create(
+    const EllipseStatus& es) noexcept ->Ellipse* {
+    auto ptr = RubyGM::NormalAlloc(sizeof(Ellipse));
+    if(!ptr) nullptr;
+    // 椭圆Y轴半径 < 0 -> 圆
+    if (es.ellipse.ry < 0.f) {
+        return new(ptr) Circle(es);
+    }
+    else {
+        return new(ptr) Ellipse(es);
+    }
+}
+
+/// <summary>
+/// Renders the specified rc.
+/// </summary>
+/// <param name="rc">The rc.</param>
+/// <returns></returns>
+void RubyGM::Drawable::Ellipse::Render(IGMRenderContext& rc) const noexcept {
+    const auto ell = reinterpret_cast<const D2D1_ELLIPSE*>(&ellipse);
+    // 笔触
+    if (this->is_draw_stroke()) {
+        this->set_stroke_brush();
+        rc.DrawEllipse(
+            ell,
+            m_pGiBrushStroke,
+            this->stroke_width,
+            m_pGiStrokeStyle
+        );
+    }
+    // 填充
+    if (this->is_draw_fill()) {
+        this->set_fill_brush();
+        rc.FillEllipse(ell, m_pGiBrushFill);
+    }
+}
+
+/// <summary>
+/// Renders the specified rc.
+/// </summary>
+/// <param name="rc">The rc.</param>
+/// <returns></returns>
+void RubyGM::Drawable::Circle::Render(IGMRenderContext& rc) const noexcept {
+    auto circle = this->ellipse;
+    circle.ry = circle.rx;
+    const auto ell = reinterpret_cast<const D2D1_ELLIPSE*>(&circle);
+    // 笔触
+    if (this->is_draw_stroke()) {
+        this->set_stroke_brush();
+        rc.DrawEllipse(
+            ell,
+            m_pGiBrushStroke,
+            this->stroke_width,
+            m_pGiStrokeStyle
+        );
+    }
+    // 填充
+    if (this->is_draw_fill()) {
+        this->set_fill_brush();
+        rc.FillEllipse(ell, m_pGiBrushFill);
+    }
+}
+
+// ============================================================================
+// =============================== Geometry ====================================
+// ============================================================================
+#include <core/drawable/vector/rgmGeometry.h>
+
+/// <summary>
+/// Finalizes an instance of the <see cref="Geometry"/> class.
+/// </summary>
+/// <returns></returns>
+RubyGM::Drawable::Geometry::~Geometry() noexcept {
+    RubyGM::SafeRelease(m_pGiGeometry);
+}
+
+/// <summary>
+/// Renders the specified rc.
+/// </summary>
+/// <param name="rc">The Render Context.</param>
+/// <returns></returns>
+void RubyGM::Drawable::Geometry::Render(IGMRenderContext& rc) const noexcept {
+    // 笔触
+    if (this->is_draw_stroke()) {
+        this->set_stroke_brush();
+        rc.DrawGeometry(
+            m_pGiGeometry,
+            m_pGiBrushStroke,
+            this->stroke_width,
+            m_pGiStrokeStyle
+        );
+    }
+    // 填充
+    if (this->is_draw_fill()) {
+        this->set_fill_brush();
+        rc.FillGeometry(m_pGiGeometry, m_pGiBrushFill);
+    }
 }

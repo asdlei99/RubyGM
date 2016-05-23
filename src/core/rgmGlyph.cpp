@@ -2,13 +2,13 @@
 #include <core/rubygm.h>
 #include <core/drawable/rgmDrawable.h>
 #include <core/graphics/rgmGraphics.h>
-#include <core/drawable/rgmGlyph.h>
+#include <core/drawable/vector/rgmText.h>
 #include <core/Text/rgmTextDetail.h>
 #include <core/drawable/rgmTextlayout.h>
 //#include <bridge/rgmluiBridge.h>
 //#include <core/util/rgmImpl.h>
 //#include <core/asset/rgmAssetFont.h>
-//#include <game/rgmGame.h>
+#include <game/rgmGame.h>
 
 
 // rubygm namespace
@@ -16,7 +16,7 @@ namespace RubyGM {
     // bridge
     namespace Bridge {
         // create path
-        auto CreatePathGeometry(IGMGeometry*& geo) noexcept->Result;
+        auto CreatePathGeometry(IGMPath*& geo) noexcept->Result;
     }
     // recorder
     class CGMGlyphRecorder final : public IDWriteTextRenderer {
@@ -80,63 +80,74 @@ namespace RubyGM {
 
 
 /// <summary>
-/// Initializes a new instance of the <see cref="Glyph"/> class.
+/// Initializes a new instance of the <see cref="Text"/> class.
 /// </summary>
-/// <param name="bs">The bs.</param>
-RubyGM::Drawable::Glyph::Glyph(const GlyphStatus& gs) noexcept : Super(gs) {
-    auto hr = Bridge::CreatePathGeometry(m_pTextGlyph);
-    assert(gs.layout);
-    auto layout = gs.layout->m_pTextlayout;
+/// <param name="ts">The TextStatus.</param>
+RubyGM::Drawable::Text::Text(const TextStatus& ts) noexcept : Super(ts) {
+    assert(ts.layout.Ptr());
+    assert(m_pGiGeometry == nullptr);
+    // 创建对象
+    IGMPath* path = nullptr;
+    auto hr = Bridge::CreatePathGeometry(path);
+    auto layout = ts.layout.Ptr()->m_pTextlayout;
     ID2D1GeometrySink* sink = nullptr;
+    // 打开路径记录
     if (SUCCEEDED(hr)) {
-        hr = m_pTextGlyph->Open(&sink);
+        hr = path->Open(&sink);
     }
+    // 填充路径
     if (SUCCEEDED(hr)) {
         CGMGlyphRecorder recorder;
         recorder.sink = sink;
-        auto thr = layout->Draw(nullptr, &recorder, 0.f, 0.f);
+        layout->Draw(nullptr, &recorder, 0.f, 0.f);
         hr = sink->Close();
     }
-    auto hhrr = HRESULT(hr);
-    assert(SUCCEEDED(hr));
+    // 失败?!
+    if (FAILED(hr)) Game::SetLastErrorCode(hr);
+    // 扫尾除了
     RubyGM::SafeRelease(sink);
+    // 数据转换
+    auto gi = static_cast<ID2D1Geometry*>(path);
+    m_pGiGeometry = static_cast<IGMGeometry*>(gi);
 }
 
-
-/// <summary>
-/// Renders the specified rc.
-/// </summary>
-/// <param name="rc">The rc.</param>
-/// <returns></returns>
-void RubyGM::Drawable::Glyph::Render(IGMRenderContext& rc) const noexcept {
-    rc.DrawGeometry(m_pTextGlyph, m_pGiBrushStroke, 0.2f);
-}
 
 /// <summary>
 /// Creates the specified .
 /// </summary>
 /// <param name="">The .</param>
 /// <returns></returns>
-auto RubyGM::Drawable::Glyph::Create(const GlyphStatus& bs) noexcept ->Glyph* {
-    if (const auto ptr = RubyGM::SmallAlloc(sizeof(Glyph))) {
-        return new(ptr) Glyph(bs);
+auto RubyGM::Drawable::Text::Create(const TextStatus& ts) noexcept ->Text* {
+    // 参数无效
+    if (!ts.layout.Ptr()) {
+        assert(!"bad argment");
+        return nullptr;
+    }
+    // 申请空间
+    if (const auto ptr = RubyGM::SmallAlloc(sizeof(Text))) {
+        // 初始化对象
+        auto obj = new(ptr) Text(ts);
+        // 初始化成功
+        if (obj->is_ok()) return obj;
+        // 失败则释放对象
+        obj->dispose();
     }
     return nullptr;
 }
 
 /// <summary>
-/// Finalizes an instance of the <see cref="Glyph"/> class.
+/// Finalizes an instance of the <see cref="Text"/> class.
 /// </summary>
 /// <returns></returns>
-RubyGM::Drawable::Glyph::~Glyph() noexcept {
-    RubyGM::SafeRelease(m_pTextGlyph);
+RubyGM::Drawable::Text::~Text() noexcept {
+
 }
 
 /// <summary>
 /// Recreates this instance.
 /// </summary>
 /// <returns></returns>
-//auto RubyGM::Drawable::Glyph::recreate() noexcept -> Result {
+//auto RubyGM::Drawable::Text::recreate() noexcept -> Result {
    // return Super::recreate();
 //}
 
@@ -144,12 +155,10 @@ RubyGM::Drawable::Glyph::~Glyph() noexcept {
 /// Recreates this instance.
 /// </summary>
 /// <returns></returns>
-void RubyGM::Drawable::Glyph::dispose() noexcept {
-    this->Glyph::~Glyph();
+void RubyGM::Drawable::Text::dispose() noexcept {
+    this->Text::~Text();
     RubyGM::SmallFree(this);
 }
-
-
 
 // ============================================================================
 // ========================= CGMGlyphRecorder =================================
@@ -270,12 +279,16 @@ auto RubyGM::CGMGlyphRecorder::DrawUnderline(
     IUnknown* effect) noexcept -> HRESULT{
     UNREFERENCED_PARAMETER(clientDrawingContext);
     // 计算矩形
-    D2D1_RECT_F rectangle = {
-        baselineOriginX,
-        baselineOriginY + underline->offset,
-        baselineOriginX + underline->width,
-        baselineOriginY + underline->offset + underline->thickness
-    };
+    const float x0 = baselineOriginX;
+    const float y0 = baselineOriginY + underline->offset;
+    const float x1 = x0 + underline->width;
+    const float y1 = y0 + underline->thickness;
+    // 计算点集
+    D2D1_POINT_2F points[] = { {x0, y0}, {x1, y0}, {x1, y1}, {x0, y1} };
+    this->sink->BeginFigure(points[0], D2D1_FIGURE_BEGIN_FILLED);
+    uint32_t len = uint32_t(std::cend(points) - std::cbegin(points) - 1);
+    this->sink->AddLines(points + 1, len);
+    this->sink->EndFigure(D2D1_FIGURE_END_CLOSED);
     return S_OK;
 }
 
@@ -296,12 +309,16 @@ auto RubyGM::CGMGlyphRecorder::DrawStrikethrough(
     const DWRITE_STRIKETHROUGH* strikethrough,
     IUnknown* effect) noexcept ->HRESULT {
     // 计算矩形
-    D2D1_RECT_F rectangle = {
-        baselineOriginX,
-        baselineOriginY + strikethrough->offset,
-        baselineOriginX + strikethrough->width,
-        baselineOriginY + strikethrough->offset + strikethrough->thickness
-    };
+    const float x0 = baselineOriginX;
+    const float y0 = baselineOriginY + strikethrough->offset;
+    const float x1 = x0 + strikethrough->width;
+    const float y1 = y0 + strikethrough->thickness;
+    // 计算点集
+    D2D1_POINT_2F points[] = { {x0, y0}, {x1, y0}, {x1, y1}, {x0, y1} };
+    this->sink->BeginFigure(points[0], D2D1_FIGURE_BEGIN_FILLED);
+    uint32_t len = uint32_t(std::cend(points) - std::cbegin(points) - 1);
+    this->sink->AddLines(points + 1, len);
+    this->sink->EndFigure(D2D1_FIGURE_END_CLOSED);
     return S_OK;
 }
 
@@ -339,13 +356,14 @@ auto RubyGM::CGMGlyphRecorder::DrawGlyphRun(
         buf = reinterpret_cast<DWRITE_GLYPH_OFFSET*>(ptr);
     }
     if (!buf) return E_OUTOFMEMORY;
+    // XXX: 偏移方向
+    float offx = baselineOriginX;
+    float offy = -baselineOriginY;
     // XXX: 进行手动偏移 -- 没有其他办法了?
     const auto offsets = glyphRun->glyphOffsets;
     for (uint32_t i = 0; i < c; ++i) {
-        buf[i] = {
-            offsets[i].advanceOffset + baselineOriginX,
-            offsets[i].ascenderOffset + baselineOriginY
-        };
+        buf[i].advanceOffset  = offsets[i].advanceOffset  + offx;
+        buf[i].ascenderOffset = offsets[i].ascenderOffset + offy;
     }
     // 获取轮廓几何
     auto hr = glyphRun->fontFace->GetGlyphRunOutline(

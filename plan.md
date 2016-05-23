@@ -4,28 +4,29 @@
   - Resource                            资源对象命名空间
     - Base                              基类
   - Drawable                            可渲染对象命名空间
-    - Object        < Resource::Base    基类
-    - Vector        < Object            矢量对象
+    - Object#       < Resource::Base    基类
+    - Vector#       < Object            矢量对象
     - ===============基本矢量对象================
     - Line          < Vector            线段几何
     - Rect          < Vector            矩形几何
     - Ellipse       < Vector            椭圆几何
-    - Path          < Vector            路径几何
-    - Polyline      < Vector            折线几何
-    - Glyph         < Vector            字形几何
-    - Geometry      < Vector            几何对象
+    - Geometry#     < Vector            几何对象
+    - Path          < Geometry          路径几何
+    - Polygon       < Geometry          多边几何
+    - Polyline      < Geometry          折线几何
+    - Text          < Geometry          字形几何
     - ===============复杂矢量对象================
     - Textlayout    < Object            文本布局
     - ===============基本位图对象================
     - Bitmap        < Object            位图
   - Asset                               Asset资源对象命名空间
-    - Object        < Resource::Base    基类
+    - Object#       < Resource::Base    基类
     - Font          < Object            文本格式/字体资源
-    - Brush         < Object            笔刷资源
+    - Brush#        < Object            笔刷资源
       - ColorBrush  < Brush             纯色笔刷资源
       - XXXXXXBrush < Brush             XXX笔刷资源
       - BitmapBrush < Brush             位图笔刷资源
-    - Bitmap        < Object            位图资源 
+    - Bitmap#       < Object            位图资源 
       - FileBitmap  < Bitmap            文件位图资源, 来自图片文件
       - StreamBitmap< Bitmap            流式位图资源, 来自数据流
       - RasterBitmap< Bitmap            光栅化位图资源, 可渲染对象光栅化结果

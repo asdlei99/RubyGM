@@ -24,10 +24,10 @@
 * OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#include "rgmDrawable.h"
-#include "../Util/rgmUtil.h"
-#include "../asset/rgmAsset.h"
-#include "../asset/rgmAssetStroke.h"
+#include "../rgmDrawable.h"
+#include "../../Util/rgmUtil.h"
+#include "../../asset/rgmAsset.h"
+#include "../../asset/rgmAssetStroke.h"
 #include <utility>
 
 // rubygm namespace

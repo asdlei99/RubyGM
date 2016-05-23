@@ -108,7 +108,7 @@ namespace RubyGM {
             // release device-dependent resource
             void release_gpu_data() noexcept;
             // something must do before deleted
-            void before_deleted() noexcept { Super::before_deleted(); }
+            void before_deleted() noexcept;
             // initialize, maybe you want call v-method
             void initialize(pugi::xml_node node) noexcept;
             // get drawable

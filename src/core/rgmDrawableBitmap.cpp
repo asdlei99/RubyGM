@@ -2,7 +2,8 @@
 #include <core/graphics/rgmGraphics.h>
 #include <core/Drawable/rgmBitmap.h>
 #include <core/util/rgmImpl.h>
-
+#include <algorithm>
+#undef min
 
 /// <summary>
 /// Initializes a new instance of the <see cref="Bitmap"/> class.
@@ -13,11 +14,44 @@ Super(bs),
 m_refBitmap(bs.bitmap),
 src_rect(bs.src),
 des_rect(bs.des),
-m_modeInter(D2D1_INTERPOLATION_MODE_LINEAR),
+m_modeInter(Mode_Linear),
 m_pBitmap(bs.bitmap.GetBitmap()) {
     m_refBitmap.AddRef();
     this->reset_bitmap_size();
 }
+
+/// <summary>
+/// Sets the interpolation mode.
+/// </summary>
+/// <param name="mode">The mode.</param>
+/// <returns></returns>
+void RubyGM::Drawable::Bitmap::SetInterpolationMode(
+    InterpolationMode mode) noexcept {
+    m_modeInter = std::min(Mode_HighQqualityCubic, mode);
+}
+
+
+/// <summary>
+/// Saves as PNG.
+/// </summary>
+/// <param name="file_name">The file_name.</param>
+/// <returns></returns>
+auto RubyGM::Drawable::Bitmap::SaveAsPng(
+    const wchar_t* file_name) noexcept ->Result {
+    return m_refBitmap.SaveAsPng(file_name);
+}
+
+/// <summary>
+/// Saves as PNG.
+/// </summary>
+/// <param name="file_name">The file_name.</param>
+/// <returns></returns>
+auto RubyGM::Drawable::Bitmap::SaveAsPng(
+    const char* file_name) noexcept ->Result {
+    return m_refBitmap.SaveAsPng(file_name);
+}
+
+
 
 /// <summary>
 /// reset the size of bitmap
@@ -81,7 +115,8 @@ void RubyGM::Drawable::Bitmap::Render(IGMRenderContext& rc) const noexcept {
     auto mode = D2D1_INTERPOLATION_MODE(m_modeInter);
     auto& des = impl::d2d(this->des_rect);
     auto& src = impl::d2d(this->src_rect);
-    rc.DrawBitmap(m_pBitmap, &des, this->opacity, mode, &src);
+    D2D1_MATRIX_4X4_F* perspective = nullptr;
+    rc.DrawBitmap(m_pBitmap, &des, this->opacity, mode, &src, perspective);
 }
 
 

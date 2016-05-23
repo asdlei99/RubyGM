@@ -23,7 +23,9 @@
     <ClCompile Include="..\src\core\rgmAssetBrush.cpp" />
     <ClCompile Include="..\src\core\rgmCache.cpp" />
     <ClCompile Include="..\src\core\rgmDrawableBitmap.cpp" />
+    <ClCompile Include="..\src\core\rgmEffect.cpp" />
     <ClCompile Include="..\src\core\rgmGlyph.cpp" />
+    <ClCompile Include="..\src\core\rgmTest.cpp" />
     <ClCompile Include="..\src\core\rgmVector.cpp" />
     <ClCompile Include="..\src\core\main.cpp" />
     <ClCompile Include="..\src\core\rgmluiBridge.cpp" />
@@ -43,12 +45,20 @@
     <ClInclude Include="..\include\core\asset\rgmAssetStroke.h" />
     <ClInclude Include="..\include\core\brush\rgmBrushStruct.h" />
     <ClInclude Include="..\include\core\cache\rgmCache.h" />
+    <ClInclude Include="..\include\core\drawable\effect\rgmBlur.h" />
+    <ClInclude Include="..\include\core\drawable\effect\rgmEffect.h" />
+    <ClInclude Include="..\include\core\drawable\effect\rgmShadow.h" />
+    <ClInclude Include="..\include\core\drawable\rgmAuto.h" />
     <ClInclude Include="..\include\core\drawable\rgmBitmap.h" />
     <ClInclude Include="..\include\core\drawable\rgmDrawable.h" />
-    <ClInclude Include="..\include\core\drawable\rgmGlyph.h" />
-    <ClInclude Include="..\include\core\drawable\rgmLine.h" />
     <ClInclude Include="..\include\core\drawable\rgmTextlayout.h" />
-    <ClInclude Include="..\include\core\drawable\rgmVector.h" />
+    <ClInclude Include="..\include\core\drawable\vector\rgmEllipse.h" />
+    <ClInclude Include="..\include\core\drawable\vector\rgmGeometry.h" />
+    <ClInclude Include="..\include\core\drawable\vector\rgmText.h" />
+    <ClInclude Include="..\include\core\drawable\vector\rgmLine.h" />
+    <ClInclude Include="..\include\core\drawable\vector\rgmPolygon.h" />
+    <ClInclude Include="..\include\core\drawable\vector\rgmRect.h" />
+    <ClInclude Include="..\include\core\drawable\vector\rgmVector.h" />
     <ClInclude Include="..\include\core\graphics\rgmGraphics.h" />
     <ClInclude Include="..\include\core\graphics\rgmSprite.h" />
     <ClInclude Include="..\include\core\graphics\rgmTilemap.h" />
@@ -63,6 +73,7 @@
     <ClInclude Include="..\include\core\Util\rgmUtil.h" />
     <ClInclude Include="..\include\game\rgmResource.h" />
     <ClInclude Include="..\include\game\rgmGame.h" />
+    <ClInclude Include="..\include\test\rgmTest.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{DE8D8120-F036-43BC-8CFC-A3B27BC45FFC}</ProjectGuid>
@@ -159,7 +170,7 @@
       <SDLCheck>true</SDLCheck>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
-      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;RUBYGM_TEST_MODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>

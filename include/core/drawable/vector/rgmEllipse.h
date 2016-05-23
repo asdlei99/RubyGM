@@ -30,51 +30,63 @@
 
 // rubygm namespace
 namespace RubyGM {
-    // graphics interface for geometry
-    struct IGMGeometry;
+    // ellipse
+    struct EllipseF {
+        // point of ellipse-center
+        Point2F         point;
+        // radius
+        float           rx, ry;
+    };
     // Drawable namespace
     namespace Drawable {
-        // pointer
-        class Textlayout;
-        // status for Glyph
-        struct GlyphStatus : VectorStatus {
-            //
-            Textlayout*     layout;
+        // always draw circle
+        struct AlwaysCircle : Default {};
+        // status for rect
+        struct EllipseStatus : VectorStatus {
+            // ellipse data
+            EllipseF        ellipse;
             // ctor
-            GlyphStatus() : VectorStatus() {}
+            EllipseStatus() : VectorStatus() {}
             // default value
-            inline GlyphStatus(Default v) : VectorStatus(v) {
-                layout = nullptr;
+            inline EllipseStatus(Default v) : VectorStatus(v) {
+                ellipse.point = { 8.f, 8.f };
+                ellipse.rx = 8.f;
+                ellipse.ry = 8.f;
+            }
+            // Circle, ALWAYS ignore rx
+            inline EllipseStatus(AlwaysCircle v) : VectorStatus(v) {
+                ellipse.point = { 8.f, 8.f };
+                ellipse.rx = 8.f;
+                ellipse.ry = -1.f;
             }
         };
-        // line 
-        class Glyph : public Drawable::Vector {
+        // ellipse 
+        class Ellipse : public Drawable::Vector {
             // super class
             using Super = Drawable::Vector;
             // dispose object
             void dispose() noexcept override;
         protected:
             // ctor
-            Glyph(const GlyphStatus&) noexcept;
+            Ellipse(const EllipseStatus&) noexcept;
             // ctor
-            ~Glyph() noexcept;
+            ~Ellipse() noexcept;
+            // recreate
+            //auto recreate() noexcept -> Result override;
         public:
             // create this
-            static auto Create(const GlyphStatus&) noexcept ->Glyph*;
+            static auto Create(const EllipseStatus&) noexcept ->Ellipse*;
             // create this
-            static auto CreateSP(const GlyphStatus& ls) noexcept {
-                return std::move(RubyGM::CGMPtrA<Drawable::Glyph>(
-                    std::move(Glyph::Create(ls)))
+            static auto CreateSP(const EllipseStatus& ls) noexcept {
+                return std::move(RubyGM::CGMPtrA<Drawable::Ellipse>(
+                    std::move(Ellipse::Create(ls)))
                 );
             }
             // render object
             void Render(IGMRenderContext& rc) const noexcept override;
-        protected:
-            // recreate
-            //auto recreate() noexcept -> Result override;
         public:
-            // 
-            IGMGeometry*        m_pTextGlyph = nullptr;
+            // ellipse
+            EllipseF                ellipse;
         };
     }
 }

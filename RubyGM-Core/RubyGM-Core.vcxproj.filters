@@ -52,6 +52,12 @@
     <Filter Include="CoreGM\Drawable\Vector">
       <UniqueIdentifier>{e162f1dc-2ab5-4b7a-ac49-b26f40ffa6eb}</UniqueIdentifier>
     </Filter>
+    <Filter Include="CoreGM\Drawable\Effect">
+      <UniqueIdentifier>{4eb518d6-8694-4973-b7c4-39c58a75e218}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="CoreGM\Test">
+      <UniqueIdentifier>{ef65eaf2-0915-45ed-9060-44d9f67393e7}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\core\main.cpp">
@@ -95,6 +101,12 @@
     </ClCompile>
     <ClCompile Include="..\src\core\rgmGlyph.cpp">
       <Filter>Source Files\Resource\Drawable</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\rgmEffect.cpp">
+      <Filter>Source Files\Resource\Drawable</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\core\rgmTest.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -170,17 +182,44 @@
     <ClInclude Include="..\include\core\cache\rgmCache.h">
       <Filter>CoreGM\Cache</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\core\drawable\rgmVector.h">
-      <Filter>CoreGM\Drawable\Vector</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\core\drawable\rgmLine.h">
-      <Filter>CoreGM\Drawable\Vector</Filter>
-    </ClInclude>
     <ClInclude Include="..\include\core\asset\rgmAssetStroke.h">
       <Filter>CoreGM\Asset</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\core\drawable\rgmGlyph.h">
+    <ClInclude Include="..\include\core\drawable\effect\rgmBlur.h">
+      <Filter>CoreGM\Drawable\Effect</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\core\drawable\effect\rgmEffect.h">
+      <Filter>CoreGM\Drawable\Effect</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\core\drawable\effect\rgmShadow.h">
+      <Filter>CoreGM\Drawable\Effect</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\core\drawable\vector\rgmLine.h">
       <Filter>CoreGM\Drawable\Vector</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\core\drawable\vector\rgmVector.h">
+      <Filter>CoreGM\Drawable\Vector</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\core\drawable\vector\rgmRect.h">
+      <Filter>CoreGM\Drawable\Vector</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\test\rgmTest.h">
+      <Filter>CoreGM\Test</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\core\drawable\vector\rgmEllipse.h">
+      <Filter>CoreGM\Drawable\Vector</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\core\drawable\vector\rgmPolygon.h">
+      <Filter>CoreGM\Drawable\Vector</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\core\drawable\vector\rgmGeometry.h">
+      <Filter>CoreGM\Drawable\Vector</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\core\drawable\vector\rgmText.h">
+      <Filter>CoreGM\Drawable\Vector</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\core\drawable\rgmAuto.h">
+      <Filter>CoreGM\Drawable</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

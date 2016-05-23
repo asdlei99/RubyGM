@@ -27,6 +27,7 @@
 #include <cstdint>
 #include "../Util/rgmStruct.h"
 #include "../../game/rgmResource.h"
+#include "../../test/rgmTest.h"
 
 // rubygm namespace
 namespace RubyGM { 
@@ -49,7 +50,8 @@ namespace RubyGM {
         // drawable bitmap class 
         class Bitmap;
         // drawable object
-        class RUBYGM_NOVTABLE Object : public Base::Resource {
+        class RUBYGM_NOVTABLE Object : public Base::Resource,
+            public CGMTestModule {
             // super class
             using Super = Base::Resource;
         public:

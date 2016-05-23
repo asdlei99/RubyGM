@@ -40,8 +40,8 @@ namespace RubyGM {
     struct IGMTextRenderer;
     // Drawable namespace
     namespace Drawable {
-        // status for textlauout
-        struct TextStatus : BaseStatus {
+        // status for textlayout
+        struct TextlayoutStatus : BaseStatus {
             // basic color
             ColorF                  color;
             // text renderer
@@ -59,11 +59,11 @@ namespace RubyGM {
             // text length
             uint32_t                textlen;
             // ctor
-            ~TextStatus() noexcept { font.Release(); }
+            ~TextlayoutStatus() noexcept { font.Release(); }
             // default ctor
-            inline TextStatus(Asset::Font&& f) : font(f) { }
+            inline TextlayoutStatus(Asset::Font&& f) : font(f) { }
             // default value
-            inline TextStatus(Asset::Font&& f, Default v) : 
+            inline TextlayoutStatus(Asset::Font&& f, Default v) : 
                 BaseStatus(v), font(f) {
                 renderer = ""; context = "";
                 text = L""; textlen = 0;
@@ -76,19 +76,19 @@ namespace RubyGM {
             // super class
             using Super = Drawable::Object;
             // frirend
-            friend class Glyph;
+            friend class Text;
         public:
             // create this
-            static auto Create(const TextStatus&) noexcept->Textlayout*;
+            static auto Create(const TextlayoutStatus&) noexcept->Textlayout*;
             // create this
-            static auto CreateSP(const TextStatus& ts) noexcept {
+            static auto CreateSP(const TextlayoutStatus& ts) noexcept {
                 return std::move(RubyGM::CGMPtrA<Drawable::Textlayout>(
                     std::move(Textlayout::Create(ts)))
                 );
             }
         private:
             // ctor
-            Textlayout(const TextStatus&) noexcept;
+            Textlayout(const TextlayoutStatus&) noexcept;
             // ctor
             Textlayout(const Textlayout&) = delete;
             // ctor
