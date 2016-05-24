@@ -51,6 +51,7 @@
     <ClInclude Include="..\include\core\drawable\rgmAuto.h" />
     <ClInclude Include="..\include\core\drawable\rgmBitmap.h" />
     <ClInclude Include="..\include\core\drawable\rgmDrawable.h" />
+    <ClInclude Include="..\include\core\drawable\rgmMask.h" />
     <ClInclude Include="..\include\core\drawable\rgmTextlayout.h" />
     <ClInclude Include="..\include\core\drawable\vector\rgmEllipse.h" />
     <ClInclude Include="..\include\core\drawable\vector\rgmGeometry.h" />

@@ -36,7 +36,9 @@
 #include "vector/rgmLine.h"
 #include "vector/rgmRect.h"
 #include "vector/rgmText.h"
+#include "vector/rgmPolygon.h"
 #include "vector/rgmEllipse.h"
+
 // effect image
 #include "effect/rgmBlur.h"
 #include "effect/rgmShadow.h"
@@ -70,6 +72,10 @@ namespace RubyGM {
         // create text vector graphics
         inline auto CreateSP(const TextStatus& ts) noexcept {
             return std::move(Text::CreateSP(ts));
+        }
+        // create text polygon graphics
+        inline auto CreateSP(const PolygonStatus& ps) noexcept {
+            return std::move(Polygon::CreateSP(ps));
         }
         // create ellipse vector graphics
         inline auto CreateSP(const EllipseStatus& es) noexcept {

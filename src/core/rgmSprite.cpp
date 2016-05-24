@@ -1,4 +1,5 @@
-﻿// M$
+﻿#define _WIN32_WINNT 0x0A000001
+// M$
 #include <core/rubygm.h>
 #include <core/graphics/rgmSprite.h>
 #include <core/graphics/rgmGraphics.h>

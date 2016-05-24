@@ -60,6 +60,13 @@ namespace RubyGM {
         Mode_Anisotropic,
         Mode_HighQqualityCubic,
     };
+    // path fill rule
+    enum FillRule : uint32_t {
+        // evenodd
+        Rule_Evenodd = 0,
+        // nonzero
+        Rule_Nonzero,
+    };
     // point
     template<typename T> struct Point { T x; T y; };
     // rect

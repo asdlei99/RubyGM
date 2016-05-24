@@ -32,7 +32,7 @@ namespace RubyGM {
     // stroke style
     struct IGMStrokeStyle : ID2D1StrokeStyle { using Super = ID2D1StrokeStyle; };
     // render context
-    struct IGMRenderContext : ID2D1DeviceContext { using Super = ID2D1DeviceContext; };
+    struct IGMRenderContext : ID2D1DeviceContext3 { using Super = ID2D1DeviceContext3; };
     // bitmap
     struct IGMBitmap : ID2D1Bitmap1 { using Super = ID2D1Bitmap1; };
     // geometry

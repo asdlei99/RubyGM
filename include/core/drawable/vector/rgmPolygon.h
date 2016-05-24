@@ -24,7 +24,7 @@
 * OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#include "rgmVector.h"
+#include "rgmGeometry.h"
 #include "../Util/rgmUtil.h"
 #include <utility>
 
@@ -33,22 +33,25 @@ namespace RubyGM {
     // Drawable namespace
     namespace Drawable {
         // status for rect
-        struct PolygonStatus : VectorStatus {
-            // points array
+        struct PolygonStatus : GeometryStatus {
+            // points array, at least three sides
             Point2F*            points;
-            // length of array
-            size_t              count;
+            // length of array, at least three sides
+            uint32_t            count;
+            // fill mode/rule
+            FillRule            fill_rule;
             // ctor
-            PolygonStatus() : VectorStatus() {}
+            PolygonStatus() : GeometryStatus() {}
             // default value
-            inline PolygonStatus(Default v) : VectorStatus(v) {
+            inline PolygonStatus(Default v) : GeometryStatus(v) {
                 points = nullptr; count = 0;
+                fill_rule = Rule_Evenodd;
             }
         };
         // line 
-        class Polygon : public Drawable::Vector {
+        class Polygon : public Drawable::Geometry {
             // super class
-            using Super = Drawable::Vector;
+            using Super = Drawable::Geometry;
             // dispose object
             void dispose() noexcept override;
         protected:
@@ -68,7 +71,7 @@ namespace RubyGM {
                 );
             }
             // render object
-            void Render(IGMRenderContext& rc) const noexcept override;
+            //void Render(IGMRenderContext& rc) const noexcept override;
         public:
         };
     }

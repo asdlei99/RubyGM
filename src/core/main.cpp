@@ -1,4 +1,5 @@
-﻿#pragma warning(disable: 4290)
+﻿#define _WIN32_WINNT 0x0A000001
+#pragma warning(disable: 4290)
 #pragma warning(disable: 4200)
 
 #include <core/rubygm.h>
@@ -144,7 +145,6 @@ int main_call() {
 
 #include <core/graphics/rgmSprite.h>
 #include <core/drawable/rgmAuto.h>
-
 #include <game/rgmGame.h>
 
 // RubyGM namespace
@@ -215,15 +215,37 @@ namespace RubyGM {
             sprite2->SetDrawable(sp);
         }
         {
-            Drawable::EllipseStatus es(def);
-            es.ellipse.point = { 30.f, 30.f };
-            es.ellipse.rx = 30.f;
-            es.ellipse.ry =- 10.f;
-            es.stroke_width = 2.f;
-            es.stroke_color.b = 1.f;
-            es.fill_color.a = 0.f;
-            auto sp = Drawable::CreateSP(es);
-            sprite3->SetDrawable(sp);
+            {
+                Drawable::EllipseStatus es(def);
+                es.ellipse.point = { 30.f, 30.f };
+                es.ellipse.rx = 30.f;
+                es.ellipse.ry = -10.f;
+                es.stroke_width = 2.f;
+                es.stroke_color.b = 1.f;
+                es.filled_color.a = 0.f;
+                auto sp = Drawable::CreateSP(es);
+            }
+            {
+                // 100,10 40,198 190,78 10,78 160,198
+                Point2F pts[] = { 
+                    { 10.0,1.0}, 
+                    { 4.0,19.8},
+                    { 19.0,7.8 }, 
+                    { 1.0,7.8}, 
+                    { 16.0,19.8 }
+                };
+                Drawable::PolygonStatus ps(def);
+                ps.points = pts;
+                ps.count = uint32_t(std::end(pts) - std::begin(pts));
+                //ps.stroke_width = 2.f;
+                ps.stroke_color.b = 1.f;
+                auto sp = Drawable::CreateSP(ps);
+                sprite3->SetZoomX(3.f);
+                sprite3->SetZoomY(3.f);
+                sprite3->antialias_mode = sprite3->Mode_PerPrimitive;
+                float sf = sprite3->ComputeScaleFactorEz1();
+                sprite3->SetDrawable(sp->RealizationSP(sf));
+            }
         }
         while (true) {
             RubyGM::FiberYield();

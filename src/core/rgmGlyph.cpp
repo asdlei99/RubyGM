@@ -16,7 +16,7 @@ namespace RubyGM {
     // bridge
     namespace Bridge {
         // create path
-        auto CreatePathGeometry(IGMPath*& geo) noexcept->Result;
+        auto CreatePathGeometry(ID2D1PathGeometry*& path) noexcept->Result;
     }
     // recorder
     class CGMGlyphRecorder final : public IDWriteTextRenderer {
@@ -87,7 +87,7 @@ RubyGM::Drawable::Text::Text(const TextStatus& ts) noexcept : Super(ts) {
     assert(ts.layout.Ptr());
     assert(m_pGiGeometry == nullptr);
     // 创建对象
-    IGMPath* path = nullptr;
+    ID2D1PathGeometry* path = nullptr;
     auto hr = Bridge::CreatePathGeometry(path);
     auto layout = ts.layout.Ptr()->m_pTextlayout;
     ID2D1GeometrySink* sink = nullptr;

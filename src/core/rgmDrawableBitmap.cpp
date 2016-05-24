@@ -1,4 +1,5 @@
-﻿#include <core/rubygm.h>
+﻿#define _WIN32_WINNT 0x0A000001
+#include <core/rubygm.h>
 #include <core/graphics/rgmGraphics.h>
 #include <core/Drawable/rgmBitmap.h>
 #include <core/util/rgmImpl.h>

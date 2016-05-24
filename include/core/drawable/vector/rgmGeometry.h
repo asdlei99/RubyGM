@@ -40,7 +40,6 @@ namespace RubyGM {
             GeometryStatus() : VectorStatus() {}
             // default value
             inline GeometryStatus(Default v) : VectorStatus(v) {
-
             }
         };
         // geometry 
@@ -56,6 +55,17 @@ namespace RubyGM {
             ~Geometry() noexcept;
             // is ok?
             bool is_ok() const noexcept { return !!m_pGiGeometry; }
+        public:
+            // Realizations  -> to MeshEx, sf = scale factor
+            auto Realization(float sf) const noexcept->Drawable::Vector*;
+            // Realizations  -> to MeshEx, sf = scale factor
+            auto RealizationSP(float sf) const noexcept {
+                return std::move(RubyGM::CGMPtrA<Drawable::Vector>(
+                    std::move(this->Realization(sf)))
+                );
+            }
+            // Tessellate -> to Mesh
+            //auto Tessellate() const noexcept->Drawable::Mesh*;
         public:
             // render object
             void Render(IGMRenderContext& rc) const noexcept override;

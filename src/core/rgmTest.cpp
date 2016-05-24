@@ -1,4 +1,5 @@
-﻿#ifdef RUBYGM_TEST_MODE
+﻿#define _WIN32_WINNT 0x0A000001
+#ifdef RUBYGM_TEST_MODE
 #include <core/rubygm.h>
 #include <test/rgmTest.h>
 #include <Core/luistring.h>

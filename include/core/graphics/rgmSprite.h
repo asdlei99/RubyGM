@@ -221,10 +221,6 @@ namespace RubyGM {
         CGMPtrA<Drawable::Object>   m_spDrawable = nullptr;
         // parent
         CGMSprite*                  m_pParent = nullptr;
-#ifdef RUBYGM_TEST_MODE
-        // testing name
-        void*                       m_pName_test = nullptr;
-#endif
         // children
         List<CGMSprite>             m_ltChildren;
         // world transform

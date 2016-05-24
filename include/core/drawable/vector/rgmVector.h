@@ -41,23 +41,26 @@ namespace RubyGM {
             ColorF          stroke_color;
             // _fill_ color, valid on _fill_ brush invalid
             // set alpha to 0.0f to undisplay this part
-            ColorF          fill_color;
+            ColorF          filled_color;
             // _fill_ brush, set null to use none-style stroke
             Asset::Stroke*  stroke_style;
             // stroke brush, set null to use stroke color
             Asset::Brush*   stroke_brush;
             // _fill_ brush, set null to use _fill_ color
-            Asset::Brush*   fill_brush;
+            Asset::Brush*   filled_brush;
             // stroke width
             float           stroke_width;
+            // _unused_ single float member, unused for sub-class
+            float           _unused_;
             // ctor
             VectorStatus() : BaseStatus() {}
             // ctor
             VectorStatus(Default v) : BaseStatus(v) {
                 stroke_color.r = stroke_color.g = stroke_color.b = 0.f;
-                stroke_color.a = 1.f;   fill_color = stroke_color;
+                stroke_color.a = 1.f;   filled_color = stroke_color;
                 stroke_style = nullptr; stroke_brush = nullptr; 
-                fill_brush = nullptr;   stroke_width = 1.f;
+                filled_brush = nullptr;   stroke_width = 1.f;
+                _unused_ = 1.f;
             }
         };
         // drawable vector graphics
@@ -77,33 +80,33 @@ namespace RubyGM {
             // set stroke brush
             void set_stroke_brush() const noexcept;
             // set fill brush
-            void set_fill_brush() const noexcept;
+            void set_filled_brush() const noexcept;
             // is draw stroke
             bool is_draw_stroke() const { return stroke_color.a != 0.f; }
             // is draw fill
-            bool is_draw_fill() const { return fill_color.a != 0.f; }
+            bool is_draw_filled() const { return filled_color.a != 0.f; }
         public:
             // stroke color, 0.0 alpha will undisplay this part
             ColorF                  stroke_color{0.f};
             // fill color, 0.0 alpha will undisplay this part
-            ColorF                  fill_color{0.f};
+            ColorF                  filled_color{0.f};
         protected:
             // stroke style asset
             Asset::Stroke*          m_pAsStrokeStyle = nullptr;
             // stroke brush asset
             Asset::Brush*           m_pAsBrushStroke = nullptr;
             // fill brush asset
-            Asset::Brush*           m_pAsBrushFill = nullptr;
+            Asset::Brush*           m_pAsBrushFilled = nullptr;
             // stroke style GI data(graphics-interface)
             IGMStrokeStyle*         m_pGiStrokeStyle = nullptr;
             // stroke brush GI data
             IGMBrush*               m_pGiBrushStroke = nullptr;
             // fill brush GI data
-            IGMBrush*               m_pGiBrushFill = nullptr;
+            IGMBrush*               m_pGiBrushFilled = nullptr;
             // is using stroke color
             bool                    m_bUseStrokeColor = false;
             // is using fill color
-            bool                    m_bUseFillColor = false;
+            bool                    m_bUseFilledColor = false;
             // unused bool data
             bool                    m_unused_bool[2];
         public:

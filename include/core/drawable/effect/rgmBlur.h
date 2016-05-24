@@ -88,5 +88,60 @@ namespace RubyGM {
             // blur Standard Deviation
             float                       m_fStdDvi = -1.f;
         };
+        // status for DirectionalBlur
+        /*struct DirectionalBlurStatus : EffectStatus {
+            // source bitmap
+            Asset::Bitmap&      bitmap;
+            // angle
+            Point2F             direction;
+            // ctor
+            ~DirectionalBlurStatus() noexcept { bitmap.Release(); }
+            // default ctor
+            inline DirectionalBlurStatus(Asset::Bitmap&& b) : bitmap(b) { }
+            // default value
+            inline DirectionalBlurStatus(Asset::Bitmap&& b, Default v) :
+                EffectStatus(v), bitmap(b) {
+                direction = { 4.f, 4.f };
+            }
+        };
+        // directional blur effect
+        class DirectionalBlur final : public Drawable::Effect {
+            // super class
+            using Super = Drawable::Effect;
+            // helper
+            friend EffectHelper<DirectionalBlur>;
+            // dispose
+            void dispose() noexcept override;
+        public:
+            // create this
+            static auto Create(const DirectionalBlurStatus&) 
+                noexcept->DirectionalBlur*;
+            // create this
+            static auto CreateSP(const DirectionalBlurStatus& ts) noexcept {
+                return std::move(RubyGM::CGMPtrA<Drawable::DirectionalBlur>(
+                    std::move(DirectionalBlur::Create(ts)))
+                );
+            }
+        public:
+            // set StandardDeviation
+            auto SetStandardDeviation(float sd) noexcept ->Result;
+            // get StandardDeviation
+            auto GetStandardDeviation() const noexcept { return m_fStdDvi; }
+        protected:
+            // ctor
+            DirectionalBlur(const DirectionalBlurStatus&) noexcept;
+            // ctor
+            DirectionalBlur(const DirectionalBlur&) = delete;
+            // DirectionalBlur
+            ~DirectionalBlur() noexcept;
+        protected:
+            // init
+            void init() noexcept;
+            // recreate resource
+            virtual auto recreate() noexcept -> Result override;
+        protected:
+            // bitmap asset
+            Asset::Bitmap&              m_refBitmapAsset;
+        };*/
     }
 }

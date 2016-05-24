@@ -1,4 +1,5 @@
-﻿#include <LongUI.h>
+﻿#define _WIN32_WINNT 0x0A000001
+#include <LongUI.h>
 #include <bridge/rgmluiBridge.h>
 #include <bridge/rgmluiConfig.h>
 
@@ -105,15 +106,58 @@ namespace RubyGM {
 
 // rubygm::bridge namespace
 namespace RubyGM { namespace Bridge {
-    // create path geo
-    auto CreatePathGeometry(IGMPath*& geo) noexcept -> Result {
-#if 0
-        using geotype = typename IGMPath::Super;
-        using same = std::is_same<ID2D1PathGeometry, geotype>;
-        static_assert(same::value, "must be same");
-#endif
-        auto** path = reinterpret_cast<ID2D1PathGeometry**>(&geo);
-        return Result(UIManager_D2DFactory->CreatePathGeometry(path));
+    /// <summary>
+    /// Creates the path geometry.
+    /// </summary>
+    /// <param name="path">The path.</param>
+    /// <returns></returns>
+    auto CreatePathGeometry(ID2D1PathGeometry*& path) noexcept -> Result {
+        return Result(UIManager_D2DFactory->CreatePathGeometry(&path));
+    }
+    /// <summary>
+    /// Creates the filled geometry realization.
+    /// </summary>
+    /// <param name="geometry">The geometry.</param>
+    /// <param name="flatteningTolerance">The flattening tolerance.</param>
+    /// <param name="geometryRealization">The geometry realization.</param>
+    /// <returns></returns>
+    auto CreateFilledGeometryRealization(
+        ID2D1Geometry* geometry,
+        float flatteningTolerance,
+        ID2D1GeometryRealization **geometryRealization 
+    ) noexcept -> Result {
+        assert(geometry && geometryRealization && flatteningTolerance > 0.f);
+        return Result(UIManager_RenderTarget->CreateFilledGeometryRealization(
+            geometry, 
+            flatteningTolerance, 
+            geometryRealization
+        ));
+    }
+    /// <summary>
+    /// Creates the stroked geometry realization.
+    /// </summary>
+    /// <param name="geometry">The geometry.</param>
+    /// <param name="flatteningTolerance">The flattening tolerance.</param>
+    /// <param name="strokeWidth">Width of the stroke.</param>
+    /// <param name="strokeStyle">The stroke style.</param>
+    /// <param name="geometryRealization">The geometry realization.</param>
+    /// <returns></returns>
+    auto CreateStrokedGeometryRealization(
+        ID2D1Geometry *geometry,
+        FLOAT flatteningTolerance,
+        FLOAT strokeWidth,
+        ID2D1StrokeStyle *strokeStyle,
+        ID2D1GeometryRealization **geometryRealization 
+    ) noexcept -> Result {
+        assert(geometry && geometryRealization );
+        assert(strokeWidth > 0.f && flatteningTolerance > 0.f);
+        return Result(UIManager_RenderTarget->CreateStrokedGeometryRealization(
+            geometry, 
+            flatteningTolerance, 
+            strokeWidth,
+            strokeStyle,
+            geometryRealization
+        ));
     }
     // create effect from guid
     auto EffectFrom(const GUID& id) noexcept->IGMEffect* {
