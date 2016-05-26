@@ -224,5 +224,14 @@
     <ClInclude Include="..\include\core\drawable\rgmMask.h">
       <Filter>CoreGM\Drawable</Filter>
     </ClInclude>
+    <ClInclude Include="..\include\core\drawable\vector\rgmPolyLine.h">
+      <Filter>CoreGM\Drawable\Vector</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\core\drawable\vector\rgmPath.h">
+      <Filter>CoreGM\Drawable\Vector</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\core\drawable\rgmBatch.h">
+      <Filter>CoreGM\Drawable</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

@@ -14,6 +14,11 @@ namespace RubyGM {
     namespace Bridge {
         // Creates the path geometry.
         auto CreatePathGeometry(ID2D1PathGeometry*& path) noexcept->Result;
+        // paerse svg path string
+        auto SvgPathGeometry(
+            const char* str, 
+            ID2D1PathGeometry1*& path
+        ) noexcept->Result;
         // Creates the filled geometry realization.
         auto CreateFilledGeometryRealization(
             ID2D1Geometry* geometry,
@@ -171,8 +176,8 @@ RubyGM::Drawable::Vector::~Vector() noexcept {
 RubyGM::Drawable::Line::Line(const LineStatus& ls) noexcept:
 Super(ls),
 point0(ls.point0),
-point1(ls.point1){
-
+point1(ls.point1) {
+    this->filled_color.a = 0.f;
 }
 
 /// <summary>
@@ -294,6 +299,11 @@ auto RubyGM::Drawable::Rect::Create(const RectStatus& rs) noexcept ->Rect* {
 /// <returns></returns>
 void RubyGM::Drawable::Rect::Render(IGMRenderContext& rc) const noexcept {
     const auto rrc = reinterpret_cast<const D2D1_ROUNDED_RECT*>(&rd_rect);
+    // 填充
+    if (this->is_draw_filled()) {
+        this->set_filled_brush();
+        rc.FillRoundedRectangle(rrc, m_pGiBrushFilled);
+    }
     // 笔触
     if (this->is_draw_stroke()) {
         this->set_stroke_brush();
@@ -304,11 +314,6 @@ void RubyGM::Drawable::Rect::Render(IGMRenderContext& rc) const noexcept {
             m_pGiStrokeStyle
         );
     }
-    // 填充
-    if (this->is_draw_filled()) {
-        this->set_filled_brush();
-        rc.FillRoundedRectangle(rrc, m_pGiBrushFilled);
-    }
 }
 
 /// <summary>
@@ -317,6 +322,11 @@ void RubyGM::Drawable::Rect::Render(IGMRenderContext& rc) const noexcept {
 /// <param name="rc">The rc.</param>
 /// <returns></returns>
 void RubyGM::Drawable::RtRect::Render(IGMRenderContext& rc) const noexcept {
+    // 填充
+    if (this->is_draw_filled()) {
+        this->set_filled_brush();
+        rc.FillRectangle(&impl::d2d(rd_rect.rect), m_pGiBrushFilled);
+    }
     // 笔触
     if (this->is_draw_stroke()) {
         this->set_stroke_brush();
@@ -326,11 +336,6 @@ void RubyGM::Drawable::RtRect::Render(IGMRenderContext& rc) const noexcept {
             this->stroke_width,
             m_pGiStrokeStyle
         );
-    }
-    // 填充
-    if (this->is_draw_filled()) {
-        this->set_filled_brush();
-        rc.FillRectangle(&impl::d2d(rd_rect.rect), m_pGiBrushFilled);
     }
 }
 
@@ -404,6 +409,11 @@ auto RubyGM::Drawable::Ellipse::Create(
 /// <returns></returns>
 void RubyGM::Drawable::Ellipse::Render(IGMRenderContext& rc) const noexcept {
     const auto ell = reinterpret_cast<const D2D1_ELLIPSE*>(&ellipse);
+    // 填充
+    if (this->is_draw_filled()) {
+        this->set_filled_brush();
+        rc.FillEllipse(ell, m_pGiBrushFilled);
+    }
     // 笔触
     if (this->is_draw_stroke()) {
         this->set_stroke_brush();
@@ -413,11 +423,6 @@ void RubyGM::Drawable::Ellipse::Render(IGMRenderContext& rc) const noexcept {
             this->stroke_width,
             m_pGiStrokeStyle
         );
-    }
-    // 填充
-    if (this->is_draw_filled()) {
-        this->set_filled_brush();
-        rc.FillEllipse(ell, m_pGiBrushFilled);
     }
 }
 
@@ -430,6 +435,11 @@ void RubyGM::Drawable::Circle::Render(IGMRenderContext& rc) const noexcept {
     auto circle = this->ellipse;
     circle.ry = circle.rx;
     const auto ell = reinterpret_cast<const D2D1_ELLIPSE*>(&circle);
+    // 填充
+    if (this->is_draw_filled()) {
+        this->set_filled_brush();
+        rc.FillEllipse(ell, m_pGiBrushFilled);
+    }
     // 笔触
     if (this->is_draw_stroke()) {
         this->set_stroke_brush();
@@ -439,11 +449,6 @@ void RubyGM::Drawable::Circle::Render(IGMRenderContext& rc) const noexcept {
             this->stroke_width,
             m_pGiStrokeStyle
         );
-    }
-    // 填充
-    if (this->is_draw_filled()) {
-        this->set_filled_brush();
-        rc.FillEllipse(ell, m_pGiBrushFilled);
     }
 }
 
@@ -619,15 +624,15 @@ auto RubyGM::Drawable::Realization::reset_realization() noexcept -> Result {
 /// <param name="rc">The  render context.</param>
 /// <returns></returns>
 void RubyGM::Drawable::Realization::Render(IGMRenderContext& rc)const noexcept{
-    // 笔触
-    if (this->is_draw_stroke() && m_pFilledRealization) {
-        this->set_stroke_brush();
-        rc.DrawGeometryRealization(m_pStrokeRealization, m_pGiBrushStroke);
-    }
     // 填充
     if (this->is_draw_filled() && m_pFilledRealization) {
         this->set_filled_brush();
         rc.DrawGeometryRealization(m_pFilledRealization, m_pGiBrushStroke);
+    }
+    // 笔触
+    if (this->is_draw_stroke() && m_pFilledRealization) {
+        this->set_stroke_brush();
+        rc.DrawGeometryRealization(m_pStrokeRealization, m_pGiBrushStroke);
     }
 }
 
@@ -651,6 +656,11 @@ RubyGM::Drawable::Geometry::~Geometry() noexcept {
 /// <param name="rc">The Render Context.</param>
 /// <returns></returns>
 void RubyGM::Drawable::Geometry::Render(IGMRenderContext& rc) const noexcept {
+    // 填充
+    if (this->is_draw_filled()) {
+        this->set_filled_brush();
+        rc.FillGeometry(m_pGiGeometry, m_pGiBrushFilled);
+    }
     // 笔触
     if (this->is_draw_stroke()) {
         this->set_stroke_brush();
@@ -660,11 +670,6 @@ void RubyGM::Drawable::Geometry::Render(IGMRenderContext& rc) const noexcept {
             this->stroke_width,
             m_pGiStrokeStyle
         );
-    }
-    // 填充
-    if (this->is_draw_filled()) {
-        this->set_filled_brush();
-        rc.FillGeometry(m_pGiGeometry, m_pGiBrushFilled);
     }
 }
 
@@ -776,3 +781,165 @@ void RubyGM::Drawable::Polygon::dispose() noexcept {
     this->Polygon::~Polygon();
     RubyGM::SmallFree(this);
 }
+
+
+// ============================================================================
+// =============================== Polyline ===================================
+// ============================================================================
+#include "core/drawable/vector/rgmPolyline.h"
+
+/// <summary>
+/// Initializes a new instance of the <see cref="Polyline"/> class.
+/// </summary>
+/// <param name="">The .</param>
+RubyGM::Drawable::Polyline::Polyline(const PolylineStatus& ps) noexcept : 
+Super(ps) {
+    assert(m_pGiGeometry == nullptr);
+    assert(ps.points && ps.count >= 2); 
+    this->filled_color.a = 0.f;
+    // 初始化
+    ID2D1PathGeometry* path = nullptr;
+    ID2D1GeometrySink* sink = nullptr;
+    // 创建路径几何
+    auto hr = Bridge::CreatePathGeometry(path);
+    // 打开路径记录
+    if (SUCCEEDED(hr)) {
+        hr = path->Open(&sink);
+    }
+    // 填充路径
+    if (SUCCEEDED(hr)) {
+        auto points = impl::d2d(ps.points);
+        sink->BeginFigure(*points, D2D1_FIGURE_BEGIN_HOLLOW);
+        sink->AddLines(points + 1, ps.count - 1);
+        sink->EndFigure(D2D1_FIGURE_END_CLOSED);
+        hr = sink->Close();
+    }
+    // 错误代码
+    if (FAILED(hr)) Game::SetLastErrorCode(hr);
+    RubyGM::SafeRelease(sink);
+    // 数据转换
+    auto gi = static_cast<ID2D1Geometry*>(path);
+    m_pGiGeometry = static_cast<IGMGeometry*>(gi);
+}
+
+
+/// <summary>
+/// Creates the specified ps.
+/// </summary>
+/// <param name="ps">The ps.</param>
+/// <returns></returns>
+auto RubyGM::Drawable::Polyline::Create(
+    const PolylineStatus& ps) noexcept -> Polyline * {
+    assert(ps.points && ps.count >= 2 && "bad argment"); 
+    // 参数无效
+    if (ps.points == nullptr || ps.count < 2) return nullptr; 
+    // 申请空间
+    if (const auto ptr = RubyGM::SmallAlloc(sizeof(Polyline))) {
+        // 初始化对象
+        auto obj = new(ptr) Polyline(ps);
+        // 初始化成功
+        if (obj->is_ok()) return obj;
+        // 失败则释放对象
+        obj->dispose();
+    }
+    // 各种失败
+    return nullptr;
+}
+
+/// <summary>
+/// Finalizes an instance of the <see cref="Polyline"/> class.
+/// </summary>
+/// <returns></returns>
+RubyGM::Drawable::Polyline::~Polyline() noexcept {
+}
+
+
+/// <summary>
+/// Disposes this instance.
+/// </summary>
+/// <returns></returns>
+void RubyGM::Drawable::Polyline::dispose() noexcept {
+    this->Polyline::~Polyline();
+    RubyGM::SmallFree(this);
+}
+
+/// <summary>
+/// Renders the specified rc.
+/// </summary>
+/// <param name="rc">The Render Context.</param>
+/// <returns></returns>
+void RubyGM::Drawable::Polyline::Render(IGMRenderContext& rc) const noexcept {
+    // 只用画笔触
+    if (this->is_draw_stroke()) {
+        this->set_stroke_brush();
+        rc.DrawGeometry(
+            m_pGiGeometry,
+            m_pGiBrushStroke,
+            this->stroke_width,
+            m_pGiStrokeStyle
+        );
+    }
+}
+
+// ============================================================================
+// ================================= Path =====================================
+// ============================================================================
+#include "core/drawable/vector/rgmPath.h"
+
+/// <summary>
+/// Initializes a new instance of the <see cref="Path"/> class.
+/// </summary>
+/// <param name="">The .</param>
+RubyGM::Drawable::Path::Path(const PathStatus& ps) noexcept : Super(ps) {
+    assert(m_pGiGeometry == nullptr);
+    // 初始化
+    ID2D1PathGeometry1* path = nullptr;
+    // 创建路径几何
+    auto hr = Bridge::SvgPathGeometry(ps.path, path);
+    // 错误代码
+    if (FAILED(hr)) Game::SetLastErrorCode(hr);
+    // 数据转换
+    auto gi = static_cast<ID2D1Geometry*>(path);
+    m_pGiGeometry = static_cast<IGMGeometry*>(gi);
+}
+
+
+/// <summary>
+/// Creates the specified ps.
+/// </summary>
+/// <param name="ps">The ps.</param>
+/// <returns></returns>
+auto RubyGM::Drawable::Path::Create(const PathStatus& ps) noexcept ->Path* {
+    assert(ps.path && "bad argment"); 
+    // 参数无效
+    if (ps.path == nullptr) return nullptr; 
+    // 申请空间
+    if (const auto ptr = RubyGM::SmallAlloc(sizeof(Path))) {
+        // 初始化对象
+        auto obj = new(ptr) Path(ps);
+        // 初始化成功
+        if (obj->is_ok()) return obj;
+        // 失败则释放对象
+        obj->dispose();
+    }
+    // 各种失败
+    return nullptr;
+}
+
+/// <summary>
+/// Finalizes an instance of the <see cref="Path"/> class.
+/// </summary>
+/// <returns></returns>
+RubyGM::Drawable::Path::~Path() noexcept {
+}
+
+
+/// <summary>
+/// Disposes this instance.
+/// </summary>
+/// <returns></returns>
+void RubyGM::Drawable::Path::dispose() noexcept {
+    this->Path::~Path();
+    RubyGM::SmallFree(this);
+}
+

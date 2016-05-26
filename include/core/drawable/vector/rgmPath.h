@@ -32,42 +32,37 @@
 namespace RubyGM {
     // Drawable namespace
     namespace Drawable {
-        // status for polygon
-        struct PolygonStatus : GeometryStatus {
-            // points array, at least three sides
-            Point2F*            points;
-            // length of array, at least three sides
-            uint32_t            count;
-            // fill mode/rule
-            FillRule            fill_rule;
+        // status for path
+        struct PathStatus : GeometryStatus {
+            // string for path
+            const char*     path;
             // ctor
-            PolygonStatus() : GeometryStatus() {}
+            PathStatus() : GeometryStatus() {}
             // default value
-            inline PolygonStatus(Default v) : GeometryStatus(v) {
-                points = nullptr; count = 0;
-                fill_rule = Rule_Evenodd;
+            inline PathStatus(Default v) : GeometryStatus(v) {
+                path = "";
             }
         };
-        // polygon
-        class Polygon : public Drawable::Geometry {
+        // path
+        class Path : public Drawable::Geometry {
             // super class
             using Super = Drawable::Geometry;
             // dispose object
             void dispose() noexcept override;
         protected:
             // ctor
-            Polygon(const PolygonStatus&) noexcept;
+            Path(const PathStatus&) noexcept;
             // ctor
-            ~Polygon() noexcept;
+            ~Path() noexcept;
             // recreate
             //auto recreate() noexcept -> Result override;
         public:
             // create this
-            static auto Create(const PolygonStatus&) noexcept ->Polygon*;
+            static auto Create(const PathStatus&) noexcept ->Path*;
             // create this
-            static auto CreateSP(const PolygonStatus& ls) noexcept {
-                return std::move(RubyGM::CGMPtrA<Drawable::Polygon>(
-                    std::move(Polygon::Create(ls)))
+            static auto CreateSP(const PathStatus& ls) noexcept {
+                return std::move(RubyGM::CGMPtrA<Drawable::Path>(
+                    std::move(Path::Create(ls)))
                 );
             }
             // render object

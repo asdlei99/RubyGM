@@ -36,8 +36,10 @@
 #include "vector/rgmLine.h"
 #include "vector/rgmRect.h"
 #include "vector/rgmText.h"
+#include "vector/rgmPath.h"
 #include "vector/rgmPolygon.h"
 #include "vector/rgmEllipse.h"
+#include "vector/rgmPolyline.h"
 
 // effect image
 #include "effect/rgmBlur.h"
@@ -73,13 +75,21 @@ namespace RubyGM {
         inline auto CreateSP(const TextStatus& ts) noexcept {
             return std::move(Text::CreateSP(ts));
         }
-        // create text polygon graphics
+        // create path vector graphics
+        inline auto CreateSP(const PathStatus& ps) noexcept {
+            return std::move(Path::CreateSP(ps));
+        }
+        // create polygon vector graphics
         inline auto CreateSP(const PolygonStatus& ps) noexcept {
             return std::move(Polygon::CreateSP(ps));
         }
         // create ellipse vector graphics
         inline auto CreateSP(const EllipseStatus& es) noexcept {
             return std::move(Ellipse::CreateSP(es));
+        }
+        // create text polyline graphics
+        inline auto CreateSP(const PolylineStatus& ps) noexcept {
+            return std::move(Polyline::CreateSP(ps));
         }
         // ====================================================================
         // ========================== Effect Image ============================

@@ -182,6 +182,7 @@ namespace RubyGM {
     void test_vector() {
         Drawable::Default def;
         auto sprite = Game::NewSprite(RubyGM::DEFAULT_STATUS);
+        auto roottt = Game::NewSprite(RubyGM::DEFAULT_STATUS);
         sprite->SetX(256);
         sprite->SetY(256);
         sprite->SetZoomX(5.f);
@@ -228,11 +229,11 @@ namespace RubyGM {
             {
                 // 100,10 40,198 190,78 10,78 160,198
                 Point2F pts[] = { 
-                    { 10.0,1.0}, 
-                    { 4.0,19.8},
-                    { 19.0,7.8 }, 
-                    { 1.0,7.8}, 
-                    { 16.0,19.8 }
+                    { 10.0f, 01.0f }, 
+                    { 04.0f, 19.8f },
+                    { 19.0f, 07.8f }, 
+                    { 01.0f, 07.8f }, 
+                    { 16.0f, 19.8f }
                 };
                 Drawable::PolygonStatus ps(def);
                 ps.points = pts;
@@ -240,11 +241,26 @@ namespace RubyGM {
                 //ps.stroke_width = 2.f;
                 ps.stroke_color.b = 1.f;
                 auto sp = Drawable::CreateSP(ps);
-                sprite3->SetZoomX(3.f);
+                /*sprite3->SetZoomX(3.f);
                 sprite3->SetZoomY(3.f);
                 sprite3->antialias_mode = sprite3->Mode_PerPrimitive;
-                float sf = sprite3->ComputeScaleFactorEz1();
-                sprite3->SetDrawable(sp->RealizationSP(sf));
+                float sf = sprite3->ComputeScaleFactorEz1();*/
+            }
+            {
+                Drawable::PathStatus ps(def);
+                ps.path =   "M230 230"
+                            "A 45 45, 0, 1, 1, 275 275"
+                            "L 275 230 Z";
+                ps.stroke_color.b = 1.f;
+                ps.filled_color.a = 0.5f;
+                sprite3->SetZoomX(0.2f);
+                sprite3->SetZoomY(0.2f);
+                auto sp = Drawable::CreateSP(ps);
+                sprite3->SetDrawable(sp);
+                roottt->SetDrawable(sp);
+                roottt->SetZoomX(2.f);
+                roottt->SetZoomY(2.f);
+                roottt->antialias_mode = roottt->Mode_PerPrimitive;
             }
         }
         while (true) {

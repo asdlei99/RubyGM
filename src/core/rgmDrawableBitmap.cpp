@@ -31,29 +31,6 @@ void RubyGM::Drawable::Bitmap::SetInterpolationMode(
     m_modeInter = std::min(Mode_HighQqualityCubic, mode);
 }
 
-
-/// <summary>
-/// Saves as PNG.
-/// </summary>
-/// <param name="file_name">The file_name.</param>
-/// <returns></returns>
-auto RubyGM::Drawable::Bitmap::SaveAsPng(
-    const wchar_t* file_name) noexcept ->Result {
-    return m_refBitmap.SaveAsPng(file_name);
-}
-
-/// <summary>
-/// Saves as PNG.
-/// </summary>
-/// <param name="file_name">The file_name.</param>
-/// <returns></returns>
-auto RubyGM::Drawable::Bitmap::SaveAsPng(
-    const char* file_name) noexcept ->Result {
-    return m_refBitmap.SaveAsPng(file_name);
-}
-
-
-
 /// <summary>
 /// reset the size of bitmap
 /// </summary>

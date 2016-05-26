@@ -34,49 +34,42 @@
 namespace RubyGM {
     // resource namespace
     namespace Drawable {
-        // status for bitmap
-        struct BitmapStatus : BaseStatus {
-            // bitmap asset
-            Asset::Bitmap&      bitmap;
-            // src clip
-            RectF               src;
-            // display rect
-            RectF               des;
+        // status for batch
+        struct BatchStatus : BaseStatus {
+            // batch bitmap asset
+            Asset::Bitmap&      batch;
             // ctor
-            ~BitmapStatus() noexcept { bitmap.Release(); }
+            ~BatchStatus() noexcept { batch.Release(); }
             // default ctor
-            inline BitmapStatus(Asset::Bitmap&& b) : bitmap(b) { }
+            inline BatchStatus(Asset::Bitmap&& b) : batch(b) { }
             // default value
-            inline BitmapStatus(Asset::Bitmap&& b, Default v) : 
-                BaseStatus(v), bitmap(b) {
-                src = { 0.f }; des = { 0.f };
+            inline BatchStatus(Asset::Bitmap&& b, Default v) : 
+                BaseStatus(v), batch(b) {
             }
         };
         // drawable bitmap 
-        class Bitmap : public Drawable::Object {
+        class Batch : public Drawable::Object {
             // super class
             using Super = Drawable::Object;
         public:
             // create this
-            static auto Create(const BitmapStatus&) noexcept->Bitmap*;
+            static auto Create(const BatchStatus&) noexcept->Batch*;
             // create this
-            static auto CreateSP(const BitmapStatus& bs) noexcept {
-                return std::move(RubyGM::CGMPtrA<Drawable::Bitmap>(
-                    std::move(Bitmap::Create(bs)))
+            static auto CreateSP(const BatchStatus& bs) noexcept {
+                return std::move(RubyGM::CGMPtrA<Drawable::Batch>(
+                    std::move(Batch::Create(bs)))
                 );
             }
         private:
             // ctor
-            Bitmap(const BitmapStatus&) noexcept;
+            Batch(const BatchStatus&) noexcept;
             // ctor
-            Bitmap(const Bitmap&) = delete;
+            Batch(const Batch&) = delete;
             // dtor
-            ~Bitmap() noexcept;
+            ~Batch() noexcept;
         public:
             // render object
             void Render(IGMRenderContext& rc) const noexcept override;
-            // get bitmap, won't add refcount
-            auto&RefBitmap() const noexcept { return m_refBitmap; }
         protected:
             // recreate resource
             virtual auto recreate() noexcept -> Result override;
@@ -86,6 +79,10 @@ namespace RubyGM {
             // reset bitmap size
             void reset_bitmap_size() noexcept;
         public:
+            // save as png file, will save total file
+            auto SaveAsPng(const wchar_t* file_name) noexcept ->Result;
+            // save as png file with utf8
+            auto SaveAsPng(const char* file_name) noexcept ->Result;
             // get width
             auto GetWidth() const noexcept { return m_fWidth; }
             // get height
@@ -95,10 +92,10 @@ namespace RubyGM {
             // set interpolation mode
             void SetInterpolationMode(InterpolationMode mode) noexcept;
         private:
-            // bitmap asset
-            Asset::Bitmap&      m_refBitmap;
+            // batch bitmap asset
+            Asset::Bitmap&      m_refBatch;
             // bitmap data
-            IGMBitmap*          m_pBitmap = nullptr;
+            IGMBitmap*          m_pBatch = nullptr;
             // width of bitmap
             float               m_fWidth = 1.f;
             // height of bitmap

@@ -1,5 +1,6 @@
 ﻿#define _WIN32_WINNT 0x0A000001
 #include <LongUI.h>
+#include <Graphics/luiGrSvg.h>
 #include <bridge/rgmluiBridge.h>
 #include <bridge/rgmluiConfig.h>
 
@@ -113,6 +114,15 @@ namespace RubyGM { namespace Bridge {
     /// <returns></returns>
     auto CreatePathGeometry(ID2D1PathGeometry*& path) noexcept -> Result {
         return Result(UIManager_D2DFactory->CreatePathGeometry(&path));
+    }
+    /// <summary>
+    /// SVG the path geometry.
+    /// </summary>
+    /// <param name="str">The string.</param>
+    /// <param name="path">The path.</param>
+    /// <returns></returns>
+    auto SvgPathGeometry(const char* str, ID2D1PathGeometry1*& path) noexcept->Result {
+        return Result(LongUI::SVG::ParserPath(str, &path));
     }
     /// <summary>
     /// Creates the filled geometry realization.

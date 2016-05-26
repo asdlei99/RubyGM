@@ -32,46 +32,45 @@
 namespace RubyGM {
     // Drawable namespace
     namespace Drawable {
-        // status for polygon
-        struct PolygonStatus : GeometryStatus {
-            // points array, at least three sides
+        // status for polyline
+        struct PolylineStatus : GeometryStatus {
+            // points array, at least two points
             Point2F*            points;
-            // length of array, at least three sides
+            // length of array, at least two
             uint32_t            count;
-            // fill mode/rule
-            FillRule            fill_rule;
+            // unused var
+            uint32_t            _unused_;
             // ctor
-            PolygonStatus() : GeometryStatus() {}
+            PolylineStatus() : GeometryStatus() {}
             // default value
-            inline PolygonStatus(Default v) : GeometryStatus(v) {
-                points = nullptr; count = 0;
-                fill_rule = Rule_Evenodd;
+            inline PolylineStatus(Default v) : GeometryStatus(v) {
+                points = nullptr; count = 0; _unused_ = 0;
             }
         };
-        // polygon
-        class Polygon : public Drawable::Geometry {
+        // polyline
+        class Polyline : public Drawable::Geometry {
             // super class
             using Super = Drawable::Geometry;
             // dispose object
             void dispose() noexcept override;
         protected:
             // ctor
-            Polygon(const PolygonStatus&) noexcept;
+            Polyline(const PolylineStatus&) noexcept;
             // ctor
-            ~Polygon() noexcept;
+            ~Polyline() noexcept;
             // recreate
             //auto recreate() noexcept -> Result override;
         public:
             // create this
-            static auto Create(const PolygonStatus&) noexcept ->Polygon*;
+            static auto Create(const PolylineStatus&) noexcept ->Polyline*;
             // create this
-            static auto CreateSP(const PolygonStatus& ls) noexcept {
-                return std::move(RubyGM::CGMPtrA<Drawable::Polygon>(
-                    std::move(Polygon::Create(ls)))
+            static auto CreateSP(const PolylineStatus& ls) noexcept {
+                return std::move(RubyGM::CGMPtrA<Drawable::Polyline>(
+                    std::move(Polyline::Create(ls)))
                 );
             }
             // render object
-            //void Render(IGMRenderContext& rc) const noexcept override;
+            void Render(IGMRenderContext& rc) const noexcept override;
         public:
         };
     }

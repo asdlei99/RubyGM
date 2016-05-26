@@ -49,12 +49,15 @@
     <ClInclude Include="..\include\core\drawable\effect\rgmEffect.h" />
     <ClInclude Include="..\include\core\drawable\effect\rgmShadow.h" />
     <ClInclude Include="..\include\core\drawable\rgmAuto.h" />
+    <ClInclude Include="..\include\core\drawable\rgmBatch.h" />
     <ClInclude Include="..\include\core\drawable\rgmBitmap.h" />
     <ClInclude Include="..\include\core\drawable\rgmDrawable.h" />
     <ClInclude Include="..\include\core\drawable\rgmMask.h" />
     <ClInclude Include="..\include\core\drawable\rgmTextlayout.h" />
     <ClInclude Include="..\include\core\drawable\vector\rgmEllipse.h" />
     <ClInclude Include="..\include\core\drawable\vector\rgmGeometry.h" />
+    <ClInclude Include="..\include\core\drawable\vector\rgmPath.h" />
+    <ClInclude Include="..\include\core\drawable\vector\rgmPolyLine.h" />
     <ClInclude Include="..\include\core\drawable\vector\rgmText.h" />
     <ClInclude Include="..\include\core\drawable\vector\rgmLine.h" />
     <ClInclude Include="..\include\core\drawable\vector\rgmPolygon.h" />
