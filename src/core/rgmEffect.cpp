@@ -109,9 +109,7 @@ namespace RubyGM { namespace Drawable {
     GaussianBlur::GaussianBlur(const GaussianBlurStatus& gbs) noexcept :
     Super(gbs, CLSID_D2D1GaussianBlur),
         m_fStdDvi(gbs.sd),
-        m_refBitmapAsset(gbs.bitmap) {
-        // 初始化
-        m_refBitmapAsset.AddRef();
+        m_spAsBitmap(gbs.bitmap) {
         this->init();
     }
     /// <summary>
@@ -119,7 +117,6 @@ namespace RubyGM { namespace Drawable {
     /// </summary>
     /// <returns></returns>
     GaussianBlur::~GaussianBlur() noexcept {
-        m_refBitmapAsset.Release();
     }
     /// <summary>
     /// Initializes this instance.
@@ -129,7 +126,7 @@ namespace RubyGM { namespace Drawable {
         // 创建成功
         if (this->is_ok()) {
             // 做为输入
-            if (auto bmp = m_refBitmapAsset.GetBitmap()) {
+            if (auto bmp = m_spAsBitmap->GetBitmap()) {
                 this->single_input_init(bmp);
                 bmp->Release();
             }
@@ -154,7 +151,7 @@ namespace RubyGM { namespace Drawable {
         }
         // 重建资源
         if (SUCCEEDED(hr)) {
-            hr = m_refBitmapAsset.Recreate();
+            hr = m_spAsBitmap->Recreate();
         }
         // 设置资源
         if (SUCCEEDED(hr)) {
@@ -228,9 +225,7 @@ namespace RubyGM { namespace Drawable {
     Super(gbs, CLSID_D2D1Shadow),
         m_fStdDvi(gbs.blur_sd),
         m_color(gbs.color),
-        m_refBitmapAsset(gbs.bitmap) {
-        // 初始化
-        m_refBitmapAsset.AddRef();
+        m_spAsBitmap(gbs.bitmap) {
         this->init();
     }
     /// <summary>
@@ -238,7 +233,7 @@ namespace RubyGM { namespace Drawable {
     /// </summary>
     /// <returns></returns>
     Shadow::~Shadow() noexcept {
-        m_refBitmapAsset.Release();
+
     }
     /// <summary>
     /// Initializes this instance.
@@ -248,7 +243,7 @@ namespace RubyGM { namespace Drawable {
         // 创建成功
         if (this->is_ok()) {
             // 做为输入
-            if (auto bmp = m_refBitmapAsset.GetBitmap()) {
+            if (auto bmp = m_spAsBitmap->GetBitmap()) {
                 this->single_input_init(bmp);
                 bmp->Release();
             }
@@ -275,7 +270,7 @@ namespace RubyGM { namespace Drawable {
         }
         // 重建资源
         if (SUCCEEDED(hr)) {
-            hr = m_refBitmapAsset.Recreate();
+            hr = m_spAsBitmap->Recreate();
         }
         // 设置资源
         if (SUCCEEDED(hr)) {

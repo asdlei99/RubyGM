@@ -27,6 +27,7 @@
 #include <cstdint>
 #include "rgmAsset.h"
 #include "../../game/rgmResource.h"
+#include "../util/rgmStrokeStruct.h"
 
 // rubygm namespace
 namespace RubyGM {
@@ -34,10 +35,35 @@ namespace RubyGM {
     struct IGMStrokeStyle;
     // asset namespace
     namespace Asset {
-        // Stroke style resource
-        struct RUBYGM_NOVTABLE Stroke : RubyGM::Asset::Object {
-            // get Stroke style
-            virtual auto GetStrokeStyle() noexcept -> IGMStrokeStyle* = 0;
+        // stroke style resource
+        class Stroke final : public RubyGM::Asset::Object {
+            // super class
+            using Super = Asset::Object;
+        public:
+            // create font with FontProperties
+            static auto Create(const StrokeStyle&) noexcept ->Stroke&;
+            // get Stroke style graphics interface
+            auto GetStroke() noexcept -> IGMStrokeStyle*;
+        protected:
+            // ctor
+            Stroke(const StrokeStyle&) noexcept;
+            // ctor
+            Stroke(const Stroke&) noexcept = delete;
+            // ctor
+            ~Stroke() noexcept;
+        private:
+            // dispose object
+            void dispose() noexcept override;
+        public:
+            // set to Low Occupancy to save memory
+            void LowOccupancy() noexcept override;
+        protected:
+            // stroke style graphics interface
+            IGMStrokeStyle*         m_pStrokeStyle = nullptr;
+            // style
+            BaseStrokeStyle         m_style;
+            // dash array
+            float                   m_dashes[0];
         };
     }
 }

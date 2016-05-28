@@ -38,10 +38,8 @@ namespace RubyGM {
             RubyGM::Point2F         point0;
             // point 1
             RubyGM::Point2F         point1;
-            // ctor
-            LineStatus() : VectorStatus() {}
             // default value
-            inline LineStatus(Default v) : VectorStatus(v) {
+            inline LineStatus() : VectorStatus() {
                 point0 = { 0.f, 0.f }; point1 = { 0.f, 0.f };
                 stroke_width = 1.f;
             }
@@ -64,7 +62,7 @@ namespace RubyGM {
             static auto Create(const LineStatus&) noexcept ->Line*;
             // create this
             static auto CreateSP(const LineStatus& ls) noexcept {
-                return std::move(RubyGM::CGMPtrA<Drawable::Line>(
+                return std::move(RubyGM::RefPtr<Drawable::Line>(
                     std::move(Line::Create(ls)))
                 );
             }

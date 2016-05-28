@@ -38,29 +38,26 @@ namespace RubyGM {
         struct VectorStatus : BaseStatus {
             // stroke color, valid on stroke brush invalid
             // set alpha to 0.0f to undisplay this part
-            ColorF          stroke_color;
+            ColorF              stroke_color;
             // _fill_ color, valid on _fill_ brush invalid
             // set alpha to 0.0f to undisplay this part
-            ColorF          filled_color;
+            ColorF              filled_color;
             // _fill_ brush, set null to use none-style stroke
-            Asset::Stroke*  stroke_style;
+            RefPtr<Asset::Stroke>stroke_style;
             // stroke brush, set null to use stroke color
-            Asset::Brush*   stroke_brush;
+            RefPtr<Asset::Brush>stroke_brush;
             // _fill_ brush, set null to use _fill_ color
-            Asset::Brush*   filled_brush;
+            RefPtr<Asset::Brush>filled_brush;
             // stroke width
-            float           stroke_width;
-            // _unused_ single float member, unused for sub-class
-            float           _unused_;
+            float               stroke_width;
+            // _unused_ single float member, implemented for sub-class
+            float               _unused_;
             // ctor
-            VectorStatus() : BaseStatus() {}
-            // ctor
-            VectorStatus(Default v) : BaseStatus(v) {
+            VectorStatus() : BaseStatus(), stroke_style(nullptr),
+                stroke_brush(nullptr), filled_brush(nullptr) {
                 stroke_color.r = stroke_color.g = stroke_color.b = 0.f;
-                stroke_color.a = 1.f;   filled_color = stroke_color;
-                stroke_style = nullptr; stroke_brush = nullptr; 
-                filled_brush = nullptr;   stroke_width = 1.f;
-                _unused_ = 1.f;
+                stroke_color.a = 1.f; filled_color = stroke_color;
+                stroke_width = 1.f; _unused_ = 1.f;
             }
         };
         // drawable vector graphics
@@ -92,11 +89,11 @@ namespace RubyGM {
             ColorF                  filled_color{0.f};
         protected:
             // stroke style asset
-            Asset::Stroke*          m_pAsStrokeStyle = nullptr;
+            RefPtr<Asset::Stroke>   m_spAsStrokeStyle;
             // stroke brush asset
-            Asset::Brush*           m_pAsBrushStroke = nullptr;
+            RefPtr<Asset::Brush>    m_spAsBrushStroke;
             // fill brush asset
-            Asset::Brush*           m_pAsBrushFilled = nullptr;
+            RefPtr<Asset::Brush>    m_spAsBrushFilled;
             // stroke style GI data(graphics-interface)
             IGMStrokeStyle*         m_pGiStrokeStyle = nullptr;
             // stroke brush GI data

@@ -36,10 +36,8 @@ namespace RubyGM {
     namespace Drawable {
         // status for Geometry
         struct GeometryStatus : VectorStatus {
-            // ctor
-            GeometryStatus() : VectorStatus() {}
             // default value
-            inline GeometryStatus(Default v) : VectorStatus(v) {
+            inline GeometryStatus() : VectorStatus() {
             }
         };
         // geometry 
@@ -60,7 +58,7 @@ namespace RubyGM {
             auto Realization(float sf) const noexcept->Drawable::Vector*;
             // Realizations  -> to MeshEx, sf = scale factor
             auto RealizationSP(float sf) const noexcept {
-                return std::move(RubyGM::CGMPtrA<Drawable::Vector>(
+                return std::move(RubyGM::RefPtr<Drawable::Vector>(
                     std::move(this->Realization(sf)))
                 );
             }

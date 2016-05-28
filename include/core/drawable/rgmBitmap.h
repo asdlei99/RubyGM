@@ -24,11 +24,14 @@
 * OTHER DEALINGS IN THE SOFTWARE.
 */
 
+// C/C++
 #include <cstdint>
+#include <utility>
+#include <cassert>
+// RubyGM
 #include "rgmDrawable.h"
 #include "../Util/rgmUtil.h"
 #include "../asset/rgmAsset.h"
-#include <utility>
 
 // rubygm namespace
 namespace RubyGM {
@@ -36,20 +39,24 @@ namespace RubyGM {
     namespace Drawable {
         // status for bitmap
         struct BitmapStatus : BaseStatus {
-            // bitmap asset
-            Asset::Bitmap&      bitmap;
+            // bitmap asset, CANNOT be null
+            RefPtr<Asset::Bitmap>   bitmap;
             // src clip
-            RectF               src;
+            RectF                   src;
             // display rect
-            RectF               des;
-            // ctor
-            ~BitmapStatus() noexcept { bitmap.Release(); }
-            // default ctor
-            inline BitmapStatus(Asset::Bitmap&& b) : bitmap(b) { }
+            RectF                   des;
             // default value
-            inline BitmapStatus(Asset::Bitmap&& b, Default v) : 
-                BaseStatus(v), bitmap(b) {
-                src = { 0.f }; des = { 0.f };
+            inline BitmapStatus(const RefPtr<Asset::Bitmap> & b) : 
+                BaseStatus(), bitmap(b) 
+            { src = { 0.f }; des = { 0.f }; asset_check(); }
+            // default value
+            inline BitmapStatus(RefPtr<Asset::Bitmap>&& b) : 
+                BaseStatus(), bitmap(std::move(b))
+            { src = { 0.f }; des = { 0.f }; asset_check();}
+        private:
+            // asset check
+            inline void asset_check() { 
+                assert(bitmap && "bitmap asset cannot be null");
             }
         };
         // drawable bitmap 
@@ -61,7 +68,7 @@ namespace RubyGM {
             static auto Create(const BitmapStatus&) noexcept->Bitmap*;
             // create this
             static auto CreateSP(const BitmapStatus& bs) noexcept {
-                return std::move(RubyGM::CGMPtrA<Drawable::Bitmap>(
+                return std::move(RubyGM::RefPtr<Drawable::Bitmap>(
                     std::move(Bitmap::Create(bs)))
                 );
             }
@@ -76,7 +83,9 @@ namespace RubyGM {
             // render object
             void Render(IGMRenderContext& rc) const noexcept override;
             // get bitmap, won't add refcount
-            auto&RefBitmap() const noexcept { return m_refBitmap; }
+            auto&RefBitmap() const noexcept { return m_spAsBitmap; }
+            // get bitmap, will add refcount
+            auto GetBitmap() const noexcept { return m_spAsBitmap; }
         protected:
             // recreate resource
             virtual auto recreate() noexcept -> Result override;
@@ -96,22 +105,22 @@ namespace RubyGM {
             void SetInterpolationMode(InterpolationMode mode) noexcept;
         private:
             // bitmap asset
-            Asset::Bitmap&      m_refBitmap;
+            RefPtr<Asset::Bitmap>   m_spAsBitmap;
             // bitmap data
-            IGMBitmap*          m_pBitmap = nullptr;
+            IGMBitmap*              m_pGiBitmap = nullptr;
             // width of bitmap
-            float               m_fWidth = 1.f;
+            float                   m_fWidth = 1.f;
             // height of bitmap
-            float               m_fHeight = 1.f;
+            float                   m_fHeight = 1.f;
             // interpolation mode
-            InterpolationMode   m_modeInter;
+            InterpolationMode       m_modeInter;
         public:
             // opacity
-            float               opacity = 1.f;
+            float                   opacity = 1.f;
             // src clip rect
-            RectF               src_rect{ 0.f };
+            RectF                   src_rect{ 0.f };
             // display rect
-            RectF               des_rect{ 0.f };
+            RectF                   des_rect{ 0.f };
         };
     }
 }

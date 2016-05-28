@@ -40,10 +40,8 @@ namespace RubyGM {
             uint32_t            count;
             // fill mode/rule
             FillRule            fill_rule;
-            // ctor
-            PolygonStatus() : GeometryStatus() {}
             // default value
-            inline PolygonStatus(Default v) : GeometryStatus(v) {
+            inline PolygonStatus() : GeometryStatus() {
                 points = nullptr; count = 0;
                 fill_rule = Rule_Evenodd;
             }
@@ -66,7 +64,7 @@ namespace RubyGM {
             static auto Create(const PolygonStatus&) noexcept ->Polygon*;
             // create this
             static auto CreateSP(const PolygonStatus& ls) noexcept {
-                return std::move(RubyGM::CGMPtrA<Drawable::Polygon>(
+                return std::move(RubyGM::RefPtr<Drawable::Polygon>(
                     std::move(Polygon::Create(ls)))
                 );
             }

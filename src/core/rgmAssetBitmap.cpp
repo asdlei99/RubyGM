@@ -1,5 +1,5 @@
 ﻿#define _WIN32_WINNT 0x0A000001
-#include <core/brush/rgmBrushStruct.h>
+#include <core/util/rgmBrushStruct.h>
 #include <core/asset/rgmAsset.h>
 #include <core/util/rgmUtil.h>
 #include <core/graphics/rgmGraphics.h>
@@ -16,7 +16,7 @@
 // rubygm::asset namespace
 namespace RubyGM { namespace Asset {
     // get null bitma for oom or some error
-    auto GetNullBitmapAsset() noexcept->Bitmap&;
+    auto GetNullBitmapAsset() noexcept ->RefPtr<Asset::Bitmap>;
     // bitmap form file
     class FileBitmap final : public Bitmap {
     public:
@@ -52,14 +52,14 @@ namespace RubyGM { namespace Asset {
 /// <returns></returns>
 auto RubyGM::Game::CreateBitmapAssetFromFile(
     const wchar_t * namebgn, 
-    const wchar_t * nameend) noexcept -> Asset::Bitmap& {
+    const wchar_t * nameend) noexcept -> RefPtr<Asset::Bitmap> {
     // 返回创建的对象
     if (auto ptr = Asset::FileBitmap::Create(namebgn, nameend)) {
-        return *ptr;
+        return std::move(RefPtr<Asset::Bitmap>(std::move(ptr)));
     }
     // 返回空资源对象
     else {
-        return Asset::GetNullBitmapAsset();
+        return std::move(Asset::GetNullBitmapAsset());
     }
 }
 
@@ -389,7 +389,7 @@ auto RubyGM::Asset::RasterBitmapImpl::Create(
 /// <param name="bs">The basic size.</param>
 /// <returns></returns>
 auto RubyGM::Game::CreateBitmapAssetFromDrawable(
-    Drawable::Object* ob, SizeF sf, SizeF bs) noexcept -> Asset::Bitmap& {
+    Drawable::Object* ob, SizeF sf, SizeF bs) noexcept -> RefPtr<Asset::Bitmap> {
     // 获取缩放后位图大小
     const SizeF s{ bs.width*sf.width, bs.height*sf.height };
     const bool wok = s.width >= 4.f && s.width < 4096.f;
@@ -398,9 +398,9 @@ auto RubyGM::Game::CreateBitmapAssetFromDrawable(
     if (wok && hok) {
         // 创建对象
         if (auto ptr = Asset::RasterBitmapImpl::Create(ob, sf, bs)) {
-            return *ptr;
+            return std::move(RefPtr<Asset::Bitmap>(std::move(ptr)));
         }
     }
     // 返回空对象
-    return Asset::GetNullBitmapAsset();
+    return std::move(Asset::GetNullBitmapAsset());
 }

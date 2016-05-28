@@ -29,6 +29,8 @@
 
 // rubygm namespace
 namespace RubyGM {
+    // matrix
+    struct Matrix3X2F;
     // bitmap
     struct IGMBitmap;
     // brush
@@ -44,19 +46,26 @@ namespace RubyGM {
             // helper for LowOccupancy
             template<class T> 
             inline void LowOccupancyHelper(T*& ptr) noexcept {
-                if (ptr) {
-                    if (ptr->Release()) ptr->AddRef();
-                    else ptr = nullptr;
-                }
+                if (!ptr) return;
+                if (ptr->Release()) ptr->AddRef();
+                else ptr = nullptr;
             }
         protected:
-            // set to Low Occupancy to save memory
+            // recreate... 
             virtual auto recreate() noexcept ->Result { return 0; };
         };
         // brush resource
         struct RUBYGM_NOVTABLE Brush : RubyGM::Asset::Object {
             // get brush
             virtual auto GetBrush() noexcept -> IGMBrush* = 0;
+            // set opacity
+            virtual void SetOpacity(float opacity) noexcept = 0;
+            // set transfrom
+            virtual void SetTransfrom(const Matrix3X2F&) noexcept = 0;
+            // get opacity
+            virtual auto GetOpacity() const noexcept -> float = 0;
+            // get transfrom
+            virtual void GetTransfrom(Matrix3X2F&) const noexcept = 0;
         };
         // bitmap resource
         struct RUBYGM_NOVTABLE Bitmap : RubyGM::Asset::Object {

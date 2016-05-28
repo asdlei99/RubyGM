@@ -12,12 +12,11 @@
 /// <param name="bs">The bs.</param>
 RubyGM::Drawable::Bitmap::Bitmap(const BitmapStatus& bs) noexcept :
 Super(bs),
-m_refBitmap(bs.bitmap),
+m_spAsBitmap(bs.bitmap),
 src_rect(bs.src),
 des_rect(bs.des),
 m_modeInter(Mode_Linear),
-m_pBitmap(bs.bitmap.GetBitmap()) {
-    m_refBitmap.AddRef();
+m_pGiBitmap(bs.bitmap->GetBitmap()) {
     this->reset_bitmap_size();
 }
 
@@ -37,8 +36,8 @@ void RubyGM::Drawable::Bitmap::SetInterpolationMode(
 /// <returns></returns>
 void RubyGM::Drawable::Bitmap::reset_bitmap_size() noexcept {
     // 修改大小
-    if (m_pBitmap) {
-        auto size = m_pBitmap->GetSize();
+    if (m_pGiBitmap) {
+        auto size = m_pGiBitmap->GetSize();
         m_fWidth = size.width;
         m_fHeight = size.height;
     }
@@ -65,8 +64,7 @@ void RubyGM::Drawable::Bitmap::reset_bitmap_size() noexcept {
 /// </summary>
 /// <returns></returns>
 RubyGM::Drawable::Bitmap::~Bitmap() noexcept {
-    RubyGM::SafeRelease(m_pBitmap);
-    m_refBitmap.Release();
+    RubyGM::SafeRelease(m_pGiBitmap);
 }
 
 
@@ -86,15 +84,15 @@ void RubyGM::Drawable::Bitmap::dispose() noexcept {
 /// <param name="rc">The rc.</param>
 /// <returns></returns>
 void RubyGM::Drawable::Bitmap::Render(IGMRenderContext& rc) const noexcept {
-    if (!m_pBitmap) return;
+    if (!m_pGiBitmap) return;
 #ifdef _DEBUG
-    assert((m_pBitmap->GetOptions() & D2D1_BITMAP_OPTIONS_CANNOT_DRAW) == 0);
+    assert((m_pGiBitmap->GetOptions() & D2D1_BITMAP_OPTIONS_CANNOT_DRAW) == 0);
 #endif
     auto mode = D2D1_INTERPOLATION_MODE(m_modeInter);
     auto& des = impl::d2d(this->des_rect);
     auto& src = impl::d2d(this->src_rect);
     D2D1_MATRIX_4X4_F* perspective = nullptr;
-    rc.DrawBitmap(m_pBitmap, &des, this->opacity, mode, &src, perspective);
+    rc.DrawBitmap(m_pGiBitmap, &des, this->opacity, mode, &src, perspective);
 }
 
 
@@ -103,7 +101,7 @@ void RubyGM::Drawable::Bitmap::Render(IGMRenderContext& rc) const noexcept {
 /// </summary>
 /// <returns></returns>
 auto RubyGM::Drawable::Bitmap::recreate() noexcept -> Result {
-    RubyGM::SafeRelease(m_pBitmap);
+    RubyGM::SafeRelease(m_pGiBitmap);
     uint32_t hr = Result(S_OK);
     // 重建父类
     if (SUCCEEDED(hr)) {
@@ -111,11 +109,11 @@ auto RubyGM::Drawable::Bitmap::recreate() noexcept -> Result {
     }
     // 重建资源
     if (SUCCEEDED(hr)) {
-        hr = m_refBitmap.Recreate();
+        hr = m_spAsBitmap->Recreate();
     }
-    // 重建资源
+    // 重获位图
     if (SUCCEEDED(hr)) {
-        m_pBitmap = m_refBitmap.GetBitmap();
+        m_pGiBitmap = m_spAsBitmap->GetBitmap();
         this->reset_bitmap_size();
     }
     return hr;
@@ -128,6 +126,7 @@ auto RubyGM::Drawable::Bitmap::recreate() noexcept -> Result {
 /// <returns></returns>
 auto RubyGM::Drawable::Bitmap::Create(
     const BitmapStatus& bs) noexcept -> Bitmap* {
+    assert(bs.bitmap && "bitmap from BitmapStatus cannot be null");
     // 申请空间
     if (const auto ptr = RubyGM::NormalAlloc(sizeof(Bitmap))) {
         return new(ptr) Bitmap(bs);

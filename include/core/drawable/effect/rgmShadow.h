@@ -33,21 +33,28 @@ namespace RubyGM {
     namespace Drawable {
         // status for shadow
         struct ShadowStatus : EffectStatus {
-            // source bitmap
-            Asset::Bitmap&      bitmap;
+            // bitmap asset, CANNOT be null
+            RefPtr<Asset::Bitmap>   bitmap;
             // color
-            ColorF              color;
+            ColorF                  color;
             // StandardDeviation for blue
-            float               blur_sd;
-            // ctor
-            ~ShadowStatus() noexcept { bitmap.Release(); }
-            // default ctor
-            inline ShadowStatus(Asset::Bitmap&& b) : bitmap(b) { }
+            float                   blur_sd;
             // default value
-            inline ShadowStatus(Asset::Bitmap&& b, Default v) :
-                EffectStatus(v), bitmap(b) {
-                color.r = color.g = color.b = 0.f; color.a = 1.f;
-                blur_sd = 3.0f;
+            inline ShadowStatus(const RefPtr<Asset::Bitmap>& b) : 
+                EffectStatus(), bitmap(b)  {
+                color.r = color.g = color.b = 0.f; color.a = 1.f; 
+                blur_sd = 3.f; asset_check();
+            }
+            // default value
+            inline ShadowStatus(RefPtr<Asset::Bitmap>&& b) : 
+                EffectStatus(), bitmap(std::move(b)) {
+                color.r = color.g = color.b = 0.f; color.a = 1.f; 
+                blur_sd = 3.f; asset_check();
+            }
+        private:
+            // asset check
+            inline void asset_check() { 
+                assert(bitmap && "bitmap asset cannot be null");
             }
         };
         // gaussian blur effect
@@ -61,7 +68,7 @@ namespace RubyGM {
             static auto Create(const ShadowStatus&) noexcept->Shadow*;
             // create this
             static auto CreateSP(const ShadowStatus& ts) noexcept {
-                return std::move(RubyGM::CGMPtrA<Drawable::Shadow>(
+                return std::move(RubyGM::RefPtr<Drawable::Shadow>(
                     std::move(Shadow::Create(ts)))
                 );
             }
@@ -88,7 +95,7 @@ namespace RubyGM {
             virtual auto recreate() noexcept -> Result override;
         protected:
             // bitmap asset
-            Asset::Bitmap&              m_refBitmapAsset;
+            RefPtr<Asset::Bitmap>       m_spAsBitmap;
             // bitmap graphics interface
             // color
             ColorF                      m_color;

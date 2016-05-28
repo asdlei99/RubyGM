@@ -7,7 +7,7 @@
 #include <core/Text/rgmTextDetail.h>
 #include <core/asset/rgmAssetFont.h>
 #include <game/rgmGame.h>
-#include <bridge/rgmluiBridge.h>
+//#include <bridge/rgmluiBridge.h>
 
 // rubygm::impl 命名空间
 namespace RubyGM { namespace impl {
@@ -96,13 +96,49 @@ RubyGM::Drawable::Textlayout::Textlayout(
     const TextlayoutStatus& ts) noexcept : Super(ts), 
 m_pTextRenderer(impl::rubygm(UIManager.GetTextRenderer(ts.renderer))),
 basic_color(ts.color) {
-    // 创建文本格式/字体
-    auto format = ts.font.GetFont(); if (!format) return;
+    // 获取文本格式接口
+    decltype(ts.font->GetFont()) format;
+    // 指定字体
+    if (ts.font) {
+        format = ts.font->GetFont();
+    }
+    // 默认字体
+    else {
+        auto deft = Game::GetFontAsset(0);
+        format = deft->GetFont();
+    }
+    // 失败
+    if (!format) return;
+    // Xml 富文本布局?
+    if (ts.isxml) {
+        // 格式化文本
+        LongUI::DX::FormatTextConfig cfg;
+        cfg.format = format; cfg.progress = 1.f;
+        cfg.width = ts.width; cfg.height = ts.height;
+        cfg.rich_type = LongUI::RichType::Type_Xml; 
+        cfg.text_length = 0;
+        auto& layout = m_pTextlayout;
+        auto len = ts.textlen + 1;
+        // 进行格式化
+        LongUI::SafeBuffer<wchar_t, 2048>(len, [&](wchar_t* buf) noexcept {
+            std::wcsncpy(buf, ts.text, ts.textlen); buf[ts.textlen] = 0;
+            if (LongUI::DX::CheckXmlValidity(buf)) {
+                auto lay = LongUI::DX::FormatTextXML(cfg, buf);
+                layout = static_cast<IGMTextlayout*>(lay);
+            }
+            else {
+                assert(!"BAD XML");
+            }
+        });
+    }
+    auto hr = S_OK;
     // 创建布局
-    auto hr = UIManager_DWriteFactory->CreateTextLayout(
-        ts.text, ts.textlen, format, ts.width, ts.height,
-        reinterpret_cast<IDWriteTextLayout**>(&m_pTextlayout)
-    );
+    if (!m_pTextlayout) {
+        hr = UIManager_DWriteFactory->CreateTextLayout(
+            ts.text, ts.textlen, format, ts.width, ts.height,
+            reinterpret_cast<IDWriteTextLayout**>(&m_pTextlayout)
+        );
+    }
     // 释放
     format->Release();
     // 记录错误代码

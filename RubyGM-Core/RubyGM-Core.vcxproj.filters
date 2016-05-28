@@ -10,9 +10,6 @@
     <Filter Include="CoreGM">
       <UniqueIdentifier>{11665e10-d019-448b-9554-80dc32323f7d}</UniqueIdentifier>
     </Filter>
-    <Filter Include="CoreGM\mruby">
-      <UniqueIdentifier>{2fddc254-8813-4dec-b389-674984c7c651}</UniqueIdentifier>
-    </Filter>
     <Filter Include="CoreGM\Graphics">
       <UniqueIdentifier>{9b35dec6-ef0c-4b5a-944a-2e4c332d84fa}</UniqueIdentifier>
     </Filter>
@@ -42,9 +39,6 @@
     </Filter>
     <Filter Include="Source Files\Resource\Drawable">
       <UniqueIdentifier>{697872aa-f1f5-4db5-ade5-714aea2dafa9}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="CoreGM\Brush">
-      <UniqueIdentifier>{c1cf1564-f6e9-4066-945d-3d3b240d086d}</UniqueIdentifier>
     </Filter>
     <Filter Include="CoreGM\Cache">
       <UniqueIdentifier>{2d46762c-9774-4703-91a0-36587445696b}</UniqueIdentifier>
@@ -110,12 +104,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\include\core\mruby\mruby.h">
-      <Filter>CoreGM\mruby</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\core\mruby\mrbconf.h">
-      <Filter>CoreGM\mruby</Filter>
-    </ClInclude>
     <ClInclude Include="..\include\core\graphics\rgmGraphics.h">
       <Filter>CoreGM\Graphics</Filter>
     </ClInclude>
@@ -176,9 +164,6 @@
     <ClInclude Include="..\include\core\drawable\rgmTextlayout.h">
       <Filter>CoreGM\Drawable</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\core\brush\rgmBrushStruct.h">
-      <Filter>CoreGM\Brush</Filter>
-    </ClInclude>
     <ClInclude Include="..\include\core\cache\rgmCache.h">
       <Filter>CoreGM\Cache</Filter>
     </ClInclude>
@@ -232,6 +217,12 @@
     </ClInclude>
     <ClInclude Include="..\include\core\drawable\rgmBatch.h">
       <Filter>CoreGM\Drawable</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\core\util\rgmBrushStruct.h">
+      <Filter>CoreGM\Util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\core\util\rgmStrokeStruct.h">
+      <Filter>CoreGM\Util</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

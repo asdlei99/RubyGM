@@ -3,7 +3,6 @@
 // friendly funtion :   RubyGM::Drawable::CreateSP
 
 
-
 /**
 * Copyright (c) 2015-2016 dustpg   mailto:dustpg@gmail.com
 *
@@ -56,8 +55,8 @@ namespace RubyGM {
         inline auto CreateSP(const BitmapStatus& bs) noexcept {
             return std::move(Bitmap::CreateSP(bs));
         }
-        // create text layout
-        inline auto CreateSP(const TextlayoutStatus& tls) noexcept {
+        // create text layout with specified font
+        inline auto CreateSP(const TextlayoutStatus& tls) {
             return std::move(Textlayout::CreateSP(tls));
         }
         // ====================================================================

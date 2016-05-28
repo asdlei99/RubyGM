@@ -35,7 +35,7 @@ auto RubyGM::Cache::RemoveAllFiles() noexcept ->Result {
         RubyGM::SafeRelease(fileop);
         return Result(hr);
 #else
-        SHFILEOPSTRUCTW fileop{};
+        SHFILEOPSTRUCTW fileop{0};
         fileop.hwnd = nullptr;
         fileop.wFunc = FO_DELETE;
         fileop.pFrom = path;

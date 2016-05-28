@@ -49,9 +49,9 @@ RubyGM::Drawable::Vector::Vector(const VectorStatus& vs) noexcept:
 Super(vs),
 stroke_color(vs.stroke_color),
 filled_color(vs.filled_color),
-m_pAsStrokeStyle(vs.stroke_style),
-m_pAsBrushStroke(vs.stroke_brush),
-m_pAsBrushFilled(vs.filled_brush),
+m_spAsStrokeStyle(vs.stroke_style),
+m_spAsBrushStroke(vs.stroke_brush),
+m_spAsBrushFilled(vs.filled_brush),
 stroke_width(vs.stroke_width),
 m_bUseStrokeColor(!vs.stroke_brush),
 m_bUseFilledColor(!vs.filled_brush){
@@ -76,14 +76,14 @@ auto RubyGM::Drawable::Vector::reset_asset() noexcept -> Result {
     RubyGM::SafeRelease(m_pGiBrushStroke);
     RubyGM::SafeRelease(m_pGiBrushFilled);
     // 获取笔触资源
-    m_pGiBrushStroke = m_pAsBrushStroke ?
-        m_pAsBrushStroke->GetBrush() : Bridge::GetCommonBrush();
+    m_pGiBrushStroke = m_spAsBrushStroke ?
+        m_spAsBrushStroke->GetBrush() : Bridge::GetCommonBrush();
     // 获取填充资源
-    m_pGiBrushFilled = m_pAsBrushFilled ?
-        m_pAsBrushFilled->GetBrush() : Bridge::GetCommonBrush();
+    m_pGiBrushFilled = m_spAsBrushFilled ?
+        m_spAsBrushFilled->GetBrush() : Bridge::GetCommonBrush();
     // 获取笔触风格的图形接口数据 -- 本项允许null
-    if (m_pAsStrokeStyle) {
-        m_pGiStrokeStyle = m_pAsStrokeStyle->GetStrokeStyle();
+    if (m_spAsStrokeStyle) {
+        m_pGiStrokeStyle = m_spAsStrokeStyle->GetStroke();
     }
     // 返回结果
     return (m_pGiBrushStroke && m_pGiBrushFilled) ?
@@ -130,15 +130,15 @@ auto RubyGM::Drawable::Vector::recreate() noexcept -> Result {
     }
     // 重建资源对象 - 笔触风格
     if (SUCCEEDED(hr)) {
-        hr = safe_recreate(m_pAsStrokeStyle);
+        hr = safe_recreate(m_spAsStrokeStyle.Ptr());
     }
     // 重建资源对象 - 笔触笔刷
     if (SUCCEEDED(hr)) {
-        hr = safe_recreate(m_pAsBrushStroke);
+        hr = safe_recreate(m_spAsBrushStroke.Ptr());
     }
     // 重建资源对象 - 填充笔刷
     if (SUCCEEDED(hr)) {
-        hr = safe_recreate(m_pAsBrushFilled);
+        hr = safe_recreate(m_spAsBrushFilled.Ptr());
     }
     // 创建本类使用的设备接口资源
     if (SUCCEEDED(hr)) {
@@ -154,9 +154,9 @@ auto RubyGM::Drawable::Vector::recreate() noexcept -> Result {
 /// <returns></returns>
 RubyGM::Drawable::Vector::~Vector() noexcept {
     // 资源
-    RubyGM::SafeRelease(m_pAsStrokeStyle);
-    RubyGM::SafeRelease(m_pAsBrushStroke);
-    RubyGM::SafeRelease(m_pAsBrushFilled);
+    //RubyGM::SafeRelease(m_pAsStrokeStyle);
+    //RubyGM::SafeRelease(m_pAsBrushStroke);
+    //RubyGM::SafeRelease(m_pAsBrushFilled);
     // 接口
     RubyGM::SafeRelease(m_pGiStrokeStyle);
     RubyGM::SafeRelease(m_pGiBrushStroke);
@@ -464,7 +464,7 @@ namespace RubyGM { namespace Drawable {
         // source geometry
         IGMGeometry*                source;
         // ctor
-        RealizationStatus(Default v) : VectorStatus(v) {
+        RealizationStatus() : VectorStatus() {
             source = nullptr;
         }
     };
@@ -687,15 +687,15 @@ auto RubyGM::Drawable::Geometry::Realization(float sf) const noexcept->Vector* {
     constexpr float FLATTENING_TOLERANCE = D2D1_DEFAULT_FLATTENING_TOLERANCE;
     float flattening_tolerance = FLATTENING_TOLERANCE / sf;
     // 创建对象
-    RealizationStatus rs(Drawable::Default{});
+    RealizationStatus rs;
     // Realization
     rs.source = m_pGiGeometry;
     // Vector
     rs.stroke_color = this->stroke_color;
     rs.filled_color = this->filled_color;
-    rs.stroke_style = m_pAsStrokeStyle;
-    rs.stroke_brush = m_pAsBrushStroke;
-    rs.filled_brush = m_pAsBrushFilled;
+    rs.stroke_style = m_spAsStrokeStyle;
+    rs.stroke_brush = m_spAsBrushStroke;
+    rs.filled_brush = m_spAsBrushFilled;
     rs.stroke_width = this->stroke_width;
     rs._unused_ = flattening_tolerance;
     // Base

@@ -38,20 +38,14 @@ namespace RubyGM {
         // status for Text
         struct TextStatus : GeometryStatus {
             // layout
-            CGMPtrA<Textlayout>     layout;
-            // ctor     - copy
-            inline TextStatus(const CGMPtrA<Textlayout>&l) : 
-                layout(l), GeometryStatus() {}
+            RefPtr<Textlayout>     layout;
             // default  - copy
-            inline TextStatus(CGMPtrA<Textlayout>&l, Default v) : 
-                layout(l), GeometryStatus(v) {
+            inline TextStatus(RefPtr<Textlayout>& l) : 
+                layout(l), GeometryStatus() {
             }
-            // ctor     - move
-            inline TextStatus(CGMPtrA<Textlayout>&&l) : 
-                layout(std::move(l)), GeometryStatus() {}
             // default  - move
-            inline TextStatus(CGMPtrA<Textlayout>&&l, Default v) : 
-                layout(std::move(l)), GeometryStatus(v) {
+            inline TextStatus(RefPtr<Textlayout>&&l) : 
+                layout(std::move(l)), GeometryStatus() {
             }
         };
         // text geometry
@@ -70,7 +64,7 @@ namespace RubyGM {
             static auto Create(const TextStatus&) noexcept ->Text*;
             // create this
             static auto CreateSP(const TextStatus& ls) noexcept {
-                return std::move(RubyGM::CGMPtrA<Drawable::Text>(
+                return std::move(RubyGM::RefPtr<Drawable::Text>(
                     std::move(Text::Create(ls)))
                 );
             }

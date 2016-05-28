@@ -18,8 +18,8 @@
 /// <returns></returns>
 auto RubyGM::Drawable::Object::Rasterization(
     SizeF sf, SizeF bs) noexcept -> Drawable::Bitmap* {
-    auto&ast = Game::CreateBitmapAssetFromDrawable(this, sf, bs);
-    Drawable::BitmapStatus bst(std::move(ast), Drawable::Default());
+    auto asset = Game::CreateBitmapAssetFromDrawable(this, sf, bs);
+    Drawable::BitmapStatus bst(std::move(asset));
     // 创建成功
     if (const auto bsp = Drawable::Bitmap::Create(bst)) {
         bsp->des_rect.right = bs.width;
@@ -230,12 +230,79 @@ namespace RubyGM { namespace Asset {
             // 创建
             auto hr = Bridge::CreateFontWithProp(this->prop(), &m_pTextFormat);
             // 检查错误
-            if (!m_pTextFormat) Game::SetLastErrorCode(hr);
+            if (FAILED(hr)) Game::SetLastErrorCode(hr);
         }
         // 拥有直接返回
         return RubyGM::SafeAcquire(m_pTextFormat);
     }
 }}
+
+// stroke
+#include <core/asset/rgmAssetStroke.h>
+
+// rubygm::asset namespace
+namespace RubyGM { namespace Asset {
+    /// <summary>
+    /// Creates the specified .
+    /// </summary>
+    /// <param name="">The .</param>
+    /// <returns></returns>
+    auto Stroke::Create(const StrokeStyle& ss) noexcept -> Stroke& {
+        const size_t extra = ss.dash_count * sizeof(float);
+        auto ptr = RubyGM::SmallAlloc(sizeof(Stroke) + extra);
+        assert(ptr && "RubyGM::SmallAlloc cannot return nullptr");
+        auto obj = new(ptr) Asset::Stroke(ss);
+        return *obj;
+    }
+    /// <summary>
+    /// Initializes a new instance of the <see cref="Stroke"/> class.
+    /// </summary>
+    /// <param name="ss">The ss.</param>
+    Stroke::Stroke(const StrokeStyle& ss) noexcept : m_style(ss) {
+        std::memcpy(m_dashes, ss.dashes, ss.dash_count * sizeof(float));
+    }
+    /// <summary>
+    /// Finalizes an instance of the <see cref=""/> class.
+    /// </summary>
+    /// <returns></returns>
+    Stroke::~Stroke() noexcept {
+        RubyGM::SafeRelease(m_pStrokeStyle);
+    }
+    /// <summary>
+    /// Lows the occupancy.
+    /// </summary>
+    /// <returns></returns>
+    void Stroke::dispose() noexcept {
+        this->Stroke::~Stroke();
+        RubyGM::SmallFree(this);
+    }
+    /// <summary>
+    /// Lows the occupancy.
+    /// </summary>
+    /// <returns></returns>
+    void Stroke::LowOccupancy() noexcept {
+        this->LowOccupancyHelper(m_pStrokeStyle);
+    }
+    /// <summary>
+    /// Gets the stroke.
+    /// </summary>
+    /// <returns></returns>
+    auto Stroke::GetStroke() noexcept -> IGMStrokeStyle* {
+        // 没有则创建
+        if (!m_pStrokeStyle) {
+            StrokeStyle ss;
+            static_cast<BaseStrokeStyle&>(ss) = m_style;
+            ss.dashes = m_dashes;
+            // 创建
+            auto hr = Bridge::CreateStrokeWithProp(ss, &m_pStrokeStyle);
+            // 检查错误
+            if (FAILED(hr)) Game::SetLastErrorCode(hr);
+        }
+        // 拥有直接返回
+        return RubyGM::SafeAcquire(m_pStrokeStyle);
+    }
+}}
+
 
 
 /// <summary>
@@ -244,6 +311,18 @@ namespace RubyGM { namespace Asset {
 /// <param name="">The .</param>
 /// <returns></returns>
 auto RubyGM::Game::CreateFontAsset(
-    const FontProperties& fp) noexcept -> Asset::Font& {
-    return Asset::Font::Create(fp);
+    const FontProperties& fp) noexcept -> RefPtr<Asset::Font> {
+    auto&font = Asset::Font::Create(fp); auto* ptr = &font;
+    return std::move(RefPtr<Asset::Font>(std::move(ptr)));
+}
+
+/// <summary>
+/// Creates the stroke asset.
+/// </summary>
+/// <param name="">The .</param>
+/// <returns></returns>
+auto RubyGM::Game::CreateStrokeAsset(
+    const StrokeStyle& ss) noexcept -> RefPtr<Asset::Stroke> {
+    auto&stroke = Asset::Stroke::Create(ss); auto* ptr = &stroke;
+    return std::move(RefPtr<Asset::Stroke>(std::move(ptr)));
 }

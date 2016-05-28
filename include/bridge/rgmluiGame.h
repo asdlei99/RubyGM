@@ -78,9 +78,9 @@ namespace RubyGM {
             // register a new bitmap resource, return index
             auto RegisterBitmapAsset() noexcept -> uint32_t;
             // register a new brush resource, return index
-            auto RegisterBrushAsset(const NBrushProperties&) noexcept -> uint32_t;
+            auto RegisterBrushAsset(Asset::Brush&) noexcept -> uint32_t;
             // register a new font resource, return index
-            auto RegisterFontAsset(const FontProperties&) noexcept -> uint32_t;
+            auto RegisterFontAsset(Asset::Font&) noexcept -> uint32_t;
             // get common brush for game
             auto GetCommonBrush() noexcept { return LongUI::SafeAcquire(m_pCommonBrush); }
             // get resource head for game
@@ -153,7 +153,8 @@ namespace RubyGM {
                 assert(size_t(m_acAssetPtr[INDEX]) <= MAX_SOURCE_EACH);
                 if (m_acAssetPtr[INDEX] == MAX_SOURCE_EACH) return 0;
                 uint32_t index = m_acAssetPtr[INDEX]++;
-                m_appAssetPtr[INDEX][index] = create();
+                auto ptr = create(); ptr->AddRef();
+                m_appAssetPtr[INDEX][index] = ptr;
                 return index;
             }
         protected:

@@ -27,20 +27,28 @@
 #include <cstdint>
 #include <cwchar>
 #include "../rubygm.h"
+#include "../core/util/rgmUtil.h"
 #include "../core/util/rgmStruct.h"
+#include "../core/asset/rgmAsset.h"
+#include "../core/asset/rgmAssetFont.h"
+#include "../core/asset/rgmAssetStroke.h"
 
 // rubygm namespace
 namespace RubyGM {
     // max resource each
-    enum : size_t { MAX_SOURCE_EACH = 1024, };
+    enum : size_t { MAX_SOURCE_EACH = 256, };
     // sprite class
     class CGMSprite;
     // sprte status
     struct SprteStatus;
     // prop for font
     struct FontProperties;
-    // prop for nromal brush
-    struct NBrushProperties;
+    // prop for linear gradient brush
+    struct LinearBrush;
+    // prop for radial gradient brush
+    struct RadialBrush;
+    // StrokeStyle
+    struct StrokeStyle;
 }
 
 // rubygm::base namespace
@@ -53,13 +61,6 @@ namespace RubyGM { namespace Base {
 namespace RubyGM { namespace Drawable {
     // object
     class Object;
-}}
-
-
-// rubygm::resource namespace
-namespace RubyGM { namespace Asset {
-    // object, font, bitmap and bursh class
-    struct Object; class Font; struct Bitmap; struct Brush;
 }}
 
 // rubygm::game namespace
@@ -83,36 +84,36 @@ namespace RubyGM { namespace Game {
     // ------------------------------------------------------------------------
     // -------------------------------- GET -----------------------------------
     // ------------------------------------------------------------------------
-    // get bitmap resource by index, won't add ref-count
-    auto RefBitmapAsset(uint32_t index) noexcept -> Asset::Bitmap&;
-    // get font resource by index, won't add ref-count
-    auto RefFontAsset(uint32_t index) noexcept -> Asset::Font&;
-    // get brush resource by index, won't add ref-count
-    auto RefBrushAsset(uint32_t index) noexcept -> Asset::Brush&;
-
     // get bitmap resource by index, will add ref-count
-    auto GetBitmapAsset(uint32_t index) noexcept -> Asset::Bitmap&;
+    auto GetBitmapAsset(uint32_t index) noexcept -> RefPtr<Asset::Bitmap>;
     // get font resource by index, will add ref-count
-    auto GetFontAsset(uint32_t index) noexcept -> Asset::Font&;
+    auto GetFontAsset(uint32_t index) noexcept -> RefPtr<Asset::Font>;
     // get brush resource by index, will add ref-count
-    auto GetBrushAsset(uint32_t index) noexcept -> Asset::Brush&;
+    auto GetBrushAsset(uint32_t index) noexcept -> RefPtr<Asset::Brush>;
     // ------------------------------------------------------------------------
     // ------------------------------- CREATE ---------------------------------
     // ------------------------------------------------------------------------
-    // creat font resource, ref-count set -> 1
-    auto CreateFontAsset(const FontProperties&) noexcept -> Asset::Font&;
-    // create normal brush resource, ref-count set -> 1
-    auto CreateBrushAsset(const NBrushProperties&) noexcept -> Asset::Brush&;
+    // creat font resource
+    auto CreateFontAsset(const FontProperties&) noexcept ->RefPtr<Asset::Font>;
+    // creat stroke resource
+    auto CreateStrokeAsset(const StrokeStyle&)noexcept ->RefPtr<Asset::Stroke>;
+    // create solid color brush resource
+    auto CreateBrushAsset(const ColorF&) noexcept ->RefPtr<Asset::Brush>;
+    // create linear gradient brush resource
+    auto CreateBrushAsset(const LinearBrush&) noexcept ->RefPtr<Asset::Brush>;
+    // create radial gradient brush resource
+    auto CreateBrushAsset(const RadialBrush&) noexcept ->RefPtr<Asset::Brush>;
     // create bitmap asset from drawable in zoomed size
     auto CreateBitmapAssetFromDrawable(Drawable::Object*, 
-        SizeF sf, SizeF bs) noexcept->Asset::Bitmap&;
+        SizeF sf, SizeF bs) noexcept-> RefPtr<Asset::Bitmap>;
     // create bitmap asset from file name
     auto CreateBitmapAssetFromFile(const wchar_t* namebgn, 
-        const wchar_t* nameend) noexcept->Asset::Bitmap&;
+        const wchar_t* nameend) noexcept->RefPtr<Asset::Bitmap>;
     // create bitmap asser from file name
     inline auto CreateBitmapAssetFromFile(
-        const wchar_t* name) noexcept->Asset::Bitmap& {
-        return Game::CreateBitmapAssetFromFile(name, name + std::wcslen(name));
+        const wchar_t* name) noexcept->RefPtr<Asset::Bitmap> {
+        auto end = name + std::wcslen(name);
+        return std::move(Game::CreateBitmapAssetFromFile(name, end));
     }
     // ------------------------------------------------------------------------
     // ------------------------------ REGISTER --------------------------------
@@ -121,8 +122,16 @@ namespace RubyGM { namespace Game {
     // register a new bitmap resource, return index, 
     auto RegisterBitmapAsset() noexcept -> uint32_t;
     // register a new brush resource, return index, 
-    auto RegisterBrushAsset(const NBrushProperties&) noexcept -> uint32_t;
+    auto RegisterBrushAsset(Asset::Brush&) noexcept -> uint32_t;
     // register a new font resource, return index, 
-    auto RegisterFontAsset(const FontProperties&) noexcept -> uint32_t;
+    auto RegisterFontAsset(Asset::Font&) noexcept -> uint32_t;
+    // register helper
+    /*inline auto RegisterAsset(Asset::Font& f) noexcept {
+        return RegisterFontAsset(f);
+    }
+    // register helper
+    inline auto RegisterAsset(Asset::Brush& b) noexcept {
+        return RegisterBrushAsset(b);
+    }*/
 }}
 

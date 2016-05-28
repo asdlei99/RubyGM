@@ -33,18 +33,24 @@ namespace RubyGM {
     namespace Drawable {
         // status for GaussianBlur
         struct GaussianBlurStatus : EffectStatus {
-            // source bitmap
-            Asset::Bitmap&      bitmap;
+            // bitmap asset, CANNOT be null
+            RefPtr<Asset::Bitmap>   bitmap;
             // StandardDeviation
-            float               sd;
-            // ctor
-            ~GaussianBlurStatus() noexcept { bitmap.Release(); }
-            // default ctor
-            inline GaussianBlurStatus(Asset::Bitmap&& b) : bitmap(b) { }
+            float                   sd;
             // default value
-            inline GaussianBlurStatus(Asset::Bitmap&& b, Default v) :
-                EffectStatus(v), bitmap(b) {
-                sd = 3.0f;
+            inline GaussianBlurStatus(const RefPtr<Asset::Bitmap>& b) : 
+                EffectStatus(), bitmap(b)  {
+                sd = 3.f; asset_check();
+            }
+            // default value
+            inline GaussianBlurStatus(RefPtr<Asset::Bitmap>&& b) : 
+                EffectStatus(), bitmap(std::move(b)) {
+                sd = 3.f; asset_check();
+            }
+        private:
+            // asset check
+            inline void asset_check() { 
+                assert(bitmap && "bitmap asset cannot be null");
             }
         };
         // gaussian blur effect
@@ -61,7 +67,7 @@ namespace RubyGM {
                 noexcept->GaussianBlur*;
             // create this
             static auto CreateSP(const GaussianBlurStatus& ts) noexcept {
-                return std::move(RubyGM::CGMPtrA<Drawable::GaussianBlur>(
+                return std::move(RubyGM::RefPtr<Drawable::GaussianBlur>(
                     std::move(GaussianBlur::Create(ts)))
                 );
             }
@@ -84,7 +90,7 @@ namespace RubyGM {
             virtual auto recreate() noexcept -> Result override;
         protected:
             // bitmap asset
-            Asset::Bitmap&              m_refBitmapAsset;
+            RefPtr<Asset::Bitmap>       m_spAsBitmap;
             // blur Standard Deviation
             float                       m_fStdDvi = -1.f;
         };
@@ -118,7 +124,7 @@ namespace RubyGM {
                 noexcept->DirectionalBlur*;
             // create this
             static auto CreateSP(const DirectionalBlurStatus& ts) noexcept {
-                return std::move(RubyGM::CGMPtrA<Drawable::DirectionalBlur>(
+                return std::move(RubyGM::RefPtr<Drawable::DirectionalBlur>(
                     std::move(DirectionalBlur::Create(ts)))
                 );
             }
@@ -141,7 +147,7 @@ namespace RubyGM {
             virtual auto recreate() noexcept -> Result override;
         protected:
             // bitmap asset
-            Asset::Bitmap&              m_refBitmapAsset;
+            RefPtr<Asset::Bitmap>       m_spAsBitmap;
         };*/
     }
 }

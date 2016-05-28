@@ -40,10 +40,8 @@ namespace RubyGM {
             uint32_t            count;
             // unused var
             uint32_t            _unused_;
-            // ctor
-            PolylineStatus() : GeometryStatus() {}
             // default value
-            inline PolylineStatus(Default v) : GeometryStatus(v) {
+            inline PolylineStatus() : GeometryStatus() {
                 points = nullptr; count = 0; _unused_ = 0;
             }
         };
@@ -65,7 +63,7 @@ namespace RubyGM {
             static auto Create(const PolylineStatus&) noexcept ->Polyline*;
             // create this
             static auto CreateSP(const PolylineStatus& ls) noexcept {
-                return std::move(RubyGM::CGMPtrA<Drawable::Polyline>(
+                return std::move(RubyGM::RefPtr<Drawable::Polyline>(
                     std::move(Polyline::Create(ls)))
                 );
             }

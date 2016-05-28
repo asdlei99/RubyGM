@@ -35,14 +35,9 @@ namespace RubyGM {
     struct IGMRenderContext;
     // Drawable namespace
     namespace Drawable {
-        // Default
-        struct Default {};
         // status for base
         struct BaseStatus {
-            // default ctor
-            inline BaseStatus() {};
-            // default value
-            inline BaseStatus(Default) {}
+
         };
     }
     // Drawable namespace
@@ -66,7 +61,7 @@ namespace RubyGM {
             // rasterization, to Drawable::Bitmap smart ptr
             template<typename ...Args>
             auto RasterizationSP(Args&&... args) noexcept {
-                return std::move(RubyGM::CGMPtrA<Drawable::Bitmap>(
+                return std::move(RubyGM::RefPtr<Drawable::Bitmap>(
                     std::move(this->Rasterization(std::forward<Args>(args)...))
                     ));
             }

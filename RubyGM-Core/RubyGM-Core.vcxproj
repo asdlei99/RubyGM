@@ -43,7 +43,6 @@
     <ClInclude Include="..\include\core\asset\rgmAssetFont.h" />
     <ClInclude Include="..\include\core\asset\rgmAsset.h" />
     <ClInclude Include="..\include\core\asset\rgmAssetStroke.h" />
-    <ClInclude Include="..\include\core\brush\rgmBrushStruct.h" />
     <ClInclude Include="..\include\core\cache\rgmCache.h" />
     <ClInclude Include="..\include\core\drawable\effect\rgmBlur.h" />
     <ClInclude Include="..\include\core\drawable\effect\rgmEffect.h" />
@@ -66,13 +65,13 @@
     <ClInclude Include="..\include\core\graphics\rgmGraphics.h" />
     <ClInclude Include="..\include\core\graphics\rgmSprite.h" />
     <ClInclude Include="..\include\core\graphics\rgmTilemap.h" />
-    <ClInclude Include="..\include\core\mruby\mrbconf.h" />
-    <ClInclude Include="..\include\core\mruby\mruby.h" />
     <ClInclude Include="..\include\core\rubygm.h" />
     <ClInclude Include="..\include\core\Text\rgmTextDetail.h" />
     <ClInclude Include="..\include\core\text\rgmTextStruct.h" />
+    <ClInclude Include="..\include\core\util\rgmBrushStruct.h" />
     <ClInclude Include="..\include\core\Util\rgmImpl.h" />
     <ClInclude Include="..\include\core\Util\rgmRuby.h" />
+    <ClInclude Include="..\include\core\util\rgmStrokeStruct.h" />
     <ClInclude Include="..\include\core\Util\rgmStruct.h" />
     <ClInclude Include="..\include\core\Util\rgmUtil.h" />
     <ClInclude Include="..\include\game\rgmResource.h" />

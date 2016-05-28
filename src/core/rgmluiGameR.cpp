@@ -1,8 +1,9 @@
 ﻿#include <bridge/rgmluiGame.h>
 #include <bridge/rgmluiBridge.h>
 #include <core/asset/rgmAssetFont.h>
-#include <core/brush/rgmBrushStruct.h>
+#include <core/util/rgmBrushStruct.h>
 #include <core/util/rgmImpl.h>
+#include <core/util/rgmUtil.h>
 #include <algorithm>
 #undef min
 #undef max
@@ -31,10 +32,10 @@ namespace RubyGM { namespace Asset {
     // bufer
     size_t s_bufNullBitmap[RubyGM::AlignedSizeTLen(sizeof(NullBitmap))];
     // get null bitmap object
-    auto GetNullBitmapAsset() noexcept -> Bitmap& {
-        auto& obj = *reinterpret_cast<NullBitmap*>(s_bufNullBitmap);
-        obj.AddRef();
-        return obj;
+    auto GetNullBitmapAsset() noexcept ->RefPtr<Asset::Bitmap> {
+        auto ptr = reinterpret_cast<NullBitmap*>(s_bufNullBitmap);
+        auto obj = static_cast<Asset::Bitmap*>(ptr);
+        return std::move(RefPtr<Asset::Bitmap>(obj));
     }
     // get null bitmap object - ex
     static inline auto RefNullBitmapAssetEx() noexcept -> NullBitmap& {
@@ -59,16 +60,14 @@ void RubyGM::Bridge::UIGame::init_resource() noexcept {
         auto& luidxtfprop = *reinterpret_cast<tfp>(buffer);
         auto& rgmfontprop = reinterpret_cast<FontProperties&>(luidxtfprop);
         LongUI::DX::InitTextFormatProperties(luidxtfprop, MAX_PATH);
-        this->RegisterFontAsset(rgmfontprop);
+        auto font = Game::CreateFontAsset(rgmfontprop);
+        this->RegisterFontAsset(*font);
     }
     // 添加默认资源 - 笔刷
     {
-        RubyGM::NBrushProperties bnprop;
-        RubyGM::MakeColorBrush(
-            bnprop, 
-            impl::rubygm(D2D1::ColorF(D2D1::ColorF::Black))
-        );
-        this->RegisterBrushAsset(bnprop);
+        ColorF color; color.r = color.g = color.b = 0.f; color.a = 1.f;
+        auto brush = Game::CreateBrushAsset(color);
+        this->RegisterBrushAsset(*brush);
     }
 }
 
@@ -232,48 +231,15 @@ const noexcept -> Asset::Brush& {
     return static_cast<Asset::Brush&>(asset);
 }
 
-
-/// <summary>
-/// Gets the bitmap resource, it won't add ref-count
-/// </summary>
-/// <param name="index">The index.</param>
-/// <returns></returns>
-auto RubyGM::Game::RefBitmapAsset(
-    uint32_t index) noexcept -> Asset::Bitmap & {
-    return Bridge::UIGame::GetInstance().RefBitmapAsset(index);
-}
-
-
-/// <summary>
-/// Gets the font resource. it won't add ref-count
-/// </summary>
-/// <param name="index">The index.</param>
-/// <returns></returns>
-auto RubyGM::Game::RefFontAsset(
-    uint32_t index) noexcept -> Asset::Font & {
-    return Bridge::UIGame::GetInstance().RefFontAsset(index);
-}
-
-/// <summary>
-/// Gets the brush resource. it won't add ref-count
-/// </summary>
-/// <param name="index">The index.</param>
-/// <returns></returns>
-auto RubyGM::Game::RefBrushAsset(
-    uint32_t index) noexcept -> Asset::Brush & {
-    return Bridge::UIGame::GetInstance().RefBrushAsset(index);
-}
-
 /// <summary>
 /// Gets the bitmap resource. it will add ref-count
 /// </summary>
 /// <param name="index">The index.</param>
 /// <returns></returns>
 auto RubyGM::Game::GetBitmapAsset(
-    uint32_t index) noexcept -> Asset::Bitmap & {
+    uint32_t index) noexcept -> RefPtr<Asset::Bitmap> {
     auto& asset = Bridge::UIGame::GetInstance().RefBitmapAsset(index);
-    asset.AddRef();
-    return asset;
+    return std::move(RefPtr<Asset::Bitmap>(&asset));
 }
 
 
@@ -283,10 +249,9 @@ auto RubyGM::Game::GetBitmapAsset(
 /// <param name="index">The index.</param>
 /// <returns></returns>
 auto RubyGM::Game::GetFontAsset(
-    uint32_t index) noexcept -> Asset::Font & {
+    uint32_t index) noexcept -> RefPtr<Asset::Font> {
     auto& asset = Bridge::UIGame::GetInstance().RefFontAsset(index);
-    asset.AddRef();
-    return asset;
+    return std::move(RefPtr<Asset::Font>(&asset));
 }
 
 /// <summary>
@@ -294,12 +259,13 @@ auto RubyGM::Game::GetFontAsset(
 /// </summary>
 /// <param name="index">The index.</param>
 /// <returns></returns>
-auto RubyGM::Game::GetBrushAsset(uint32_t index) 
-noexcept -> Asset::Brush & {
+auto RubyGM::Game::GetBrushAsset(
+    uint32_t index) noexcept -> RefPtr<Asset::Brush> {
     auto& asset = Bridge::UIGame::GetInstance().RefBrushAsset(index);
-    asset.AddRef();
-    return asset;
+    return std::move(RefPtr<Asset::Brush>(&asset));
 }
+
+
 
 
 /// <summary>
@@ -315,21 +281,20 @@ auto RubyGM::Game::RegisterBitmapAsset() noexcept -> uint32_t {
 /// Adds the resource brush.
 /// </summary>
 /// <returns></returns>
-auto RubyGM::Game::RegisterBrushAsset
-(const NBrushProperties& bnp) noexcept -> uint32_t {
-    return Bridge::UIGame::GetInstance().RegisterBrushAsset(bnp);
+auto RubyGM::Game::RegisterBrushAsset(
+    Asset::Brush& b) noexcept -> uint32_t {
+    return Bridge::UIGame::GetInstance().RegisterBrushAsset(b);
 }
 
 /// <summary>
-/// Adds the resource font.
+/// Registers the font asset.
 /// </summary>
-/// <param name="">The .</param>
+/// <param name="brush">The brush.</param>
 /// <returns></returns>
 auto RubyGM::Game::RegisterFontAsset(
-    const FontProperties& fp) noexcept -> uint32_t {
-    return Bridge::UIGame::GetInstance().RegisterFontAsset(fp);
+    Asset::Font& f) noexcept -> uint32_t {
+    return Bridge::UIGame::GetInstance().RegisterFontAsset(f);
 }
-
 
 /// <summary>
 /// Creates the font with property.
@@ -346,41 +311,140 @@ auto RubyGM::Bridge::CreateFontWithProp(
     return Result(hr);
 }
 
+
 // brush
-#include <core/brush/rgmBrushStruct.h>
+#include <core/util/rgmBrushStruct.h>
 #include <core/util/rgmImpl.h>
 
+// rubygm::impl naemspace
+namespace RubyGM { namespace impl {
+    // GradientStop
+    auto d2d(const GradientStop* s) noexcept {
+        constexpr auto a = sizeof(GradientStop);
+        constexpr auto b = sizeof(D2D1_GRADIENT_STOP);
+        static_assert(a == b, "bad cast");
+        constexpr auto c = offsetof(GradientStop, color);
+        constexpr auto d = offsetof(D2D1_GRADIENT_STOP, color);;
+        static_assert(c == d, "bad cast");
+        return reinterpret_cast<const D2D1_GRADIENT_STOP*>(s);
+    }
+}}
+
+
 /// <summary>
-/// Creates the brush with property.
+/// Creates the stroke with property.
 /// </summary>
-/// <param name="">The .</param>
-/// <param name="">The .</param>
+/// <param name="fp">The fp.</param>
+/// <param name="stroke">The stroke.</param>
+/// <returns></returns>
+auto RubyGM::Bridge::CreateStrokeWithProp(
+    const StrokeStyle& ss, IGMStrokeStyle** stroke) noexcept -> Result {
+    D2D1_STROKE_STYLE_PROPERTIES ssp;
+    ssp.startCap    = D2D1_CAP_STYLE(ss.cap_begin);
+    ssp.endCap      = D2D1_CAP_STYLE(ss.cap_end);
+    ssp.dashCap     = D2D1_CAP_STYLE(ss.cap_dash);
+    ssp.lineJoin    = D2D1_LINE_JOIN(ss.line_join);
+    ssp.miterLimit  = ss.miter_limit;
+    ssp.dashStyle   = D2D1_DASH_STYLE_CUSTOM;
+    ssp.dashOffset  = ss.dash_offset;
+    return Result(UIManager_D2DFactory->CreateStrokeStyle(
+        &ssp,
+        ss.dashes,
+        ss.dash_count, 
+        reinterpret_cast<ID2D1StrokeStyle**>(stroke)
+    ));
+}
+
+/// <summary>
+/// Creates the color-brush with property.
+/// </summary>
+/// <param name="color">The color.</param>
+/// <param name="brush">The brush.</param>
 /// <returns></returns>
 auto RubyGM::Bridge::CreateBrushWithProp(
-    const NBrushProperties& prop, IGMBrush** brush) noexcept -> Result {
-    D2D1_BRUSH_PROPERTIES d2d1bprop;
-    d2d1bprop.opacity = prop.opacity;
-    d2d1bprop.transform = D2D1::Matrix3x2F::Identity();
-    switch (prop.type)
-    {
-    case RubyGM::Type_Color:
-        return Result(UIManager_RenderTarget->CreateSolidColorBrush(
-            &impl::d2d(prop.color),
-            &d2d1bprop,
-            reinterpret_cast<ID2D1SolidColorBrush**>(brush)
-            ));
-    /*case RubyGM::Type_Linear:
-        break;
-    case RubyGM::Type_Radial:
-        break;
-    case RubyGM::Type_Other:
-        break;*/
-    default:
-        assert(!"NOIMPL");
-        return Result(E_NOTIMPL);
-        break;
-    }
+    const ColorF& color, IGMBrush** brush) noexcept -> Result {
+    return Result(UIManager_RenderTarget->CreateSolidColorBrush(
+        &impl::d2d(color),
+        nullptr,
+        reinterpret_cast<ID2D1SolidColorBrush**>(brush)
+    ));
 }
+
+
+/// <summary>
+/// Creates the linear-gradient-brush with property.
+/// </summary>
+/// <param name="linear">The linear.</param>
+/// <param name="brush">The brush.</param>
+/// <returns></returns>
+auto RubyGM::Bridge::CreateBrushWithProp(
+    const LinearBrush& linear, IGMBrush** brush) noexcept -> Result {
+    auto hr = S_OK;
+    ID2D1GradientStopCollection* collection = nullptr;
+    // 创建渐变色集
+    if (SUCCEEDED(hr)) {
+        hr = UIManager_RenderTarget->CreateGradientStopCollection(
+            impl::d2d(linear.stops),
+            linear.count,
+            &collection
+        );
+    }
+    // 创建线性渐变笔刷
+    if (SUCCEEDED(hr)) {
+        D2D1_LINEAR_GRADIENT_BRUSH_PROPERTIES gbp;
+        gbp.startPoint = impl::d2d(linear.begin);
+        gbp.endPoint = impl::d2d(linear.end);
+        hr = UIManager_RenderTarget->CreateLinearGradientBrush(
+            &gbp, 
+            nullptr, 
+            collection, 
+            reinterpret_cast<ID2D1LinearGradientBrush**>(brush)
+        );
+    }
+    // 扫尾处理
+    RubyGM::SafeRelease(collection);
+    // 返回结果
+    return Result(hr);
+}
+
+/// <summary>
+/// Creates the radial-gradien-brush with property.
+/// </summary>
+/// <param name="radial">The radial.</param>
+/// <param name="brush">The brush.</param>
+/// <returns></returns>
+auto RubyGM::Bridge::CreateBrushWithProp(
+    const RadialBrush& radial, IGMBrush** brush) noexcept -> Result {
+    auto hr = S_OK;
+    ID2D1GradientStopCollection* collection = nullptr;
+    // 创建渐变色集
+    if (SUCCEEDED(hr)) {
+        hr = UIManager_RenderTarget->CreateGradientStopCollection(
+            impl::d2d(radial.stops),
+            radial.count,
+            &collection
+        );
+    }
+    // 创建线性渐变笔刷
+    if (SUCCEEDED(hr)) {
+        D2D1_RADIAL_GRADIENT_BRUSH_PROPERTIES rbp;
+        rbp.center = impl::d2d(radial.center);
+        rbp.gradientOriginOffset = impl::d2d(radial.offset);
+        rbp.radiusX = radial.rx;
+        rbp.radiusY = radial.ry;
+        hr = UIManager_RenderTarget->CreateRadialGradientBrush(
+            &rbp, 
+            nullptr, 
+            collection, 
+            reinterpret_cast<ID2D1RadialGradientBrush**>(brush)
+        );
+    }
+    // 扫尾处理
+    RubyGM::SafeRelease(collection);
+    // 返回结果
+    return Result(hr);
+}
+
 
 
 
@@ -399,9 +463,10 @@ auto RubyGM::Bridge::UIGame::RegisterBitmapAsset(
 /// <param name="">The .</param>
 /// <returns></returns>
 auto RubyGM::Bridge::UIGame::RegisterFontAsset(
-    const FontProperties& fp) noexcept -> uint32_t {
-    return this->register_helper<Index_Font>([&fp]() {
-        return &Game::CreateFontAsset(fp);
+    Asset::Font& font) noexcept -> uint32_t {
+    return this->register_helper<Index_Font>([&font]() {
+        auto ptr = &font; assert(ptr && "cannot be null");
+        return ptr;
     });
 }
 
@@ -411,9 +476,10 @@ auto RubyGM::Bridge::UIGame::RegisterFontAsset(
 /// </summary>
 /// <returns></returns>
 auto RubyGM::Bridge::UIGame::RegisterBrushAsset(
-    const NBrushProperties& bnp) noexcept -> uint32_t {
-    return this->register_helper<Index_Brush>([&bnp]() {
-        return &Game::CreateBrushAsset(bnp);
+    Asset::Brush& brush) noexcept -> uint32_t {
+    return this->register_helper<Index_Brush>([&brush]() {
+        auto ptr = &brush; assert(ptr && "cannot be null");
+        return ptr;
     });
 }
 

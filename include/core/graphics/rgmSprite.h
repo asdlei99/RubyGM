@@ -81,15 +81,21 @@ namespace RubyGM {
             Mode_Aliased = 1,
         };
         // set drawable object
-        void SetDrawable(CGMPtrA<Drawable::Object>&& obj) noexcept;
+        void SetDrawable(RefPtr<Drawable::Object>&& obj) noexcept;
         // set drawable object
-        void SetDrawable(const CGMPtrA<Drawable::Object>& obj) noexcept;
+        void SetDrawable(const RefPtr<Drawable::Object>& obj) noexcept;
         // get drawable, will add ref-count
         auto GetDrawable() const noexcept { return m_spDrawable; }
         // ref drawable, won't add ref-count
         auto&RefDrawable() const noexcept { return m_spDrawable; }
     public:
-        // ctor
+        // operator ==
+        inline bool operator==(const CGMSprite& sprite) const noexcept { 
+            return this == &sprite;
+        }
+        // ctor with parent
+        CGMSprite(const SprteStatus& ss) noexcept;
+        // ctor without parent
         CGMSprite(const SprteStatus& ss, CGMSprite* parent) noexcept;
         // dtor
         ~CGMSprite() noexcept;
@@ -97,8 +103,10 @@ namespace RubyGM {
         CGMSprite(const CGMSprite&) noexcept = delete;
         // move ctor
         CGMSprite(CGMSprite&&) noexcept = delete;
-        // clear sprite
+        // clear sprite : dispose all children & drawable object
         void Clear() noexcept;
+        // dispose: dispose this sprite, cannot be accessed after dispose
+        void Dispose() noexcept;
         // render
         void Render(IGMRenderContext& ) noexcept;
         // root render
@@ -218,7 +226,7 @@ namespace RubyGM {
         void update() noexcept;
     protected:
         // drawable object
-        CGMPtrA<Drawable::Object>   m_spDrawable = nullptr;
+        RefPtr<Drawable::Object>   m_spDrawable = nullptr;
         // parent
         CGMSprite*                  m_pParent = nullptr;
         // children

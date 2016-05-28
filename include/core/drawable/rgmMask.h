@@ -40,11 +40,9 @@ namespace RubyGM {
             Asset::Bitmap&      mask;
             // ctor
             ~MaskStatus() noexcept { mask.Release(); }
-            // default ctor
-            inline MaskStatus(Asset::Bitmap&& b) : mask(b) { }
             // default value
-            inline MaskStatus(Asset::Bitmap&& b, Default v) : 
-                BaseStatus(v), mask(b) {
+            inline MaskStatus(Asset::Bitmap&& b) : 
+                BaseStatus(), mask(std::move(b)) {
             }
         };
         // drawable bitmap 
@@ -56,7 +54,7 @@ namespace RubyGM {
             static auto Create(const MaskStatus&) noexcept->Mask*;
             // create this
             static auto CreateSP(const MaskStatus& bs) noexcept {
-                return std::move(RubyGM::CGMPtrA<Drawable::Mask>(
+                return std::move(RubyGM::RefPtr<Drawable::Mask>(
                     std::move(Mask::Create(bs)))
                 );
             }

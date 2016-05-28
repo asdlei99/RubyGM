@@ -40,21 +40,19 @@ namespace RubyGM {
     // Drawable namespace
     namespace Drawable {
         // always draw circle
-        struct AlwaysCircle : Default {};
+        struct AlwaysCircle {};
         // status for rect
         struct EllipseStatus : VectorStatus {
             // ellipse data
             EllipseF        ellipse;
-            // ctor
-            EllipseStatus() : VectorStatus() {}
             // default value
-            inline EllipseStatus(Default v) : VectorStatus(v) {
+            inline EllipseStatus() : VectorStatus() {
                 ellipse.point = { 8.f, 8.f };
                 ellipse.rx = 8.f;
                 ellipse.ry = 8.f;
             }
             // Circle, ALWAYS ignore rx
-            inline EllipseStatus(AlwaysCircle v) : VectorStatus(v) {
+            inline EllipseStatus(AlwaysCircle) : VectorStatus() {
                 ellipse.point = { 8.f, 8.f };
                 ellipse.rx = 8.f;
                 ellipse.ry = -1.f;
@@ -78,7 +76,7 @@ namespace RubyGM {
             static auto Create(const EllipseStatus&) noexcept ->Ellipse*;
             // create this
             static auto CreateSP(const EllipseStatus& ls) noexcept {
-                return std::move(RubyGM::CGMPtrA<Drawable::Ellipse>(
+                return std::move(RubyGM::RefPtr<Drawable::Ellipse>(
                     std::move(Ellipse::Create(ls)))
                 );
             }

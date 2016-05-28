@@ -23,7 +23,7 @@ namespace RubyGM {
 /// </summary>
 /// <param name="obj">The object.</param>
 /// <returns></returns>
-void RubyGM::CGMSprite::SetDrawable(CGMPtrA<Drawable::Object>&& obj) noexcept {
+void RubyGM::CGMSprite::SetDrawable(RefPtr<Drawable::Object>&& obj) noexcept {
     m_spDrawable = std::move(obj);
 }
 
@@ -32,24 +32,49 @@ void RubyGM::CGMSprite::SetDrawable(CGMPtrA<Drawable::Object>&& obj) noexcept {
 /// </summary>
 /// <param name="obj">The object.</param>
 /// <returns></returns>
-void RubyGM::CGMSprite::SetDrawable(const CGMPtrA<Drawable::Object>& obj) noexcept {
+void RubyGM::CGMSprite::SetDrawable(const RefPtr<Drawable::Object>& obj) noexcept {
     m_spDrawable = obj;
 }
 
 /// <summary>
-/// Initializes a new instance of the <see cref="CGMSprite"/> class.
+/// Initializes a new instance of the <see cref="CGMSprite" /> class.
 /// </summary>
+/// <param name="ss">The ss.</param>
+/// <param name="parent">The parent.</param>
 RubyGM::CGMSprite::CGMSprite(const SprteStatus& ss, CGMSprite* parent) noexcept
     :m_pParent(parent), m_status(ss) {
+    assert(parent && "bad argment");
 #ifdef RUBYGM_TEST_MODE
     static int spid = 0;
     this->Init_test(L"sprite", spid, this);
     spid++;
 #endif
-    this->make_transform(m_matWorld);
     this->set_visible();
     this->ClearClipRect();
+    // 修改世界转换矩阵
+    D2D1_MATRIX_3X2_F transform;
+    this->make_transform(impl::rubygm(transform));
+    m_matWorld = impl::rubygm(
+        transform * impl::d2d(parent->m_matWorld)
+    );
 }
+
+/// <summary>
+/// Initializes a new instance of the <see cref="CGMSprite"/> class.
+/// </summary>
+/// <param name="ss">The ss.</param>
+RubyGM::CGMSprite::CGMSprite(const SprteStatus& ss) noexcept
+    :m_pParent(nullptr), m_status(ss) {
+#ifdef RUBYGM_TEST_MODE
+    static int spid = 0;
+    this->Init_test(L"sprite", spid, this);
+    spid++;
+#endif
+    this->set_visible();
+    this->ClearClipRect();
+    this->make_transform(m_matWorld);
+}
+
 
 /// <summary>
 /// Finalizes an instance of the <see cref="CGMSprite"/> class.
@@ -131,6 +156,17 @@ void RubyGM::CGMSprite::Clear() noexcept {
     m_spDrawable.Dispose();
 }
 
+/// <summary>
+/// Releases unmanaged and - optionally - managed resources.
+/// </summary>
+/// <returns></returns>
+void RubyGM::CGMSprite::Dispose() noexcept {
+    assert(m_pParent && "no parent!");
+    auto& list = m_pParent->m_ltChildren;
+    auto itr = std::find(list.begin(), list.end(), *this);
+    if (itr == list.end()) assert(!"404");
+    else list.erase(itr);
+}
 
 /// <summary>
 /// Gets the specified .

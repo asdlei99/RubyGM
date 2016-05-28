@@ -14,7 +14,7 @@
 /// <param name="cp">The cp.</param>
 RubyGM::Bridge::UIGame::UIGame(LongUI::UIContainer* cp) noexcept :
 Super(cp), 
-m_sprRoot(RubyGM::DEFAULT_STATUS, nullptr), 
+m_sprRoot(RubyGM::DEFAULT_STATUS), 
 m_strCacheDir(L"cache\\"),
 m_uLastFrameTime(impl::get_time()) {
     std::memset(m_appAssetPtr, 0, sizeof(m_appAssetPtr));
@@ -352,6 +352,43 @@ namespace RubyGM { namespace Cache {
 }}
 
 
+#ifdef _DEBUG
+#include <map>
+#include <cassert>
+namespace RubyGM { namespace impl {
+    // debugger
+    struct alloc_debugger {
+        alloc_debugger() {}
+        ~alloc_debugger() noexcept { assert(map.empty()); }
+        void alloc(void* ptr, size_t len) { 
+            assert(map.find(ptr) == map.end());
+            try { map.insert(std::pair<void*, size_t>(ptr, len)); }
+            catch (...) { assert(!"error"); }
+        }
+        void free(void* ptr) { 
+            assert(map.find(ptr) != map.end());
+            try { map.erase(ptr); }
+            catch (...) { assert(!"error"); }
+        }
+        std::map<void*, size_t> map;
+    };
+    // buffer
+    alignas(void*) char g_dbg_small_alloc_data[sizeof(alloc_debugger)];
+    // get_alloc_debugger
+    static auto&get_alloc_debugger() noexcept { 
+        return *reinterpret_cast<alloc_debugger*>(g_dbg_small_alloc_data);
+    }
+    // init
+    void init() {
+        get_alloc_debugger().alloc_debugger::alloc_debugger();
+    }
+    // uninit
+    void uninit() {
+        get_alloc_debugger().alloc_debugger::~alloc_debugger();
+    }
+}}
+#endif
+
 /// <summary>
 /// Smalls the alloc a small size(less 256)
 /// </summary>
@@ -359,7 +396,11 @@ namespace RubyGM { namespace Cache {
 /// <returns></returns>
 auto RubyGM::SmallAlloc(size_t len) noexcept -> void * {
     assert(len <= 256);
-    return LongUI::SmallAlloc(len);
+    auto ptr = LongUI::SmallAlloc(len);
+#ifdef _DEBUG
+    impl::get_alloc_debugger().alloc(ptr, len);
+#endif
+    return ptr;
 }
 
 /// <summary>
@@ -368,6 +409,9 @@ auto RubyGM::SmallAlloc(size_t len) noexcept -> void * {
 /// <param name="">The ptr</param>
 /// <returns></returns>
 void RubyGM::SmallFree(void* ptr) noexcept {
+#ifdef _DEBUG
+    impl::get_alloc_debugger().free(ptr);
+#endif
     return LongUI::SmallFree(ptr);
 }
 
@@ -389,7 +433,6 @@ auto RubyGM::NormalAlloc(size_t len) noexcept -> void* {
 void RubyGM::NormalFree(void* ptr) noexcept {
     LongUI::NormalFree(ptr);
 }
-
 
 // rubygm::resouce namepsace
 namespace RubyGM { namespace Asset {

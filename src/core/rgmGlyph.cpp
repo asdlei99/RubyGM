@@ -89,7 +89,7 @@ RubyGM::Drawable::Text::Text(const TextStatus& ts) noexcept : Super(ts) {
     // 创建对象
     ID2D1PathGeometry* path = nullptr;
     auto hr = Bridge::CreatePathGeometry(path);
-    auto layout = ts.layout.Ptr()->m_pTextlayout;
+    auto layout = ts.layout->m_pTextlayout;
     ID2D1GeometrySink* sink = nullptr;
     // 打开路径记录
     if (SUCCEEDED(hr)) {

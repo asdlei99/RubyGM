@@ -8,11 +8,27 @@
 auto GetRubyGMXmlLayout() noexcept -> const char*;
 // init window
 void InitWindow(LongUI::XUIBaseWindow* , int) noexcept;
+#ifdef _DEBUG
+namespace RubyGM { namespace impl { void init(); void uninit(); } }
+#endif
+// init
+inline void rubygm_init_call() {
+#ifdef _DEBUG
+    RubyGM::impl::init();
+#endif
+}
+void rubygm_uninit_call() {
+#ifdef _DEBUG
+    RubyGM::impl::uninit();
+#endif
+}
 
 // Entry for App
 int WINAPI WinMain(HINSTANCE, HINSTANCE, char* lpCmdLine, int nCmdShow) noexcept {
     // every windows desktop app should do this
     ::HeapSetInformation(nullptr, HeapEnableTerminationOnCorruption, nullptr, 0);
+    // init
+    rubygm_init_call();
     // use OleInitialize to init ole and com
     if (SUCCEEDED(::OleInitialize(nullptr))) {
         // config
@@ -33,6 +49,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, char* lpCmdLine, int nCmdShow) noexcept
     }
     // cleanup ole and com
     ::OleUninitialize();
+    // un
+    rubygm_uninit_call();
     // exit
     return EXIT_SUCCESS;
 }
@@ -59,6 +77,8 @@ const char* const RUBYGM_XML = u8R"(xml(<?xml version="1.0" encoding="utf-8"?>
 )xml)";
 
 #include <game/rgmGame.h>
+
+
 
 // init window
 void InitWindow(LongUI::XUIBaseWindow* window, int cmd) noexcept {
@@ -121,7 +141,8 @@ namespace RubyGM { namespace Bridge {
     /// <param name="str">The string.</param>
     /// <param name="path">The path.</param>
     /// <returns></returns>
-    auto SvgPathGeometry(const char* str, ID2D1PathGeometry1*& path) noexcept->Result {
+    auto SvgPathGeometry(const char* str, 
+        ID2D1PathGeometry1*& path) noexcept->Result {
         return Result(LongUI::SVG::ParserPath(str, &path));
     }
     /// <summary>
@@ -196,7 +217,6 @@ auto GetRubyGMXmlLayout() noexcept -> const char* { return RUBYGM_XML; }
 #pragma comment(lib, "longui")
 #pragma comment(lib, "dlmalloc")
 #pragma comment(lib, "pugixml")
-#pragma comment(lib, "libmruby")
 
 
 #ifdef _UNICODE

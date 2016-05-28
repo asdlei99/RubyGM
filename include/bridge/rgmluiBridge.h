@@ -28,16 +28,22 @@
 
 // rubygm namespace
 namespace RubyGM {
-    // max resource each
-    //enum : size_t { MAX_SOURCE_EACH = 1024, };
+    // color
+    struct ColorF;
     // brush
     struct IGMBrush;
     // font
     struct IGMFont;
+    // stroke style
+    struct IGMStrokeStyle;
     // prop for font
     struct FontProperties;
-    // prop for nromal brush
-    struct NBrushProperties;
+    // prop for linear gradient brush
+    struct LinearBrush;
+    // prop for radial gradient brush
+    struct RadialBrush;
+    // prop for StrokeStyle
+    struct StrokeStyle;
 }
 
 // rubygm::base namespace
@@ -68,11 +74,20 @@ namespace RubyGM {
         auto GetCommonBrush() noexcept->IGMBrush*;
         // get last resource pointer
         auto GetLastResourceObject() noexcept ->Base::Resource*;
+        // create stroke-GI with properties
+        auto CreateStrokeWithProp(const StrokeStyle& fp, 
+            IGMStrokeStyle** stroke) noexcept->Result;
         // create font-GI with properties
         auto CreateFontWithProp(const FontProperties& fp, 
             IGMFont** font) noexcept->Result;
         // create brush-GI with properties
-        auto CreateBrushWithProp(const NBrushProperties& fp, 
+        auto CreateBrushWithProp(const ColorF& fp, 
+            IGMBrush** brush) noexcept->Result;
+        // create brush-GI with properties
+        auto CreateBrushWithProp(const LinearBrush& fp, 
+            IGMBrush** brush) noexcept->Result;
+        // create brush-GI with properties
+        auto CreateBrushWithProp(const RadialBrush& fp, 
             IGMBrush** brush) noexcept->Result;
     }
 }

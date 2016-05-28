@@ -29,39 +29,38 @@
 
 // rubygm namespace
 namespace RubyGM { 
-    // brush type
-    enum BrushType:uint32_t{ Type_Color,Type_Linear,Type_Radial,Type_Other };
     // brush
     struct IGMBrush;
-    // properties to creating normal brush
-    struct NBrushProperties {
-        // brush type
-        BrushType           type;
-        // brush opacity
-        float               opacity;
-        // union
-        union {
-            //  color
-            ColorF          color;
-        };
+    // gradient stop
+    struct GradientStop {
+        // postion
+        float   position;
+        // color
+        ColorF  color;
     };
-    // make color brush
-    inline auto MakeColorBrush(
-        NBrushProperties& prop,
-        const RubyGM::ColorF& c,
-        float opcity
-    )->NBrushProperties& {
-        prop.opacity = opcity;
-        prop.type = BrushType::Type_Color;
-        prop.color = c;
-        return prop;
-    }
-    // make color brush
-    inline auto MakeColorBrush(
-        NBrushProperties& prop,
-        const RubyGM::ColorF& c
-    )->NBrushProperties& {
-        return MakeColorBrush(prop, c, 1.f);
-    }
+    // linear gradient brush
+    struct LinearBrush {
+        // begin point
+        Point2F         begin;
+        // end point
+        Point2F         end;
+        // gradient stops 
+        GradientStop*   stops;
+        // count of stops
+        uint32_t        count;
+    };
+    // radial gradien brush
+    struct RadialBrush {
+        // begin point
+        Point2F         center;
+        // end point
+        Point2F         offset;
+        // radius
+        float           rx, ry;
+        // gradient stops 
+        GradientStop*   stops;
+        // count of stops
+        uint32_t        count;
+    };
 }
 

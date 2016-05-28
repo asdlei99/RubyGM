@@ -40,11 +40,9 @@ namespace RubyGM {
             Asset::Bitmap&      batch;
             // ctor
             ~BatchStatus() noexcept { batch.Release(); }
-            // default ctor
-            inline BatchStatus(Asset::Bitmap&& b) : batch(b) { }
             // default value
-            inline BatchStatus(Asset::Bitmap&& b, Default v) : 
-                BaseStatus(v), batch(b) {
+            inline BatchStatus(Asset::Bitmap&& b) : 
+                BaseStatus(), batch(b) {
             }
         };
         // drawable bitmap 
@@ -56,7 +54,7 @@ namespace RubyGM {
             static auto Create(const BatchStatus&) noexcept->Batch*;
             // create this
             static auto CreateSP(const BatchStatus& bs) noexcept {
-                return std::move(RubyGM::CGMPtrA<Drawable::Batch>(
+                return std::move(RubyGM::RefPtr<Drawable::Batch>(
                     std::move(Batch::Create(bs)))
                 );
             }

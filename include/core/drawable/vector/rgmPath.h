@@ -37,11 +37,7 @@ namespace RubyGM {
             // string for path
             const char*     path;
             // ctor
-            PathStatus() : GeometryStatus() {}
-            // default value
-            inline PathStatus(Default v) : GeometryStatus(v) {
-                path = "";
-            }
+            PathStatus() : GeometryStatus(), path(""){}
         };
         // path
         class Path : public Drawable::Geometry {
@@ -61,7 +57,7 @@ namespace RubyGM {
             static auto Create(const PathStatus&) noexcept ->Path*;
             // create this
             static auto CreateSP(const PathStatus& ls) noexcept {
-                return std::move(RubyGM::CGMPtrA<Drawable::Path>(
+                return std::move(RubyGM::RefPtr<Drawable::Path>(
                     std::move(Path::Create(ls)))
                 );
             }

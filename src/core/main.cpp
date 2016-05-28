@@ -2,7 +2,7 @@
 #pragma warning(disable: 4290)
 #pragma warning(disable: 4200)
 
-#include <core/rubygm.h>
+/*#include <core/rubygm.h>
 #include <mruby/compile.h>
 #include "../../../BindER/bindenvruby.h"
 
@@ -140,9 +140,10 @@ int main_call() {
         mruby = nullptr;
     }
     return 0;
-}
+}*/
 
 
+#include <core/util/rgmBrushStruct.h>
 #include <core/graphics/rgmSprite.h>
 #include <core/drawable/rgmAuto.h>
 #include <game/rgmGame.h>
@@ -170,7 +171,7 @@ namespace RubyGM {
     // update fiber
     void impl_update_fiber() {
 
-        constexpr int switch_on = 1;
+        constexpr int switch_on = 0;
         switch (switch_on)
         {
         case 0: test_text();
@@ -180,7 +181,6 @@ namespace RubyGM {
     }
 
     void test_vector() {
-        Drawable::Default def;
         auto sprite = Game::NewSprite(RubyGM::DEFAULT_STATUS);
         auto roottt = Game::NewSprite(RubyGM::DEFAULT_STATUS);
         sprite->SetX(256);
@@ -196,7 +196,7 @@ namespace RubyGM {
         sprite2->antialias_mode = sprite->Mode_Aliased;
         sprite3->SetY(50.f);
         {
-            Drawable::LineStatus ls(def);
+            Drawable::LineStatus ls;
             ls.point1.x = 100.f;
             ls.stroke_width = 4.f;
             ls.stroke_color.r = 1.f;
@@ -204,7 +204,7 @@ namespace RubyGM {
             sprite1->SetDrawable(sp);
         }
         {
-            Drawable::RectStatus rs(def);
+            Drawable::RectStatus rs;
             rs.rd_rect.rect.right = 100.f;
             rs.rd_rect.rect.bottom = 20.f;
             rs.rd_rect.rx = 30.f;
@@ -217,7 +217,7 @@ namespace RubyGM {
         }
         {
             {
-                Drawable::EllipseStatus es(def);
+                Drawable::EllipseStatus es;
                 es.ellipse.point = { 30.f, 30.f };
                 es.ellipse.rx = 30.f;
                 es.ellipse.ry = -10.f;
@@ -235,7 +235,7 @@ namespace RubyGM {
                     { 01.0f, 07.8f }, 
                     { 16.0f, 19.8f }
                 };
-                Drawable::PolygonStatus ps(def);
+                Drawable::PolygonStatus ps;
                 ps.points = pts;
                 ps.count = uint32_t(std::end(pts) - std::begin(pts));
                 //ps.stroke_width = 2.f;
@@ -247,7 +247,7 @@ namespace RubyGM {
                 float sf = sprite3->ComputeScaleFactorEz1();*/
             }
             {
-                Drawable::PathStatus ps(def);
+                Drawable::PathStatus ps;
                 ps.path =   "M230 230"
                             "A 45 45, 0, 1, 1, 275 275"
                             "L 275 230 Z";
@@ -273,7 +273,7 @@ namespace RubyGM {
 
 
     void test_text() {
-        Drawable::Default def;
+        auto backgd = Game::NewSprite(RubyGM::DEFAULT_STATUS);
         auto sprite = Game::NewSprite(RubyGM::DEFAULT_STATUS);
         sprite->SetX(128.f * 2.f);
         sprite->SetY(128.f);
@@ -281,14 +281,18 @@ namespace RubyGM {
         sprite->SetZoomY(5.f);
         sprite->SetOX(40.f);
         sprite->SetOY(20.f);
+        {
+            auto ast = Game::CreateBitmapAssetFromFile(L"asset/FC4-screenshot.jpg");
+            Drawable::BitmapStatus bs(ast);
+            auto sp = Drawable::CreateSP(bs);
+            backgd->SetDrawable(sp);
+        }
         auto sprite1 = sprite->AddChild(RubyGM::DEFAULT_STATUS);
         auto sprite2 = sprite->AddChild(RubyGM::DEFAULT_STATUS);
         sprite2->SetY(20.f);
         {
-            Drawable::TextlayoutStatus ts(
-                std::move(Game::GetFontAsset(0)),
-                def
-            );
+            auto font = Game::GetFontAsset(0);
+            Drawable::TextlayoutStatus ts;
             ts.text = L"Hello, 世界!";
             ts.textlen = static_cast<uint32_t>(std::wcslen(ts.text));
             if (auto sp = Drawable::CreateSP(ts)) {
@@ -299,10 +303,39 @@ namespace RubyGM {
                 sp->SetFontFeature(TextRange{ 1, 4 }, "smcp");
                 sprite1->SetDrawable(sp);
                 {
-                    auto sf = sprite2->ComputeScaleFactorEz1();
-                    auto bsp = sp->RasterizationSP(sf);
+                    GradientStop stops[] = {
+                        {0.f, {0.f, 1.f, 0.f, 1.f}},
+                        {1.f, {0.f, 0.f, 1.f, 1.f}},
+                    };
+                    LinearBrush lb;
+                    lb.begin = { 0.f };
+                    lb.end = { ms.width, 0.f };
+                    lb.count = 2;
+                    lb.stops = stops;
+                    auto brush = Game::CreateBrushAsset(lb);
+
+                    float dashes[] = { 1.f, 2.f };
+                    StrokeStyle ss;
+                    ss.dash_count = 2;
+                    ss.line_join = Join_Miter;
+                    ss.cap_begin = Style_Round;
+                    ss.cap_end = Style_Round;
+                    ss.cap_dash = Style_Round;
+                    ss.miter_limit = 1.f;
+                    ss.dash_offset = 0.f;
+                    ss.dashes = dashes;
+                    auto stroke = Game::CreateStrokeAsset(ss);
+
+
+                    Drawable::TextStatus txts(sp);
+                    txts.stroke_style = stroke;
+                    txts.stroke_color.r = 0.8f;
+                    txts.stroke_width = 0.233f;
+                    txts.stroke_brush = brush;
+                    txts.filled_color.a = 0.0f;
+                    auto text_geo = Drawable::CreateSP(txts);
                     //bsp->SetInterpolationMode(Mode_HighQqualityCubic);
-                    sprite2->SetDrawable(bsp);
+                    sprite2->SetDrawable(text_geo);
                     sp->SetFontColor(TextRange{ 3, 4 }, ColorF{ 1.f,0.,0.8f,1.f });
                     //sprite1->SetDrawable(bsp);
                 }
@@ -318,8 +351,6 @@ namespace RubyGM {
 
 
     void text_bitmap() {
-        Drawable::Default def;
-
         //main_call();
         auto mod = [](float x, float y) { return x - float(int(x / y)); };
         auto sprite = Game::NewSprite(RubyGM::DEFAULT_STATUS);
@@ -332,19 +363,24 @@ namespace RubyGM {
         //sprite->SetOX(50.f);
         auto sprite1 = sprite->AddChild(DEFAULT_STATUS);
         auto sprite2 = sprite->AddChild(DEFAULT_STATUS);
+#ifdef RUBYGM_TEST_MODE
+        sprite2->SetName_test(L"sprite2");
+#endif
         //sprite2->SetOX(10.f);
         //sprite2->SetOY(20.f);
         {
-            Drawable::TextlayoutStatus tls(
-                std::move(Game::GetFontAsset(0)),
-                def
-            );
-            tls.color.b = 1.f;
+            Drawable::TextlayoutStatus tls;
             tls.width = 64.f;
+            tls.color = { 1.f, 1.f, 1.f, 1.f };
+            tls.font = std::move(Game::GetFontAsset(0));
             tls.text = L"Hello, 世界!";
+            tls.text = LR"(This is<font color="#6CF"> Maya Blue </font>)";
+            tls.renderer = "outline";
+            tls.context = "0.7495832145\0, #F00";
+            tls.isxml = true;
             tls.textlen = uint32_t(std::wcslen(tls.text));
             auto layout = Drawable::CreateSP(tls);
-            if (layout) {
+            if (layout && false) {
                 TextMetrics ms;
                 layout->GetMetrics(ms);
                 layout->SetFontSize(TextRange{ 0, 4 }, 5.f);
@@ -355,9 +391,9 @@ namespace RubyGM {
                 //sprite1->SetDrawable(std::move());
             }
             {
-                auto&ast = Game::CreateBitmapAssetFromFile(L"asset/FC4-screenshot.jpg");
+                auto ast = Game::CreateBitmapAssetFromFile(L"asset/FC4-screenshot.jpg");
                 if (false) {
-                    Drawable::BitmapStatus bs(std::move(ast), def);
+                    Drawable::BitmapStatus bs(std::move(ast));
                     auto sp = Drawable::CreateSP(bs);
                     if (sp) {
                         sp->des_rect.right = 128.f;
@@ -367,7 +403,7 @@ namespace RubyGM {
                 }
                 else {
                     {
-                        Drawable::BitmapStatus bs(std::move(ast), def);
+                        Drawable::BitmapStatus bs(std::move(ast));
                         auto sp = Drawable::CreateSP(bs);
                         if (sp) {
                             //sp->des_rect.right = 128.f;
@@ -381,18 +417,16 @@ namespace RubyGM {
                     sprite2->SetZoomX(6.f);
                     sprite2->SetZoomY(6.f);
                     auto shadow = sprite2->AddChild(DEFAULT_STATUS);
-                    auto&tst = Game::CreateBitmapAssetFromDrawable(
+                    auto tst = Game::CreateBitmapAssetFromDrawable(
                         layout.Ptr(), shadow->ComputeScaleFactorEz2(),
                         SizeF{ ms.width, ms.height }
                     );
-                    tst.AddRef();
-                    Drawable::BitmapStatus bs(std::move(tst), def);
+                    Drawable::BitmapStatus bs(tst);
                     auto bmp = Drawable::CreateSP(bs);
                     bmp->des_rect.right = ms.width;
                     bmp->des_rect.bottom = ms.height;
                     shadow->SetDrawable(bmp);
-
-                    Drawable::ShadowStatus ss(std::move(tst), def);
+                    Drawable::ShadowStatus ss(std::move(tst));
                     auto sp = Drawable::CreateSP(ss);
                     if (sp) {
                         float offsetx = 1.f;
@@ -403,27 +437,38 @@ namespace RubyGM {
                         sp->des_rect.bottom = offsety + ms.height;
                         sprite2->SetDrawable(sp);
                     }
-                    float v = -1.f;
-                    float s = .01f;
-                    while (true) {
-                        RubyGM::FiberYield();
-                        auto time = Game::GetDetalTime();
-                        v += s * time * 5.f;
-                        if (v >= 4.f) s = -1.f;
-                        else if (v <= 1.f) s = 1.f;
-                        sp->SetStandardDeviation(v);
-                    }
                 }
 
             }
             {
-                Drawable::TextStatus ts(layout, def);
+                Drawable::TextStatus ts(layout);
                 auto sp = Drawable::CreateSP(ts);
                 sprite->SetDrawable(std::move(sp));
             }
         }
+
         float v = -1.f;
         float s = .01f;
+        int a = 0;
+        while (true) {
+            ++a;
+            RubyGM::FiberYield();
+            auto time = Game::GetDetalTime();
+            v += s * time * 5.f;
+            if (v >= 4.f) s = -1.f;
+            else if (v <= 1.f) s = 1.f;
+            if (sprite2) {
+                auto obj = sprite2->RefDrawable().Ptr();
+                auto tmp = static_cast<Drawable::Shadow*>(obj);
+                tmp->SetStandardDeviation(v);
+                if (a > 600) {
+                    sprite2->Dispose();
+                    sprite2 = nullptr;
+                }
+            }
+
+        }
+
         sprite->SetRotation(30.f);
         while (true) {
             RubyGM::FiberYield();

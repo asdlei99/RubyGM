@@ -40,21 +40,19 @@ namespace RubyGM {
     // Drawable namespace
     namespace Drawable {
         // always right angle
-        struct AlwaysRightAngle : Default {};
+        struct AlwaysRightAngle {};
         // status for rect
         struct RectStatus : VectorStatus {
             // Rounded Rect data
             RoundedRectF    rd_rect;
-            // ctor
-            RectStatus() : VectorStatus() {}
             // default value
-            inline RectStatus(Default v) : VectorStatus(v) {
+            inline RectStatus() : VectorStatus() {
                 rd_rect.rect = { 0.f, 0.f, 1.f , 1.f };
                 rd_rect.rx = 0.f;
                 rd_rect.ry = 0.f;
             }
             // Right Angle, ALWAYS ignore rx/ry
-            inline RectStatus(AlwaysRightAngle v) : VectorStatus(v) {
+            inline RectStatus(AlwaysRightAngle ) : VectorStatus() {
                 rd_rect.rect = { 0.f, 0.f, 1.f , 1.f };
                 rd_rect.rx = -1.f;
                 rd_rect.ry = -1.f;
@@ -78,7 +76,7 @@ namespace RubyGM {
             static auto Create(const RectStatus&) noexcept ->Rect*;
             // create this
             static auto CreateSP(const RectStatus& ls) noexcept {
-                return std::move(RubyGM::CGMPtrA<Drawable::Rect>(
+                return std::move(RubyGM::RefPtr<Drawable::Rect>(
                     std::move(Rect::Create(ls)))
                 );
             }

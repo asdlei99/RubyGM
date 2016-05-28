@@ -44,35 +44,38 @@ namespace RubyGM {
         struct TextlayoutStatus : BaseStatus {
             // basic color
             ColorF                  color;
-            // text renderer
+            // font, use default font if set to null
+            RefPtr<Asset::Font>     font;
+            // text renderer name, c-style string required
+            // could be: "normal", "outline"...
             const char*             renderer;
-            // text context
+            // text context, c-style string required
+            // for "normal" renderer: none
+            // for "outline"renderer: "stroke-width[, stroke-color]"
             const char*             context;
-            // text
+            // text, c-style string NOT required
             const wchar_t*          text;
-            // font resource
-            Asset::Font&            font;
             // layout width
             float                   width;
             // layout height
             float                   height;
             // text length
             uint32_t                textlen;
-            // ctor
-            ~TextlayoutStatus() noexcept { font.Release(); }
-            // default ctor
-            inline TextlayoutStatus(Asset::Font&& f) : font(f) { }
+            // xml rich-text-format?  
+            // like:  This is<font color="#6CF"> Maya Blue </font>
+            // if set but invalid xml given it will ignore this flag
+            uint32_t                isxml;
             // default value
-            inline TextlayoutStatus(Asset::Font&& f, Default v) : 
-                BaseStatus(v), font(f) {
+            inline TextlayoutStatus() : font(nullptr), BaseStatus() {
                 renderer = ""; context = "";
                 text = L""; textlen = 0;
                 width = 128.f; height = 32.f;
                 color.r = color.g = color.b = 0.f; color.a = 1.f;
+                isxml = false;
             }
         };
         // text layout 
-        class Textlayout : public Drawable::Object {
+        class Textlayout final : public Drawable::Object {
             // super class
             using Super = Drawable::Object;
             // frirend
@@ -82,11 +85,11 @@ namespace RubyGM {
             static auto Create(const TextlayoutStatus&) noexcept->Textlayout*;
             // create this
             static auto CreateSP(const TextlayoutStatus& ts) noexcept {
-                return std::move(RubyGM::CGMPtrA<Drawable::Textlayout>(
+                return std::move(RubyGM::RefPtr<Drawable::Textlayout>(
                     std::move(Textlayout::Create(ts)))
                 );
             }
-        private:
+        protected:
             // ctor
             Textlayout(const TextlayoutStatus&) noexcept;
             // ctor
@@ -109,7 +112,7 @@ namespace RubyGM {
             // rasterization helper
             template<typename ...Args>
             auto RasterizationSP(Args&&... args) noexcept {
-                return std::move(RubyGM::CGMPtrA<Drawable::Bitmap>(
+                return std::move(RubyGM::RefPtr<Drawable::Bitmap>(
                     std::move(this->Rasterization(std::forward<Args>(args)...))
                     ));
             }

@@ -48,10 +48,8 @@ namespace RubyGM {
             RectF           src_rect;
             // des rect
             RectF           des_rect;
-            // default ctor
-            inline EffectStatus()  { }
             // default value
-            inline EffectStatus(Default v) : BaseStatus(v) {
+            inline EffectStatus() : BaseStatus() {
                 src_rect = { 0.f };
                 des_rect = { 0.f };
             }
