@@ -43,10 +43,14 @@ namespace RubyGM { namespace impl {
     inline auto&rubygm(const D2D1_COLOR_F& c) { return reinterpret_cast<const RubyGM::ColorF&>(c); }
     // d2d
     inline auto&d2d(RubyGM::Matrix3X2F& mt) { return reinterpret_cast<D2D1_MATRIX_3X2_F&>(mt); }
+    // d2d
+    inline auto&d2d(RubyGM::Matrix4X4F& mt) { return reinterpret_cast<D2D1_MATRIX_4X4_F&>(mt); }
     // rubygm
     inline auto&rubygm(D2D1_MATRIX_3X2_F& mt) { return reinterpret_cast<RubyGM::Matrix3X2F&>(mt); }
     // d2d
     inline auto&d2d(const RubyGM::Matrix3X2F& mt) { return reinterpret_cast<const D2D1_MATRIX_3X2_F&>(mt); }
+    // d2d
+    inline auto&d2d(const RubyGM::Matrix4X4F& mt) { return reinterpret_cast<const D2D1_MATRIX_4X4_F&>(mt); }
     // rubygm
     inline auto&rubygm(const D2D1_MATRIX_3X2_F& mt) { return reinterpret_cast<const RubyGM::Matrix3X2F&>(mt); }
     // d2d
@@ -56,6 +60,7 @@ namespace RubyGM { namespace impl {
     // ---------------------------
     template<class T, class Y, class U>
     auto d2d(Y* obj, const U& iid) noexcept -> T* {
+        UNREFERENCED_PARAMETER(iid);
 #ifdef _DEBUG
         if(obj) {
             void* brush = nullptr;

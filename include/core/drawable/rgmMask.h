@@ -36,13 +36,23 @@ namespace RubyGM {
     namespace Drawable {
         // status for mask
         struct MaskStatus : BaseStatus {
-            // mask bitmap asset
-            Asset::Bitmap&      mask;
-            // ctor
-            ~MaskStatus() noexcept { mask.Release(); }
+            // mask bitmap asset, CANNOT be null
+            RefPtr<Asset::Bitmap>   mask;
+            // filled brush asset , CANNOT be null
+            RefPtr<Asset::Brush>    brush;
             // default value
-            inline MaskStatus(Asset::Bitmap&& b) : 
-                BaseStatus(), mask(std::move(b)) {
+            inline MaskStatus(const RefPtr<Asset::Bitmap>& m,
+                const RefPtr<Asset::Brush>& b) : 
+                BaseStatus(), mask(m), brush(b) { asset_check(); }
+            // default value
+            inline MaskStatus(RefPtr<Asset::Bitmap>&& m,
+                RefPtr<Asset::Brush>&& b) : BaseStatus(),
+                 mask(std::move(m)), brush(std::move(b)) { asset_check(); }
+        private:
+            // asset check
+            inline void asset_check() { 
+                assert(mask && "mask bitmap asset cannot be null");
+                assert(brush && "filled brush asset cannot be null");
             }
         };
         // drawable bitmap 
@@ -68,47 +78,21 @@ namespace RubyGM {
         public:
             // render object
             void Render(IGMRenderContext& rc) const noexcept override;
-            // redraw bitmap if bitmap is RasterMask
-            auto RedrawMask() noexcept { return m_refMask.Redraw(); }
         protected:
             // recreate resource
             virtual auto recreate() noexcept -> Result override;
         private:
             // dispose object
             void dispose() noexcept override;
-            // reset bitmap size
-            void reset_bitmap_size() noexcept;
-        public:
-            // save as png file, will save total file
-            auto SaveAsPng(const wchar_t* file_name) noexcept ->Result;
-            // save as png file with utf8
-            auto SaveAsPng(const char* file_name) noexcept ->Result;
-            // get width
-            auto GetWidth() const noexcept { return m_fWidth; }
-            // get height
-            auto GetHeight() const noexcept { return m_fHeight; }
-            // get interpolation mode
-            auto GetInterpolationMode() const noexcept { return m_modeInter; }
-            // set interpolation mode
-            void SetInterpolationMode(InterpolationMode mode) noexcept;
-        private:
-            // mask bitmap asset
-            Asset::Bitmap&      m_refMask;
-            // bitmap data
-            IGMBitmap*          m_pMask = nullptr;
-            // width of bitmap
-            float               m_fWidth = 1.f;
-            // height of bitmap
-            float               m_fHeight = 1.f;
-            // interpolation mode
-            InterpolationMode   m_modeInter;
-        public:
-            // opacity
-            float               opacity = 1.f;
-            // src clip rect
-            RectF               src_rect{ 0.f };
-            // display rect
-            RectF               des_rect{ 0.f };
+        protected:
+            // mask bitmap
+            RefPtr<Asset::Bitmap>   m_spAsMask;
+            // filled brush
+            RefPtr<Asset::Brush>    m_spAsBrush;
+            // mask graphics interface data
+            IGMBitmap*              m_pGiMask = nullptr;
+            // filled brush graphics interface data
+            IGMBrush*               m_pGiBrush = nullptr;
         };
     }
 }

@@ -59,6 +59,15 @@ namespace RubyGM {
                 assert(bitmap && "bitmap asset cannot be null");
             }
         };
+        // Status for PerspectiveBitmap
+        struct PerspectiveBitmapStatus : BitmapStatus {
+            // default value
+            inline PerspectiveBitmapStatus(const RefPtr<Asset::Bitmap>& b) : 
+                BitmapStatus(b) {}
+            // default value
+            inline PerspectiveBitmapStatus(RefPtr<Asset::Bitmap>&& b) :
+                BitmapStatus(std::move(b)) {}
+        };
         // drawable bitmap 
         class Bitmap : public Drawable::Object {
             // super class
@@ -72,7 +81,7 @@ namespace RubyGM {
                     std::move(Bitmap::Create(bs)))
                 );
             }
-        private:
+        protected:
             // ctor
             Bitmap(const BitmapStatus&) noexcept;
             // ctor
@@ -103,17 +112,17 @@ namespace RubyGM {
             auto GetInterpolationMode() const noexcept { return m_modeInter; }
             // set interpolation mode
             void SetInterpolationMode(InterpolationMode mode) noexcept;
-        private:
+        protected:
             // bitmap asset
             RefPtr<Asset::Bitmap>   m_spAsBitmap;
-            // bitmap data
+            // bitmap graphics interface data
             IGMBitmap*              m_pGiBitmap = nullptr;
             // width of bitmap
             float                   m_fWidth = 1.f;
             // height of bitmap
             float                   m_fHeight = 1.f;
             // interpolation mode
-            InterpolationMode       m_modeInter;
+            InterpolationMode       m_modeInter = Mode_Linear;
         public:
             // opacity
             float                   opacity = 1.f;
@@ -121,6 +130,37 @@ namespace RubyGM {
             RectF                   src_rect{ 0.f };
             // display rect
             RectF                   des_rect{ 0.f };
+        };
+        // drawable perspective-bitmap 
+        class PerspectiveBitmap : public Drawable::Bitmap {
+            // super class
+            using Super = Drawable::Bitmap;
+        public:
+            // create this
+            static auto Create(const PerspectiveBitmapStatus&) 
+                noexcept->PerspectiveBitmap*;
+            // create this
+            static auto CreateSP(const PerspectiveBitmapStatus& bs) noexcept {
+                return std::move(RubyGM::RefPtr<Drawable::PerspectiveBitmap>(
+                    std::move(PerspectiveBitmap::Create(bs)))
+                );
+            }
+        protected:
+            // ctor
+            PerspectiveBitmap(const PerspectiveBitmapStatus&) noexcept;
+            // ctor
+            PerspectiveBitmap(const Bitmap&) = delete;
+            // dtor
+            ~PerspectiveBitmap() noexcept {}
+        public:
+            // render object
+            void Render(IGMRenderContext& rc) const noexcept override;
+        private:
+            // dispose object
+            void dispose() noexcept override;
+        public:
+            // perspective matrix
+            Matrix4X4F          perspective;
         };
     }
 }

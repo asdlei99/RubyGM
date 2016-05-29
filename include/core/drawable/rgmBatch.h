@@ -32,23 +32,34 @@
 
 // rubygm namespace
 namespace RubyGM {
+    // batch
+    struct IGMBatch;
     // resource namespace
     namespace Drawable {
         // status for batch
         struct BatchStatus : BaseStatus {
-            // batch bitmap asset
-            Asset::Bitmap&      batch;
-            // ctor
-            ~BatchStatus() noexcept { batch.Release(); }
+            // bitmap asset, CANNOT be null
+            RefPtr<Asset::Bitmap>   bitmap;
             // default value
-            inline BatchStatus(Asset::Bitmap&& b) : 
-                BaseStatus(), batch(b) {
+            inline BatchStatus(const RefPtr<Asset::Bitmap> & b) : 
+                BaseStatus(), bitmap(b) { asset_check(); }
+            // default value
+            inline BatchStatus(RefPtr<Asset::Bitmap>&& b) : 
+                BaseStatus(), bitmap(std::move(b)) { asset_check();}
+        private:
+            // asset check
+            inline void asset_check() { 
+                assert(bitmap && "bitmap asset cannot be null");
             }
         };
         // drawable bitmap 
         class Batch : public Drawable::Object {
             // super class
             using Super = Drawable::Object;
+            // dispose object
+            void dispose() noexcept override;
+            // reset batch
+            void reset_batch() noexcept;
         public:
             // create this
             static auto Create(const BatchStatus&) noexcept->Batch*;
@@ -58,7 +69,7 @@ namespace RubyGM {
                     std::move(Batch::Create(bs)))
                 );
             }
-        private:
+        protected:
             // ctor
             Batch(const BatchStatus&) noexcept;
             // ctor
@@ -68,45 +79,26 @@ namespace RubyGM {
         public:
             // render object
             void Render(IGMRenderContext& rc) const noexcept override;
+            // set the interpolation mode
+            void SetInterpolationMode(InterpolationMode) noexcept;
         protected:
             // recreate resource
             virtual auto recreate() noexcept -> Result override;
-        private:
-            // dispose object
-            void dispose() noexcept override;
-            // reset bitmap size
-            void reset_bitmap_size() noexcept;
-        public:
-            // save as png file, will save total file
-            auto SaveAsPng(const wchar_t* file_name) noexcept ->Result;
-            // save as png file with utf8
-            auto SaveAsPng(const char* file_name) noexcept ->Result;
-            // get width
-            auto GetWidth() const noexcept { return m_fWidth; }
-            // get height
-            auto GetHeight() const noexcept { return m_fHeight; }
-            // get interpolation mode
-            auto GetInterpolationMode() const noexcept { return m_modeInter; }
-            // set interpolation mode
-            void SetInterpolationMode(InterpolationMode mode) noexcept;
-        private:
-            // batch bitmap asset
-            Asset::Bitmap&      m_refBatch;
-            // bitmap data
-            IGMBitmap*          m_pBatch = nullptr;
-            // width of bitmap
-            float               m_fWidth = 1.f;
-            // height of bitmap
-            float               m_fHeight = 1.f;
+        protected:
+            // batch bitmap
+            RefPtr<Asset::Bitmap>   m_spAsBitmap;
+            // batch bitmap graphics interface
+            IGMBitmap*              m_pGiBitmap = nullptr;
+            // batch graphics interface
+            IGMBatch*               m_pGiBatch = nullptr;
+            // unit total count
+            uint32_t                m_cUnitTotal = 0;
+            // unit display start index
+            uint32_t                m_iUnitStart = 0;
+            // unit display count
+            uint32_t                m_cUnitDisplay = 0;
             // interpolation mode
-            InterpolationMode   m_modeInter;
-        public:
-            // opacity
-            float               opacity = 1.f;
-            // src clip rect
-            RectF               src_rect{ 0.f };
-            // display rect
-            RectF               des_rect{ 0.f };
+            InterpolationMode       m_modeInter = Mode_Linear;
         };
     }
 }

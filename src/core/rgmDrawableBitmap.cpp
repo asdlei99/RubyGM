@@ -3,6 +3,7 @@
 #include <core/graphics/rgmGraphics.h>
 #include <core/Drawable/rgmBitmap.h>
 #include <core/util/rgmImpl.h>
+#include <game/rgmGame.h>
 #include <algorithm>
 #undef min
 
@@ -27,7 +28,8 @@ m_pGiBitmap(bs.bitmap->GetBitmap()) {
 /// <returns></returns>
 void RubyGM::Drawable::Bitmap::SetInterpolationMode(
     InterpolationMode mode) noexcept {
-    m_modeInter = std::min(Mode_HighQqualityCubic, mode);
+    m_modeInter = mode > Mode_HighQqualityCubic ?
+        Mode_Linear : mode;
 }
 
 /// <summary>
@@ -74,7 +76,7 @@ RubyGM::Drawable::Bitmap::~Bitmap() noexcept {
 /// <returns></returns>
 void RubyGM::Drawable::Bitmap::dispose() noexcept {
     this->Bitmap::~Bitmap();
-    RubyGM::NormalFree(this);
+    RubyGM::SmallFree(this);
 }
 
 
@@ -91,8 +93,7 @@ void RubyGM::Drawable::Bitmap::Render(IGMRenderContext& rc) const noexcept {
     auto mode = D2D1_INTERPOLATION_MODE(m_modeInter);
     auto& des = impl::d2d(this->des_rect);
     auto& src = impl::d2d(this->src_rect);
-    D2D1_MATRIX_4X4_F* perspective = nullptr;
-    rc.DrawBitmap(m_pGiBitmap, &des, this->opacity, mode, &src, perspective);
+    rc.DrawBitmap(m_pGiBitmap, &des, this->opacity, mode, &src, nullptr);
 }
 
 
@@ -128,8 +129,281 @@ auto RubyGM::Drawable::Bitmap::Create(
     const BitmapStatus& bs) noexcept -> Bitmap* {
     assert(bs.bitmap && "bitmap from BitmapStatus cannot be null");
     // 申请空间
-    if (const auto ptr = RubyGM::NormalAlloc(sizeof(Bitmap))) {
+    if (const auto ptr = RubyGM::SmallAlloc(sizeof(Bitmap))) {
         return new(ptr) Bitmap(bs);
     }
     return nullptr;
+}
+
+/// <summary>
+/// Initializes a new instance of the <see cref="PerspectiveBitmap"/> class.
+/// </summary>
+/// <param name="bs">The bs.</param>
+RubyGM::Drawable::PerspectiveBitmap::PerspectiveBitmap(
+    const PerspectiveBitmapStatus& bs) noexcept : Super(bs) {
+    auto&pers = reinterpret_cast<D2D1::Matrix4x4F&>(this->perspective);
+    pers.D2D1::Matrix4x4F::Matrix4x4F();
+}
+
+/// <summary>
+/// Disposes this instance.
+/// </summary>
+/// <returns></returns>
+void RubyGM::Drawable::PerspectiveBitmap::dispose() noexcept {
+    this->PerspectiveBitmap::~PerspectiveBitmap();
+    RubyGM::NormalFree(this);
+}
+
+
+/// <summary>
+/// Creates the specified bs.
+/// </summary>
+/// <param name="bs">The bs.</param>
+/// <returns></returns>
+auto RubyGM::Drawable::PerspectiveBitmap::Create(
+    const PerspectiveBitmapStatus& bs) noexcept -> PerspectiveBitmap* {
+    assert(bs.bitmap && "bitmap from BitmapStatus cannot be null");
+    // 申请空间
+    if (const auto ptr = RubyGM::NormalAlloc(sizeof(PerspectiveBitmap))) {
+        return new(ptr) PerspectiveBitmap(bs);
+    }
+    return nullptr;
+}
+
+/// <summary>
+/// Renders the specified rc.
+/// </summary>
+/// <param name="rc">The rc.</param>
+/// <returns></returns>
+void RubyGM::Drawable::PerspectiveBitmap::Render(
+    IGMRenderContext& rc) const noexcept {
+    if (!m_pGiBitmap) return;
+#ifdef _DEBUG
+    assert((m_pGiBitmap->GetOptions() & D2D1_BITMAP_OPTIONS_CANNOT_DRAW) == 0);
+#endif
+    auto mode = D2D1_INTERPOLATION_MODE(m_modeInter);
+    auto& des = impl::d2d(this->des_rect);
+    auto& src = impl::d2d(this->src_rect);
+    auto& per = impl::d2d(this->perspective);
+    rc.DrawBitmap(m_pGiBitmap, &des, this->opacity, mode, &src, &per);
+}
+
+
+// ============================================================================
+// ================================= Mask =====================================
+// ============================================================================
+#include <core/drawable/rgmMask.h>
+
+
+/// <summary>
+/// Initializes a new instance of the <see cref="Mask"/> class.
+/// </summary>
+/// <param name="ms">The ms.</param>
+RubyGM::Drawable::Mask::Mask(const MaskStatus& ms) noexcept :
+Super(ms), m_spAsMask(ms.mask), m_spAsBrush(ms.brush),
+m_pGiMask(ms.mask->GetBitmap()),m_pGiBrush(ms.brush->GetBrush()) {
+
+}
+
+/// <summary>
+/// Creates the specified bs.
+/// </summary>
+/// <param name="bs">The bs.</param>
+/// <returns></returns>
+auto RubyGM::Drawable::Mask::Create(const MaskStatus& ms) noexcept ->Mask*{
+    assert(ms.mask && "bitmap from MaskStatus cannot be null");
+    // 申请空间
+    if (const auto ptr = RubyGM::SmallAlloc(sizeof(Mask))) {
+        return new(ptr) Mask(ms);
+    }
+    return nullptr;
+}
+
+/// <summary>
+/// Finalizes an instance of the <see cref="Mask"/> class.
+/// </summary>
+/// <returns></returns>
+RubyGM::Drawable::Mask::~Mask() noexcept {
+    RubyGM::SafeRelease(m_pGiMask);
+    RubyGM::SafeRelease(m_pGiBrush);
+}
+
+/// <summary>
+/// Disposes this instance.
+/// </summary>
+/// <returns></returns>
+void RubyGM::Drawable::Mask::dispose() noexcept {
+    this->Mask::~Mask();
+    RubyGM::SmallFree(this);
+}
+
+/// <summary>
+/// Recreates this instance.
+/// </summary>
+/// <returns></returns>
+auto RubyGM::Drawable::Mask::recreate() noexcept -> Result {
+    RubyGM::SafeRelease(m_pGiMask);
+    RubyGM::SafeRelease(m_pGiBrush);
+    uint32_t hr = Result(S_OK);
+    // 重建父类
+    if (SUCCEEDED(hr)) {
+        hr = Super::recreate();
+    }
+    // 重建遮罩
+    if (SUCCEEDED(hr)) {
+        hr = m_spAsMask->Recreate();
+    }
+    // 重建笔刷
+    if (SUCCEEDED(hr)) {
+        hr = m_spAsMask->Recreate();
+    }
+    // 重获资源
+    if (SUCCEEDED(hr)) {
+        m_pGiMask = m_spAsMask->GetBitmap();
+        m_pGiBrush = m_spAsBrush->GetBrush();
+        // 检查错误
+        if (!(m_pGiBrush && m_pGiMask)) {
+#ifdef _DEBUG
+            assert(!"error check");
+#endif
+            hr = Game::GetLastErrorCode();
+            Game::SetLastErrorCode(Result(S_OK));
+        }
+    }
+    return hr;
+}
+
+/// <summary>
+/// Renders the specified rc.
+/// </summary>
+/// <param name="rc">The rc.</param>
+/// <returns></returns>
+void RubyGM::Drawable::Mask::Render(IGMRenderContext& rc) const noexcept {
+    if (m_pGiMask && m_pGiBrush) {
+        auto mode = rc.GetAntialiasMode();
+        rc.SetAntialiasMode(D2D1_ANTIALIAS_MODE_ALIASED);
+        rc.FillOpacityMask(m_pGiMask, m_pGiBrush);
+        rc.SetAntialiasMode(mode);
+    }
+}
+
+
+
+// ============================================================================
+// ================================ Batch =====================================
+// ============================================================================
+#include <core/drawable/rgmBatch.h>
+#include <bridge/rgmluiBridge.h>
+
+/// <summary>
+/// reset batches
+/// </summary>
+/// <returns></returns>
+void RubyGM::Drawable::Batch::reset_batch() noexcept {
+    if (m_pGiBatch && m_pGiBitmap) {
+        D2D1_RECT_U src;
+        D2D1_RECT_F des;
+        {
+            auto size = m_pGiBitmap->GetPixelSize();
+            src = { 0, 0, size.width, size.height };
+            des = { 0.f, 0.f, float(size.width), float(size.height) };
+        }
+        auto hr = m_pGiBatch->AddSprites(
+            1, &des, &src, nullptr, nullptr, 0, 0, 0, 0
+        );
+        assert(SUCCEEDED(hr));
+    }
+}
+
+
+/// <summary>
+/// Initializes a new instance of the <see cref="Mask"/> class.
+/// </summary>
+/// <param name="ms">The ms.</param>
+RubyGM::Drawable::Batch::Batch(const BatchStatus& bs) noexcept :
+Super(bs), m_spAsBitmap(bs.bitmap), m_pGiBitmap(bs.bitmap->GetBitmap()),
+m_pGiBatch(Bridge::CreateBatch()) {
+    this->reset_batch();
+}
+
+/// <summary>
+/// Creates the specified bs.
+/// </summary>
+/// <param name="bs">The bs.</param>
+/// <returns></returns>
+auto RubyGM::Drawable::Batch::Create(const BatchStatus& bs) noexcept ->Batch* {
+    assert(bs.bitmap && "bitmap from BatchStatus cannot be null");
+    // 申请空间
+    if (const auto ptr = RubyGM::SmallAlloc(sizeof(Batch))) {
+        return new(ptr) Batch(bs);
+    }
+    return nullptr;
+}
+
+/// <summary>
+/// Finalizes an instance of the <see cref="Mask"/> class.
+/// </summary>
+/// <returns></returns>
+RubyGM::Drawable::Batch::~Batch() noexcept {
+    RubyGM::SafeRelease(m_pGiBitmap);
+    RubyGM::SafeRelease(m_pGiBatch);
+}
+
+/// <summary>
+/// Disposes this instance.
+/// </summary>
+/// <returns></returns>
+void RubyGM::Drawable::Batch::dispose() noexcept {
+    this->Batch::~Batch();
+    RubyGM::SmallFree(this);
+}
+
+/// <summary>
+/// Sets the interpolation mode.
+/// </summary>
+/// <param name="mode">The mode.</param>
+/// <returns></returns>
+void RubyGM::Drawable::Batch::SetInterpolationMode(
+    InterpolationMode mode) noexcept {
+    m_modeInter = mode > Mode_HighQqualityCubic ?
+        Mode_Linear : mode;
+}
+
+
+
+/// <summary>
+/// Recreates this instance.
+/// </summary>
+/// <returns></returns>
+auto RubyGM::Drawable::Batch::recreate() noexcept -> Result {
+    RubyGM::SafeRelease(m_pGiBitmap);
+    RubyGM::SafeRelease(m_pGiBatch);
+    // 创建新的精灵集
+    if ((m_pGiBatch = Bridge::CreateBatch())) {
+        assert(!"NOT IMPL");
+    }
+    return m_spAsBitmap->Recreate();
+}
+
+/// <summary>
+/// Renders the specified rc.
+/// </summary>
+/// <param name="rc">The rc.</param>
+/// <returns></returns>
+void RubyGM::Drawable::Batch::Render(IGMRenderContext& rc) const noexcept {
+    if (m_pGiBatch && m_pGiBitmap) {
+        // 过多的精灵单元
+        if (m_cUnitDisplay > 256) {
+            auto hr = rc.Flush();
+            if (FAILED(hr)) Game::SetLastErrorCode(hr);
+        }
+        rc.DrawSpriteBatch(
+            m_pGiBatch,
+            m_iUnitStart,
+            m_cUnitDisplay,
+            m_pGiBitmap,
+            D2D1_BITMAP_INTERPOLATION_MODE(m_modeInter),
+            D2D1_SPRITE_OPTIONS_NONE
+        );
+    }
 }

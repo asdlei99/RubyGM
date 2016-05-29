@@ -29,6 +29,7 @@
 */
 
 // basic graphics
+#include "rgmMask.h"
 #include "rgmBitmap.h"
 #include "rgmTextlayout.h"
 // vector graphics
@@ -52,8 +53,16 @@ namespace RubyGM {
         // ============================= Basic ================================
         // ====================================================================
         // create bitmap
+        inline auto CreateSP(const MaskStatus& ms) noexcept {
+            return std::move(Mask::CreateSP(ms));
+        }
+        // create bitmap
         inline auto CreateSP(const BitmapStatus& bs) noexcept {
             return std::move(Bitmap::CreateSP(bs));
+        }
+        // create perspective-bitmap
+        inline auto CreateSP(const PerspectiveBitmapStatus& bs) noexcept {
+            return std::move(PerspectiveBitmap::CreateSP(bs));
         }
         // create text layout with specified font
         inline auto CreateSP(const TextlayoutStatus& tls) {

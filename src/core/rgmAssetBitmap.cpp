@@ -21,7 +21,7 @@ namespace RubyGM { namespace Asset {
     class FileBitmap final : public Bitmap {
     public:
         // create one instance
-        static auto Create(const wchar_t*, const wchar_t*) noexcept ->FileBitmap* ;
+        static auto Create(const wchar_t*,const wchar_t*)noexcept->FileBitmap*;
         // get bitmap
         auto GetBitmap() noexcept -> IGMBitmap* override;
         // low occu

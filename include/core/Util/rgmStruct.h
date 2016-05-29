@@ -99,6 +99,8 @@ namespace RubyGM {
     struct ColorF { float r; float g; float b; float a; };
     // Matrix3X2F
     struct Matrix3X2F { float _11, _12, _21, _22, _31, _32; };
+    // Matrix4X4F
+    struct Matrix4X4F { float m[4][4]; };
     // Ellipse
     struct Ellipse { Point2F point; float radius_x; float radius_y; };
 }

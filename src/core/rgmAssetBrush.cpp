@@ -17,7 +17,7 @@ namespace RubyGM { namespace Asset {
         using Super = Brush;
     protected:
         // Recreates this instance.
-        auto recreate() noexcept->Result override final;
+        auto recreate() noexcept->Result override;
     public:
         // Lows the occupancy.
         void LowOccupancy() noexcept override final;
@@ -160,9 +160,31 @@ namespace RubyGM { namespace Asset {
         // gradient stops
         GradientStop        m_aStops[0];
     };
+    // bitmap brush
+    class BitmapBrush final : public BrushImpl {
+        // super class
+        using Super = BrushImpl;
+    public:
+        // create one instance
+        static auto Create(RefPtr<Asset::Bitmap>&&)
+            noexcept->BitmapBrush*;
+        // get brush
+        auto GetBrush() noexcept -> IGMBrush* override;
+    protected:
+        // create
+        auto recreate() noexcept->Result;
+    private:
+        // ctor
+        BitmapBrush(RefPtr<Asset::Bitmap>&&) noexcept;
+        // ctor
+        ~BitmapBrush() noexcept {}
+        // dispose
+        void dispose() noexcept override;
+    private:
+        // begin point
+        RefPtr<Asset::Bitmap>   m_spSource;
+    }; 
 }}
-
-
 
 
 
@@ -336,6 +358,68 @@ namespace RubyGM { namespace Asset {
         // 返回已创建的笔刷
         return RubyGM::SafeAcquire(m_pBrush);
     }
+
+
+    /// <summary>
+    /// Creates the specified property.
+    /// </summary>
+    /// <param name="source">The source.</param>
+    /// <returns></returns>
+    auto BitmapBrush::Create(
+        RefPtr<Asset::Bitmap>&& source) noexcept -> BitmapBrush*  {
+        auto ptr = RubyGM::SmallAlloc(sizeof(BitmapBrush));
+        assert(ptr && "SmallAlloc cannot return nullptr");
+        return new(ptr) BitmapBrush(std::move(source));
+    }
+
+    /// <summary>
+    /// Radials the gradient brush.
+    /// </summary>
+    /// <param name="source">The source.</param>
+    /// <returns></returns>
+    BitmapBrush::BitmapBrush(RefPtr<Asset::Bitmap>&& source) noexcept 
+        :  m_spSource(std::move(source)) {
+    }
+    /// <summary>
+    /// Disposes this instance.
+    /// </summary>
+    /// <returns></returns>
+    void BitmapBrush::dispose() noexcept {
+        this->BitmapBrush::~BitmapBrush();
+        RubyGM::SmallFree(this);
+    }
+    /// <summary>
+    /// Recreates this instance.
+    /// </summary>
+    /// <returns></returns>
+    auto BitmapBrush::recreate() noexcept->Result {
+        Super::recreate();
+        return m_spSource->Recreate();
+    }
+    /// <summary>
+    /// Gets the brush.
+    /// </summary>
+    /// <returns></returns>
+    auto BitmapBrush::GetBrush() noexcept ->IGMBrush* {
+        // 没有笔刷
+        if (!m_pBrush) {
+            // 获取位图
+            if (const auto bitmap = m_spSource->GetBitmap()) {
+                // 初始化
+                IGMBrush* brush = nullptr; 
+                // 则创建
+                auto hr = Bridge::CreateBrushWithProp(bitmap, &brush);
+                // 检查错误
+                if (FAILED(hr)) Game::SetLastErrorCode(hr);
+                // 替换笔刷
+                this->repleace_brush(std::move(brush));
+                // 释放引用
+                bitmap->Release();
+            }
+        }
+        // 返回已创建的笔刷
+        return RubyGM::SafeAcquire(m_pBrush);
+    }
 }}
 
 /// <summary>
@@ -382,4 +466,17 @@ auto RubyGM::Game::CreateBrushAsset(
     else {
         return std::move(Game::CreateBrushAsset(rb.stops->color));
     }
+}
+
+
+/// <summary>
+/// Creates the brush asset.
+/// </summary>
+/// <param name="bitmap">The bitmap.</param>
+/// <returns></returns>
+auto RubyGM::Game::CreateBrushAsset(
+    const AssetBitmap& ab) noexcept -> RefPtr<Asset::Brush> {
+    AssetBitmap bitmap(ab);
+    auto brush = Asset::BitmapBrush::Create(std::move(bitmap));
+    return std::move(RefPtr<Asset::Brush>(std::move(brush)));
 }

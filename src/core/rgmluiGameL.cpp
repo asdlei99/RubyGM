@@ -359,7 +359,7 @@ namespace RubyGM { namespace impl {
     // debugger
     struct alloc_debugger {
         alloc_debugger() {}
-        ~alloc_debugger() noexcept { assert(map.empty()); }
+        ~alloc_debugger() noexcept { assert(map.empty() && "bad alloc paired!"); }
         void alloc(void* ptr, size_t len) { 
             assert(map.find(ptr) == map.end());
             try { map.insert(std::pair<void*, size_t>(ptr, len)); }

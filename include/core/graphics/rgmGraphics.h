@@ -41,4 +41,6 @@ namespace RubyGM {
     struct IGMPath : ID2D1PathGeometry { using Super = ID2D1PathGeometry; };
     // brush
     struct IGMBrush : ID2D1Brush { using Super = ID2D1Brush; };
+    // Batch
+    struct IGMBatch : ID2D1SpriteBatch { using Super = ID2D1SpriteBatch; };
 }

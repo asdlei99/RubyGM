@@ -30,10 +30,14 @@
 namespace RubyGM {
     // color
     struct ColorF;
+    // bitmap
+    struct IGMBitmap;
     // brush
     struct IGMBrush;
     // font
     struct IGMFont;
+    // batch
+    struct IGMBatch;
     // stroke style
     struct IGMStrokeStyle;
     // prop for font
@@ -70,6 +74,8 @@ namespace RubyGM { namespace Asset {
 namespace RubyGM {
     // bridge namespace
     namespace Bridge {
+        // create batch
+        auto CreateBatch() noexcept->IGMBatch*;
         // get common color brush
         auto GetCommonBrush() noexcept->IGMBrush*;
         // get last resource pointer
@@ -84,10 +90,13 @@ namespace RubyGM {
         auto CreateBrushWithProp(const ColorF& fp, 
             IGMBrush** brush) noexcept->Result;
         // create brush-GI with properties
-        auto CreateBrushWithProp(const LinearBrush& fp, 
+        auto CreateBrushWithProp(const LinearBrush& lb, 
             IGMBrush** brush) noexcept->Result;
         // create brush-GI with properties
-        auto CreateBrushWithProp(const RadialBrush& fp, 
+        auto CreateBrushWithProp(const RadialBrush& rb, 
+            IGMBrush** brush) noexcept->Result;
+        // create brush-GI with properties
+        auto CreateBrushWithProp(IGMBitmap* bitmap, 
             IGMBrush** brush) noexcept->Result;
     }
 }

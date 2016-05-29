@@ -331,7 +331,7 @@ void RubyGM::CGMSprite::RootRender(IGMRenderContext& rc) const noexcept {
 }
 
 // rubygm::dx namespace
-namespace RubyGM { namespace DX{
+namespace RubyGM { namespace DX {
     /// <summary>
     /// D2s the d1 make rotate matrix.
     /// </summary>
@@ -339,7 +339,7 @@ namespace RubyGM { namespace DX{
     /// <param name="center">The center.</param>
     /// <param name="matrix">The matrix.</param>
     /// <returns></returns>
-    inline void D2D1MakeRotateMatrix(float angle, D2D1_POINT_2F center, D2D1_MATRIX_3X2_F& matrix) noexcept {
+    static inline void D2D1MakeRotateMatrix(float angle, D2D1_POINT_2F center, D2D1_MATRIX_3X2_F& matrix) noexcept {
         constexpr float pi = 3.141592654f;
         float theta = angle * (pi / 180.0f);
         float sin_theta = std::sin(theta);
@@ -351,8 +351,15 @@ namespace RubyGM { namespace DX{
         matrix._31 = center.x - center.x * cos_theta + center.y * sin_theta;
         matrix._32 = center.y - center.x * sin_theta - center.y * cos_theta;
     }
-    // make skew
-    inline void D2D1MakeSkewMatrix(
+    /// <summary>
+    /// D2s the d1 make skew matrix.
+    /// </summary>
+    /// <param name="x">The x.</param>
+    /// <param name="y">The y.</param>
+    /// <param name="center">The center.</param>
+    /// <param name="matrix">The matrix.</param>
+    /// <returns></returns>
+    static inline void D2D1MakeSkewMatrix(
         float x, float y, 
         D2D1_POINT_2F center,
         D2D1_MATRIX_3X2_F& matrix) noexcept {
@@ -372,17 +379,22 @@ namespace RubyGM { namespace DX{
 /// <returns></returns>
 void RubyGM::CGMSprite::make_transform(Matrix3X2F& transform) const noexcept {
     auto& matrix = impl::d2d(transform);
-    D2D1_MATRIX_3X2_F romt;
-    D2D1_POINT_2F center{ m_status.x + m_status.ox, m_status.y + m_status.oy };
-    RubyGM::DX::D2D1MakeRotateMatrix(m_status.rotation, center, romt);
+    D2D1_MATRIX_3X2_F rotate_matrix;
+    D2D1_POINT_2F center{ m_status.ox, m_status.oy };
+    D2D1_SIZE_F scale{ m_status.zoomx, m_status.zoomy };
+    D2D1_SIZE_F trans{ m_status.x - m_status.ox, m_status.y - m_status.oy };
+    RubyGM::DX::D2D1MakeRotateMatrix(m_status.rotation, center, rotate_matrix);
     // 常规转变
-    matrix = D2D1::Matrix3x2F::Translation(D2D1_SIZE_F{ m_status.x, m_status.y })
-        * D2D1::Matrix3x2F::Scale(D2D1_SIZE_F{m_status.zoomx, m_status.zoomy}, center)
-        * romt;
+    matrix = rotate_matrix
+        * D2D1::Matrix3x2F::Scale(scale, center)
+        * D2D1::Matrix3x2F::Translation(trans)
+        ;
     // 倾斜转变 -- 不常用....
     if (m_status.skewx != 0.f || m_status.skewy != 0.f) {
-        DX::D2D1MakeSkewMatrix(m_status.skewx, m_status.skewy, center, romt);
-        matrix = matrix * romt;
+        DX::D2D1MakeSkewMatrix(
+            m_status.skewx, m_status.skewy, center, rotate_matrix
+        );
+        matrix = matrix * rotate_matrix;
     }
 }
 

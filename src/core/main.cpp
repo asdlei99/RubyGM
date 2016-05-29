@@ -167,16 +167,91 @@ namespace RubyGM {
     // yield
     void test_vector();
     // yield
-    void text_bitmap();
+    void test_bitmap();
+    // yield
+    void test_mask();
+    // yield
+    void test_batch();
     // update fiber
     void impl_update_fiber() {
-
-        constexpr int switch_on = 0;
+        int switch_on = 4;
         switch (switch_on)
         {
         case 0: test_text();
         case 1: test_vector();
-        case 2: text_bitmap();
+        case 2: test_bitmap();
+        case 3: test_mask();
+        case 4: test_batch();
+        }
+    }
+
+    void test_batch() {
+        auto sprite = Game::NewSprite(RubyGM::DEFAULT_STATUS);
+        {
+            const auto file_name = L"asset/FC4-screenshot.jpg";
+            auto ast = Game::CreateBitmapAssetFromFile(file_name);
+            Drawable::BitmapStatus bs(ast);
+            auto sp = Drawable::CreateSP(bs);
+            sprite->SetDrawable(sp);
+        }
+        float s = 1.f;
+        while (true) {
+            RubyGM::FiberYield();
+            auto time = Game::GetDetalTime();
+            s -= time * 0.9f;
+            if (s <= 0.f) s = 1.f;
+            sprite->SetZoomX(s);
+            sprite->SetZoomY(s);
+        }
+    }
+
+    // yield
+    void test_mask() {
+        auto sprite = Game::NewSprite(RubyGM::DEFAULT_STATUS);
+        auto sprite1= Game::NewSprite(RubyGM::DEFAULT_STATUS);
+        auto sprite2= Game::NewSprite(RubyGM::DEFAULT_STATUS);
+        {
+            auto ast = Game::CreateBitmapAssetFromFile(L"asset/FC4-screenshot.jpg");
+            Drawable::BitmapStatus bs(ast);
+            RefPtr<Asset::Brush> brush = nullptr;
+            brush = Game::CreateBrushAsset(ast);
+            if (const auto sp = Drawable::CreateSP(bs)) {
+                sprite->SetDrawable(sp);
+                sprite->SetOX(sp->GetWidth() * 0.5f);
+                sprite->SetOY(sp->GetHeight() * 0.5f);
+                //backgd->SetOY(200.f);
+                //sprite->SetZoomX(0.5f);
+                //sprite->SetZoomY(0.5f);
+                sprite->SetX(sprite->GetOX() * sprite->GetZoomX());
+                sprite->SetY(sprite->GetOY() * sprite->GetZoomY());
+            }
+            Drawable::TextlayoutStatus ts;
+            ts.text = L"Hello, 世界!";
+            ts.textlen = static_cast<uint32_t>(std::wcslen(ts.text));
+            if (auto sp = Drawable::CreateSP(ts)) {
+                TextMetrics ms;
+                sp->GetMetrics(ms);
+                sp->SetFontSize(TextRange{ 0, 4 }, 5.f);
+                sp->SetFontColor(TextRange{ 0, 5 }, ColorF{ 1.f,0.,0.f,1.f });
+                sp->SetFontFeature(TextRange{ 1, 4 }, "smcp");
+                sprite1->SetZoomX(5.f);
+                sprite1->SetZoomY(5.f);
+                float sf = sprite1->ComputeScaleFactorEz1();
+                RefPtr<Drawable::Bitmap> tbmp = sp->RasterizationSP(sf);
+                RefPtr<Asset::Bitmap> bmp = tbmp->GetBitmap();
+                Drawable::MaskStatus masks(bmp, brush);
+                auto msk = Drawable::CreateSP(masks);
+                sprite2->SetDrawable(msk);
+                sprite1->SetDrawable(tbmp);
+                sprite1->SetY(200.f);
+            }
+
+        }
+        while (true) {
+            RubyGM::FiberYield();
+            auto time = Game::GetDetalTime();
+            float rplus = time*30.f;
+            sprite->SetRotation(sprite->GetRotation() + rplus);
         }
     }
 
@@ -281,11 +356,16 @@ namespace RubyGM {
         sprite->SetZoomY(5.f);
         sprite->SetOX(40.f);
         sprite->SetOY(20.f);
+        RefPtr<Asset::Brush> bitmap_brush(nullptr);
         {
             auto ast = Game::CreateBitmapAssetFromFile(L"asset/FC4-screenshot.jpg");
+            bitmap_brush = std::move(Game::CreateBrushAsset(ast));
             Drawable::BitmapStatus bs(ast);
             auto sp = Drawable::CreateSP(bs);
             backgd->SetDrawable(sp);
+            //backgd->SetOY(200.f);
+            backgd->SetZoomX(0.5f);
+            backgd->SetZoomY(0.5f);
         }
         auto sprite1 = sprite->AddChild(RubyGM::DEFAULT_STATUS);
         auto sprite2 = sprite->AddChild(RubyGM::DEFAULT_STATUS);
@@ -331,8 +411,9 @@ namespace RubyGM {
                     txts.stroke_style = stroke;
                     txts.stroke_color.r = 0.8f;
                     txts.stroke_width = 0.233f;
-                    txts.stroke_brush = brush;
-                    txts.filled_color.a = 0.0f;
+                    txts.filled_brush = bitmap_brush;
+                    //txts.stroke_brush = brush;
+                    txts.stroke_color.a = 0.0f;
                     auto text_geo = Drawable::CreateSP(txts);
                     //bsp->SetInterpolationMode(Mode_HighQqualityCubic);
                     sprite2->SetDrawable(text_geo);
@@ -340,6 +421,9 @@ namespace RubyGM {
                     //sprite1->SetDrawable(bsp);
                 }
             }
+        }
+        {
+            decltype(bitmap_brush) tmp(std::move(bitmap_brush));
         }
         while (true) {
             RubyGM::FiberYield();
@@ -350,7 +434,7 @@ namespace RubyGM {
     }
 
 
-    void text_bitmap() {
+    void test_bitmap() {
         //main_call();
         auto mod = [](float x, float y) { return x - float(int(x / y)); };
         auto sprite = Game::NewSprite(RubyGM::DEFAULT_STATUS);

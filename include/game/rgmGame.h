@@ -49,6 +49,8 @@ namespace RubyGM {
     struct RadialBrush;
     // StrokeStyle
     struct StrokeStyle;
+    // asset bitmap
+    using AssetBitmap = RefPtr<Asset::Bitmap>;
 }
 
 // rubygm::base namespace
@@ -103,6 +105,8 @@ namespace RubyGM { namespace Game {
     auto CreateBrushAsset(const LinearBrush&) noexcept ->RefPtr<Asset::Brush>;
     // create radial gradient brush resource
     auto CreateBrushAsset(const RadialBrush&) noexcept ->RefPtr<Asset::Brush>;
+    // create radial gradient brush resource
+    auto CreateBrushAsset(const AssetBitmap&) noexcept ->RefPtr<Asset::Brush>;
     // create bitmap asset from drawable in zoomed size
     auto CreateBitmapAssetFromDrawable(Drawable::Object*, 
         SizeF sf, SizeF bs) noexcept-> RefPtr<Asset::Bitmap>;

@@ -2,6 +2,7 @@
 #include <bridge/rgmluiBridge.h>
 #include <core/asset/rgmAssetFont.h>
 #include <core/util/rgmBrushStruct.h>
+#include <core/graphics/rgmGraphics.h>
 #include <core/util/rgmImpl.h>
 #include <core/util/rgmUtil.h>
 #include <algorithm>
@@ -137,6 +138,18 @@ auto RubyGM::Bridge::GetCommonBrush() noexcept ->IGMBrush* {
     auto brush = RubyGM::Bridge::UIGame::GetInstance().GetCommonBrush();
     return reinterpret_cast<IGMBrush*>(brush);
 }
+
+/// <summary>
+/// Creates the batch.
+/// </summary>
+/// <returns></returns>
+auto RubyGM::Bridge::CreateBatch() noexcept -> IGMBatch* {
+    ID2D1SpriteBatch* batch = nullptr;
+    auto hr = UIManager_RenderTarget->CreateSpriteBatch(&batch);
+    if (FAILED(hr)) Game::SetLastErrorCode(Result(hr));
+    return static_cast<IGMBatch*>(batch);
+}
+
 
 
 /// <summary>
@@ -367,6 +380,28 @@ auto RubyGM::Bridge::CreateBrushWithProp(
         &impl::d2d(color),
         nullptr,
         reinterpret_cast<ID2D1SolidColorBrush**>(brush)
+    ));
+}
+
+
+/// <summary>
+/// Creates the brush with property.
+/// </summary>
+/// <param name="bitmap">The bitmap.</param>
+/// <param name="brush">The brush.</param>
+/// <returns></returns>
+auto RubyGM::Bridge::CreateBrushWithProp(
+    IGMBitmap* bitmap, IGMBrush ** brush) noexcept -> Result {
+    assert(bitmap && brush && "bad argment");
+    D2D1_BITMAP_BRUSH_PROPERTIES1 bbp;
+    bbp.extendModeX = D2D1_EXTEND_MODE_MIRROR;
+    bbp.extendModeY = D2D1_EXTEND_MODE_MIRROR;
+    bbp.interpolationMode = D2D1_INTERPOLATION_MODE_LINEAR;
+    return Result(UIManager_RenderTarget->CreateBitmapBrush(
+        reinterpret_cast<ID2D1Bitmap1*>(bitmap), 
+        &bbp,
+        nullptr,
+        reinterpret_cast<ID2D1BitmapBrush1**>(brush)
     ));
 }
 
