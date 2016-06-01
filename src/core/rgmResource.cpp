@@ -313,7 +313,7 @@ namespace RubyGM { namespace Asset {
 auto RubyGM::Game::CreateFontAsset(
     const FontProperties& fp) noexcept -> RefPtr<Asset::Font> {
     auto&font = Asset::Font::Create(fp); auto* ptr = &font;
-    return std::move(RefPtr<Asset::Font>(std::move(ptr)));
+    return RefPtr<Asset::Font>(std::move(ptr));
 }
 
 /// <summary>
@@ -324,5 +324,5 @@ auto RubyGM::Game::CreateFontAsset(
 auto RubyGM::Game::CreateStrokeAsset(
     const StrokeStyle& ss) noexcept -> RefPtr<Asset::Stroke> {
     auto&stroke = Asset::Stroke::Create(ss); auto* ptr = &stroke;
-    return std::move(RefPtr<Asset::Stroke>(std::move(ptr)));
+    return RefPtr<Asset::Stroke>(std::move(ptr));
 }

@@ -64,9 +64,7 @@ namespace RubyGM {
             static auto Create(const TextStatus&) noexcept ->Text*;
             // create this
             static auto CreateSP(const TextStatus& ls) noexcept {
-                return std::move(RubyGM::RefPtr<Drawable::Text>(
-                    std::move(Text::Create(ls)))
-                );
+                return RefPtr<Drawable::Text>(Text::Create(ls));
             }
             // render object
             //void Render(IGMRenderContext& rc) const noexcept override;

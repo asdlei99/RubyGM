@@ -30,6 +30,7 @@
 
 // basic graphics
 #include "rgmMask.h"
+#include "rgmBatch.h"
 #include "rgmBitmap.h"
 #include "rgmTextlayout.h"
 // vector graphics
@@ -52,63 +53,67 @@ namespace RubyGM {
         // ====================================================================
         // ============================= Basic ================================
         // ====================================================================
-        // create bitmap
+        // create mask
         inline auto CreateSP(const MaskStatus& ms) noexcept {
-            return std::move(Mask::CreateSP(ms));
+            return Mask::CreateSP(ms);
+        }
+        // create batch
+        inline auto CreateSP(const BatchStatus& bs) noexcept {
+            return Batch::CreateSP(bs);
         }
         // create bitmap
         inline auto CreateSP(const BitmapStatus& bs) noexcept {
-            return std::move(Bitmap::CreateSP(bs));
+            return Bitmap::CreateSP(bs);
         }
         // create perspective-bitmap
         inline auto CreateSP(const PerspectiveBitmapStatus& bs) noexcept {
-            return std::move(PerspectiveBitmap::CreateSP(bs));
+            return PerspectiveBitmap::CreateSP(bs);
         }
         // create text layout with specified font
         inline auto CreateSP(const TextlayoutStatus& tls) {
-            return std::move(Textlayout::CreateSP(tls));
+            return Textlayout::CreateSP(tls);
         }
         // ====================================================================
         // ========================= Vector Graphics ==========================
         // ====================================================================
         // create line vector graphics
         inline auto CreateSP(const LineStatus& ls) noexcept {
-            return std::move(Line::CreateSP(ls));
+            return Line::CreateSP(ls);
         }
         // create rect vector graphics
         inline auto CreateSP(const RectStatus& rs) noexcept {
-            return std::move(Rect::CreateSP(rs));
+            return Rect::CreateSP(rs);
         }
         // create text vector graphics
         inline auto CreateSP(const TextStatus& ts) noexcept {
-            return std::move(Text::CreateSP(ts));
+            return Text::CreateSP(ts);
         }
         // create path vector graphics
         inline auto CreateSP(const PathStatus& ps) noexcept {
-            return std::move(Path::CreateSP(ps));
+            return Path::CreateSP(ps);
         }
         // create polygon vector graphics
         inline auto CreateSP(const PolygonStatus& ps) noexcept {
-            return std::move(Polygon::CreateSP(ps));
+            return Polygon::CreateSP(ps);
         }
         // create ellipse vector graphics
         inline auto CreateSP(const EllipseStatus& es) noexcept {
-            return std::move(Ellipse::CreateSP(es));
+            return Ellipse::CreateSP(es);
         }
         // create text polyline graphics
         inline auto CreateSP(const PolylineStatus& ps) noexcept {
-            return std::move(Polyline::CreateSP(ps));
+            return Polyline::CreateSP(ps);
         }
         // ====================================================================
         // ========================== Effect Image ============================
         // ====================================================================
         // create gaussian blur effect
         inline auto CreateSP(const GaussianBlurStatus& gbs) noexcept {
-            return std::move(GaussianBlur::CreateSP(gbs));
+            return GaussianBlur::CreateSP(gbs);
         }
         // create shadow effect
         inline auto CreateSP(const ShadowStatus& ss) noexcept {
-            return std::move(Shadow::CreateSP(ss));
+            return Shadow::CreateSP(ss);
         }
     }
 }

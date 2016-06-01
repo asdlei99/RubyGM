@@ -58,13 +58,24 @@ namespace RubyGM {
             auto Rasterization(float sf, SizeF basic_size) noexcept {
                 return this->Rasterization({ sf, sf }, basic_size);
             }
+#if 0
+            // rasterization, to Drawable::Bitmap smart ptr
+            auto RasterizationSP(SizeF sf, SizeF bs) noexcept {
+                return RefPtr<Drawable::Bitmap>(this->Rasterization(sf, bs));
+            }
+            // rasterization, to Drawable::Bitmap smart ptr
+            auto RasterizationSP(float sf, SizeF bs) noexcept {
+                return RefPtr<Drawable::Bitmap>(this->Rasterization(sf, bs));
+            }
+#else
             // rasterization, to Drawable::Bitmap smart ptr
             template<typename ...Args>
             auto RasterizationSP(Args&&... args) noexcept {
-                return std::move(RubyGM::RefPtr<Drawable::Bitmap>(
-                    std::move(this->Rasterization(std::forward<Args>(args)...))
-                    ));
+                return RefPtr<Drawable::Bitmap>(
+                    this->Rasterization(std::forward<Args>(args)...)
+                    );
             }
+#endif
         protected:
             // recreate resource
             inline virtual auto recreate() noexcept -> Result override {

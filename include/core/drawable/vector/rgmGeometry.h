@@ -58,9 +58,7 @@ namespace RubyGM {
             auto Realization(float sf) const noexcept->Drawable::Vector*;
             // Realizations  -> to MeshEx, sf = scale factor
             auto RealizationSP(float sf) const noexcept {
-                return std::move(RubyGM::RefPtr<Drawable::Vector>(
-                    std::move(this->Realization(sf)))
-                );
+                return RefPtr<Drawable::Vector>(this->Realization(sf));
             }
             // Tessellate -> to Mesh
             //auto Tessellate() const noexcept->Drawable::Mesh*;

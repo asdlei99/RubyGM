@@ -36,7 +36,7 @@ namespace RubyGM { namespace Asset {
     auto GetNullBitmapAsset() noexcept ->RefPtr<Asset::Bitmap> {
         auto ptr = reinterpret_cast<NullBitmap*>(s_bufNullBitmap);
         auto obj = static_cast<Asset::Bitmap*>(ptr);
-        return std::move(RefPtr<Asset::Bitmap>(obj));
+        return RefPtr<Asset::Bitmap>(obj);
     }
     // get null bitmap object - ex
     static inline auto RefNullBitmapAssetEx() noexcept -> NullBitmap& {
@@ -252,7 +252,7 @@ const noexcept -> Asset::Brush& {
 auto RubyGM::Game::GetBitmapAsset(
     uint32_t index) noexcept -> RefPtr<Asset::Bitmap> {
     auto& asset = Bridge::UIGame::GetInstance().RefBitmapAsset(index);
-    return std::move(RefPtr<Asset::Bitmap>(&asset));
+    return RefPtr<Asset::Bitmap>(&asset);
 }
 
 
@@ -264,7 +264,7 @@ auto RubyGM::Game::GetBitmapAsset(
 auto RubyGM::Game::GetFontAsset(
     uint32_t index) noexcept -> RefPtr<Asset::Font> {
     auto& asset = Bridge::UIGame::GetInstance().RefFontAsset(index);
-    return std::move(RefPtr<Asset::Font>(&asset));
+    return RefPtr<Asset::Font>(&asset);
 }
 
 /// <summary>
@@ -275,7 +275,7 @@ auto RubyGM::Game::GetFontAsset(
 auto RubyGM::Game::GetBrushAsset(
     uint32_t index) noexcept -> RefPtr<Asset::Brush> {
     auto& asset = Bridge::UIGame::GetInstance().RefBrushAsset(index);
-    return std::move(RefPtr<Asset::Brush>(&asset));
+    return RefPtr<Asset::Brush>(&asset);
 }
 
 

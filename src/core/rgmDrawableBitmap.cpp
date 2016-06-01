@@ -261,14 +261,9 @@ auto RubyGM::Drawable::Mask::recreate() noexcept -> Result {
     if (SUCCEEDED(hr)) {
         m_pGiMask = m_spAsMask->GetBitmap();
         m_pGiBrush = m_spAsBrush->GetBrush();
-        // 检查错误
-        if (!(m_pGiBrush && m_pGiMask)) {
 #ifdef _DEBUG
-            assert(!"error check");
+        assert(m_pGiBrush && m_pGiMask && "error check");
 #endif
-            hr = Game::GetLastErrorCode();
-            Game::SetLastErrorCode(Result(S_OK));
-        }
     }
     return hr;
 }
@@ -292,27 +287,69 @@ void RubyGM::Drawable::Mask::Render(IGMRenderContext& rc) const noexcept {
 // ============================================================================
 // ================================ Batch =====================================
 // ============================================================================
+
 #include <core/drawable/rgmBatch.h>
 #include <bridge/rgmluiBridge.h>
+
+
+/// <summary>
+/// Updates the batch.
+/// </summary>
+/// <returns></returns>
+void RubyGM::Drawable::Batch::UpdateBatch() noexcept {
+    if (m_pGiBatch && m_pGiBitmap) {
+        auto& this_ = static_cast<XGMBatchController&>(*this);
+        auto& other = *m_pController;
+        other.UpdateBatch(*m_pGiBatch, *m_pGiBitmap);
+        this_ = other;
+    }
+}
 
 /// <summary>
 /// reset batches
 /// </summary>
 /// <returns></returns>
 void RubyGM::Drawable::Batch::reset_batch() noexcept {
+    this->start_index = 0;
+    this->display_count = 0;
+    this->unit_count = 0;
     if (m_pGiBatch && m_pGiBitmap) {
-        D2D1_RECT_U src;
-        D2D1_RECT_F des;
-        {
-            auto size = m_pGiBitmap->GetPixelSize();
-            src = { 0, 0, size.width, size.height };
-            des = { 0.f, 0.f, float(size.width), float(size.height) };
-        }
-        auto hr = m_pGiBatch->AddSprites(
-            1, &des, &src, nullptr, nullptr, 0, 0, 0, 0
-        );
-        assert(SUCCEEDED(hr));
+        auto& this_ = static_cast<XGMBatchController&>(*this);
+        auto& other = *m_pController;
+        other.ResetBatch(*m_pGiBatch, *m_pGiBitmap);
+        this_ = other;
     }
+}
+
+/// <summary>
+/// Resets the batch.
+/// </summary>
+/// <param name="a">a.</param>
+/// <param name="b">The b.</param>
+/// <returns></returns>
+void RubyGM::Drawable::Batch::ResetBatch(IGMBatch& a, IGMBitmap& b) noexcept {
+    auto size = b.GetPixelSize();
+    D2D1_RECT_U src{ 0, 0, size.width, size.height };
+    D2D1_RECT_F des{ 0.f, 0.f, float(size.width), float(size.height) };
+    auto hr = a.AddSprites(
+        1, &des, &src, nullptr, nullptr, 0, 0, 0, 0
+    );
+    assert(SUCCEEDED(hr));
+    if (SUCCEEDED(hr)) {
+        this->start_index = 0;
+        this->display_count = 1;
+        this->unit_count = 1;
+    }
+}
+
+/// <summary>
+/// Updates the batch.
+/// </summary>
+/// <param name="">The .</param>
+/// <param name="">The .</param>
+/// <returns></returns>
+void RubyGM::Drawable::Batch::UpdateBatch(IGMBatch&, IGMBitmap&) noexcept {
+
 }
 
 
@@ -320,9 +357,11 @@ void RubyGM::Drawable::Batch::reset_batch() noexcept {
 /// Initializes a new instance of the <see cref="Mask"/> class.
 /// </summary>
 /// <param name="ms">The ms.</param>
-RubyGM::Drawable::Batch::Batch(const BatchStatus& bs) noexcept :
-Super(bs), m_spAsBitmap(bs.bitmap), m_pGiBitmap(bs.bitmap->GetBitmap()),
-m_pGiBatch(Bridge::CreateBatch()) {
+RubyGM::Drawable::Batch::Batch(const BatchStatus& bs) noexcept : Super(bs), 
+m_spAsBitmap(bs.bitmap), 
+m_pGiBitmap(bs.bitmap->GetBitmap()),
+m_pGiBatch(Bridge::CreateBatch()), 
+m_pController(bs.controller ? bs.controller : this) {
     this->reset_batch();
 }
 
@@ -358,18 +397,6 @@ void RubyGM::Drawable::Batch::dispose() noexcept {
     RubyGM::SmallFree(this);
 }
 
-/// <summary>
-/// Sets the interpolation mode.
-/// </summary>
-/// <param name="mode">The mode.</param>
-/// <returns></returns>
-void RubyGM::Drawable::Batch::SetInterpolationMode(
-    InterpolationMode mode) noexcept {
-    m_modeInter = mode > Mode_HighQqualityCubic ?
-        Mode_Linear : mode;
-}
-
-
 
 /// <summary>
 /// Recreates this instance.
@@ -378,11 +405,27 @@ void RubyGM::Drawable::Batch::SetInterpolationMode(
 auto RubyGM::Drawable::Batch::recreate() noexcept -> Result {
     RubyGM::SafeRelease(m_pGiBitmap);
     RubyGM::SafeRelease(m_pGiBatch);
-    // 创建新的精灵集
-    if ((m_pGiBatch = Bridge::CreateBatch())) {
-        assert(!"NOT IMPL");
+    Result hr = Result(S_OK);
+    // 重建位图
+    if (SUCCEEDED(hr)) {
+        hr = m_spAsBitmap->Recreate();
     }
-    return m_spAsBitmap->Recreate();
+    // 重获位图, 精灵集
+    if (SUCCEEDED(hr)) {
+        m_pGiBitmap = m_spAsBitmap->GetBitmap();
+        m_pGiBatch = Bridge::CreateBatch();
+        this->reset_batch();
+    }
+    return hr;
+}
+
+
+/// <summary>
+/// Disconnects the controller.
+/// </summary>
+/// <returns></returns>
+void RubyGM::Drawable::Batch::DisconnectController() noexcept {
+    m_pController = this;
 }
 
 /// <summary>
@@ -393,17 +436,20 @@ auto RubyGM::Drawable::Batch::recreate() noexcept -> Result {
 void RubyGM::Drawable::Batch::Render(IGMRenderContext& rc) const noexcept {
     if (m_pGiBatch && m_pGiBitmap) {
         // 过多的精灵单元
-        if (m_cUnitDisplay > 256) {
+        if (this->display_count > 256) {
             auto hr = rc.Flush();
             if (FAILED(hr)) Game::SetLastErrorCode(hr);
         }
+        auto antimode = rc.GetAntialiasMode();
+        rc.SetAntialiasMode(D2D1_ANTIALIAS_MODE_ALIASED);
         rc.DrawSpriteBatch(
             m_pGiBatch,
-            m_iUnitStart,
-            m_cUnitDisplay,
+            this->start_index,
+            this->display_count,
             m_pGiBitmap,
-            D2D1_BITMAP_INTERPOLATION_MODE(m_modeInter),
+            D2D1_BITMAP_INTERPOLATION_MODE(this->mode),
             D2D1_SPRITE_OPTIONS_NONE
         );
+        rc.SetAntialiasMode(antimode);
     }
 }

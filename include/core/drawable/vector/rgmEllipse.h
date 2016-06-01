@@ -76,9 +76,7 @@ namespace RubyGM {
             static auto Create(const EllipseStatus&) noexcept ->Ellipse*;
             // create this
             static auto CreateSP(const EllipseStatus& ls) noexcept {
-                return std::move(RubyGM::RefPtr<Drawable::Ellipse>(
-                    std::move(Ellipse::Create(ls)))
-                );
+                return RefPtr<Drawable::Ellipse>(Ellipse::Create(ls));
             }
             // render object
             void Render(IGMRenderContext& rc) const noexcept override;

@@ -62,9 +62,7 @@ namespace RubyGM {
             static auto Create(const LineStatus&) noexcept ->Line*;
             // create this
             static auto CreateSP(const LineStatus& ls) noexcept {
-                return std::move(RubyGM::RefPtr<Drawable::Line>(
-                    std::move(Line::Create(ls)))
-                );
+                return RefPtr<Drawable::Line>(Line::Create(ls));
             }
             // render object
             void Render(IGMRenderContext& rc) const noexcept override;

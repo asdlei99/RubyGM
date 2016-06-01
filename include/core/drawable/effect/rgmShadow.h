@@ -68,9 +68,7 @@ namespace RubyGM {
             static auto Create(const ShadowStatus&) noexcept->Shadow*;
             // create this
             static auto CreateSP(const ShadowStatus& ts) noexcept {
-                return std::move(RubyGM::RefPtr<Drawable::Shadow>(
-                    std::move(Shadow::Create(ts)))
-                );
+                return RefPtr<Drawable::Shadow>(Shadow::Create(ts));
             }
         public:
             // set blur color

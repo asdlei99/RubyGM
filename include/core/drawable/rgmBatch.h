@@ -34,18 +34,41 @@
 namespace RubyGM {
     // batch
     struct IGMBatch;
+    // batch controller
+    struct RUBYGM_NOVTABLE XGMBatchController {
+        // ctor
+        XGMBatchController() noexcept = default;
+        // reset batch
+        virtual void ResetBatch(IGMBatch&, IGMBitmap&) noexcept = 0;
+        // update batch
+        virtual void UpdateBatch(IGMBatch&, IGMBitmap&) noexcept = 0;
+        // unit display start index
+        uint32_t                start_index = 0;
+        // unit display count
+        uint32_t                display_count = 0;
+        // unit total count
+        uint32_t                unit_count = 0;
+        // interpolation mode
+        InterpolationMode       mode = Mode_Linear;
+    };
     // resource namespace
     namespace Drawable {
         // status for batch
         struct BatchStatus : BaseStatus {
             // bitmap asset, CANNOT be null
             RefPtr<Asset::Bitmap>   bitmap;
+            // controller, set to null to use none-controller
+            XGMBatchController*     controller;
             // default value
             inline BatchStatus(const RefPtr<Asset::Bitmap> & b) : 
-                BaseStatus(), bitmap(b) { asset_check(); }
+                BaseStatus(), bitmap(b) {
+                controller = nullptr; asset_check();
+            }
             // default value
             inline BatchStatus(RefPtr<Asset::Bitmap>&& b) : 
-                BaseStatus(), bitmap(std::move(b)) { asset_check();}
+                BaseStatus(), bitmap(std::move(b)) {
+                controller = nullptr; asset_check();
+            }
         private:
             // asset check
             inline void asset_check() { 
@@ -53,21 +76,17 @@ namespace RubyGM {
             }
         };
         // drawable bitmap 
-        class Batch : public Drawable::Object {
+        class Batch : public Drawable::Object, protected XGMBatchController {
             // super class
             using Super = Drawable::Object;
             // dispose object
             void dispose() noexcept override;
-            // reset batch
-            void reset_batch() noexcept;
         public:
             // create this
             static auto Create(const BatchStatus&) noexcept->Batch*;
             // create this
             static auto CreateSP(const BatchStatus& bs) noexcept {
-                return std::move(RubyGM::RefPtr<Drawable::Batch>(
-                    std::move(Batch::Create(bs)))
-                );
+                return RefPtr<Drawable::Batch>(Batch::Create(bs));
             }
         protected:
             // ctor
@@ -77,11 +96,21 @@ namespace RubyGM {
             // dtor
             ~Batch() noexcept;
         public:
+            // reset batch, implement for XGMBatchController
+            void ResetBatch(IGMBatch&, IGMBitmap&) noexcept override;
+            // update batch, implement for XGMBatchController
+            void UpdateBatch(IGMBatch&, IGMBitmap&) noexcept override;
+            // update batch, call this if you want to update
+            void UpdateBatch() noexcept;
             // render object
             void Render(IGMRenderContext& rc) const noexcept override;
-            // set the interpolation mode
-            void SetInterpolationMode(InterpolationMode) noexcept;
+            // get unit count
+            auto GetUnitCount() const noexcept { return this->unit_count; }
+            // disconnect controller
+            void DisconnectController() noexcept;
         protected:
+            // reset batch, call this if want to reset
+            void reset_batch() noexcept;
             // recreate resource
             virtual auto recreate() noexcept -> Result override;
         protected:
@@ -91,14 +120,8 @@ namespace RubyGM {
             IGMBitmap*              m_pGiBitmap = nullptr;
             // batch graphics interface
             IGMBatch*               m_pGiBatch = nullptr;
-            // unit total count
-            uint32_t                m_cUnitTotal = 0;
-            // unit display start index
-            uint32_t                m_iUnitStart = 0;
-            // unit display count
-            uint32_t                m_cUnitDisplay = 0;
-            // interpolation mode
-            InterpolationMode       m_modeInter = Mode_Linear;
+            // controller
+            XGMBatchController*     m_pController = nullptr;
         };
     }
 }

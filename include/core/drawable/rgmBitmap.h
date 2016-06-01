@@ -77,9 +77,7 @@ namespace RubyGM {
             static auto Create(const BitmapStatus&) noexcept->Bitmap*;
             // create this
             static auto CreateSP(const BitmapStatus& bs) noexcept {
-                return std::move(RubyGM::RefPtr<Drawable::Bitmap>(
-                    std::move(Bitmap::Create(bs)))
-                );
+                return RefPtr<Drawable::Bitmap>(Bitmap::Create(bs));
             }
         protected:
             // ctor
@@ -141,8 +139,8 @@ namespace RubyGM {
                 noexcept->PerspectiveBitmap*;
             // create this
             static auto CreateSP(const PerspectiveBitmapStatus& bs) noexcept {
-                return std::move(RubyGM::RefPtr<Drawable::PerspectiveBitmap>(
-                    std::move(PerspectiveBitmap::Create(bs)))
+                return RefPtr<Drawable::PerspectiveBitmap>(
+                    PerspectiveBitmap::Create(bs)
                 );
             }
         protected:

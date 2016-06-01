@@ -17,7 +17,6 @@ namespace RubyGM { namespace impl {
     /// <param name="typography">The typography</param>
     /// <returns></returns>
     auto create_typography(IDWriteTypography** typography) noexcept->Result;
-
     /// <summary>
     /// White spaces?
     /// </summary>
@@ -28,6 +27,11 @@ namespace RubyGM { namespace impl {
     }
 }}
 
+
+
+// ============================================================================
+// ============================== Textlayout ==================================
+// ============================================================================
 
 /// <summary>
 /// Recreates this instance.
@@ -44,12 +48,15 @@ auto RubyGM::Drawable::Textlayout::recreate() noexcept -> Result {
 /// <returns></returns>
 auto RubyGM::Drawable::Textlayout::Create(
     const TextlayoutStatus& ts) noexcept -> Textlayout* {
+    Textlayout* tmp = nullptr; auto ctx = tmp->get_context();
+    const size_t this_len = reinterpret_cast<size_t>(ctx);
+    assert(this_len == sizeof(Textlayout));
     // 获取渲染器
     auto renderer = UIManager.GetTextRenderer(ts.renderer);
     // 不可能出错，否则进不到这一步
     assert(renderer);
     // 获取上下文长度
-    auto len = renderer->GetContextSizeInByte() + sizeof(Textlayout);
+    auto len = renderer->GetContextSizeInByte() + this_len;
     // 释放掉
     renderer->Release();
     // 申请空间
@@ -130,6 +137,7 @@ basic_color(ts.color) {
                 assert(!"BAD XML");
             }
         });
+        m_uTextLength = cfg.text_length;
     }
     auto hr = S_OK;
     // 创建布局
@@ -138,6 +146,7 @@ basic_color(ts.color) {
             ts.text, ts.textlen, format, ts.width, ts.height,
             reinterpret_cast<IDWriteTextLayout**>(&m_pTextlayout)
         );
+        m_uTextLength = ts.textlen;
     }
     // 释放
     format->Release();
@@ -146,7 +155,7 @@ basic_color(ts.color) {
         Game::SetLastErrorCode(Result(hr));
     }
     // 创建渲染上下文
-    m_pTextRenderer->MakeContextFromString(m_bufDrawContext, ts.context);
+    m_pTextRenderer->MakeContextFromString(this->get_context(), ts.context);
 }
 
 /// <summary>
@@ -170,7 +179,7 @@ void RubyGM::Drawable::Textlayout::Render(IGMRenderContext& rc) const noexcept {
     m_pTextRenderer->basic_color.color = impl::d2d(this->basic_color);
     // 刻画文本
     m_pTextlayout->Draw(
-        const_cast<size_t*>(m_bufDrawContext),
+        this->get_context(),
         m_pTextRenderer,
         0.f, 0.f
     );
@@ -549,3 +558,8 @@ auto RubyGM::Drawable::Textlayout::HittesTextRange(
     return Result(hr);
 
 }
+
+// ============================================================================
+// =============================== Editable ===================================
+// ============================================================================
+

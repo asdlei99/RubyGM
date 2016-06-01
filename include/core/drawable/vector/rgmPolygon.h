@@ -64,9 +64,7 @@ namespace RubyGM {
             static auto Create(const PolygonStatus&) noexcept ->Polygon*;
             // create this
             static auto CreateSP(const PolygonStatus& ls) noexcept {
-                return std::move(RubyGM::RefPtr<Drawable::Polygon>(
-                    std::move(Polygon::Create(ls)))
-                );
+                return RefPtr<Drawable::Polygon>(Polygon::Create(ls));
             }
             // render object
             //void Render(IGMRenderContext& rc) const noexcept override;

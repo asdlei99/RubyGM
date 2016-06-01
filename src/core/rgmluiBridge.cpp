@@ -5,7 +5,7 @@
 #include <bridge/rgmluiConfig.h>
 
 // get xml layout
-auto GetRubyGMXmlLayout() noexcept -> const char*;
+/*auto GetRubyGMXmlLayout() noexcept -> const char*;
 // init window
 void InitWindow(LongUI::XUIBaseWindow* , int) noexcept;
 #ifdef _DEBUG
@@ -114,7 +114,7 @@ void InitWindow(LongUI::XUIBaseWindow* window, int cmd) noexcept {
         }
         window->ShowWindow(cmd);
     }
-}
+}*/
 
 
 #include <core/graphics/rgmGraphics.h>
@@ -200,34 +200,11 @@ namespace RubyGM { namespace Bridge {
 
 
 // message box
-int msgbox_error(const char* str) {
+/*int msgbox_error(const char* str) {
     return ::MessageBoxA(nullptr, str, "RubyGM - Error", MB_ICONERROR);
 }
 
 // xml layout
-auto GetRubyGMXmlLayout() noexcept -> const char* { return RUBYGM_XML; }
+auto GetRubyGMXmlLayout() noexcept -> const char* { return RUBYGM_XML; }*/
 
-#pragma comment(lib, "dxguid")
-#pragma comment(lib, "d3d11")
-#pragma comment(lib, "d2d1")
-#pragma comment(lib, "Shcore")
-#pragma comment(lib, "Winmm")
-#pragma comment(lib, "dwrite")
-
-#pragma comment(lib, "longui")
-#pragma comment(lib, "dlmalloc")
-#pragma comment(lib, "pugixml")
-
-
-#ifdef _UNICODE
-#if defined _M_IX86
-#pragma comment(linker,"/manifestdependency:\"type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='x86' publicKeyToken='6595b64144ccf1df' language='*'\"")
-#elif defined _M_IA64
-#pragma comment(linker,"/manifestdependency:\"type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='ia64' publicKeyToken='6595b64144ccf1df' language='*'\"")
-#elif defined _M_X64
-#pragma comment(linker,"/manifestdependency:\"type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='amd64' publicKeyToken='6595b64144ccf1df' language='*'\"")
-#else
-#pragma comment(linker,"/manifestdependency:\"type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
-#endif
-#endif
 

@@ -67,9 +67,7 @@ namespace RubyGM {
                 noexcept->GaussianBlur*;
             // create this
             static auto CreateSP(const GaussianBlurStatus& ts) noexcept {
-                return std::move(RubyGM::RefPtr<Drawable::GaussianBlur>(
-                    std::move(GaussianBlur::Create(ts)))
-                );
+                return RefPtr<Drawable::GaussianBlur>(GaussianBlur::Create(ts));
             }
         public:
             // set StandardDeviation
@@ -124,8 +122,8 @@ namespace RubyGM {
                 noexcept->DirectionalBlur*;
             // create this
             static auto CreateSP(const DirectionalBlurStatus& ts) noexcept {
-                return std::move(RubyGM::RefPtr<Drawable::DirectionalBlur>(
-                    std::move(DirectionalBlur::Create(ts)))
+                return (RubyGM::RefPtr<Drawable::DirectionalBlur>(
+                    (DirectionalBlur::Create(ts)))
                 );
             }
         public:

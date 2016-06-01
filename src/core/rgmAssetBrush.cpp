@@ -430,7 +430,7 @@ namespace RubyGM { namespace Asset {
 auto RubyGM::Game::CreateBrushAsset(
     const ColorF& c) noexcept ->RefPtr<Asset::Brush> {
     auto brush = Asset::ColorBrush::Create(c);
-    return std::move(RefPtr<Asset::Brush>(std::move(brush)));
+    return RefPtr<Asset::Brush>(std::move(brush));
 }
 
 
@@ -443,11 +443,11 @@ auto RubyGM::Game::CreateBrushAsset(
     const LinearBrush& lb) noexcept ->RefPtr<Asset::Brush> {
     // 试图创建
     if (auto brush = Asset::LinearGradientBrush::Create(lb)) {
-        return std::move(RefPtr<Asset::Brush>(std::move(brush)));
+        return RefPtr<Asset::Brush>(std::move(brush));
     }
     // 内存不足则创建一般笔刷
     else {
-        return std::move(Game::CreateBrushAsset(lb.stops->color));
+        return Game::CreateBrushAsset(lb.stops->color);
     }
 }
 
@@ -460,11 +460,11 @@ auto RubyGM::Game::CreateBrushAsset(
     const RadialBrush& rb) noexcept ->RefPtr<Asset::Brush> {
     // 试图创建
     if (auto brush = Asset::RadialGradientBrush::Create(rb)) {
-        return std::move(RefPtr<Asset::Brush>(std::move(brush)));
+        return RefPtr<Asset::Brush>(std::move(brush));
     }
     // 内存不足则创建一般笔刷
     else {
-        return std::move(Game::CreateBrushAsset(rb.stops->color));
+        return Game::CreateBrushAsset(rb.stops->color);
     }
 }
 
@@ -478,5 +478,5 @@ auto RubyGM::Game::CreateBrushAsset(
     const AssetBitmap& ab) noexcept -> RefPtr<Asset::Brush> {
     AssetBitmap bitmap(ab);
     auto brush = Asset::BitmapBrush::Create(std::move(bitmap));
-    return std::move(RefPtr<Asset::Brush>(std::move(brush)));
+    return RefPtr<Asset::Brush>(std::move(brush));
 }

@@ -55,11 +55,11 @@ auto RubyGM::Game::CreateBitmapAssetFromFile(
     const wchar_t * nameend) noexcept -> RefPtr<Asset::Bitmap> {
     // 返回创建的对象
     if (auto ptr = Asset::FileBitmap::Create(namebgn, nameend)) {
-        return std::move(RefPtr<Asset::Bitmap>(std::move(ptr)));
+        return RefPtr<Asset::Bitmap>(std::move(ptr));
     }
     // 返回空资源对象
     else {
-        return std::move(Asset::GetNullBitmapAsset());
+        return Asset::GetNullBitmapAsset();
     }
 }
 
@@ -398,9 +398,9 @@ auto RubyGM::Game::CreateBitmapAssetFromDrawable(
     if (wok && hok) {
         // 创建对象
         if (auto ptr = Asset::RasterBitmapImpl::Create(ob, sf, bs)) {
-            return std::move(RefPtr<Asset::Bitmap>(std::move(ptr)));
+            return RefPtr<Asset::Bitmap>(std::move(ptr));
         }
     }
     // 返回空对象
-    return std::move(Asset::GetNullBitmapAsset());
+    return Asset::GetNullBitmapAsset();
 }

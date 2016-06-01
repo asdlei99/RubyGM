@@ -117,7 +117,7 @@ namespace RubyGM { namespace Game {
     inline auto CreateBitmapAssetFromFile(
         const wchar_t* name) noexcept->RefPtr<Asset::Bitmap> {
         auto end = name + std::wcslen(name);
-        return std::move(Game::CreateBitmapAssetFromFile(name, end));
+        return Game::CreateBitmapAssetFromFile(name, end);
     }
     // ------------------------------------------------------------------------
     // ------------------------------ REGISTER --------------------------------

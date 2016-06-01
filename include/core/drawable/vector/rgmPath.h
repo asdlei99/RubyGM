@@ -57,9 +57,7 @@ namespace RubyGM {
             static auto Create(const PathStatus&) noexcept ->Path*;
             // create this
             static auto CreateSP(const PathStatus& ls) noexcept {
-                return std::move(RubyGM::RefPtr<Drawable::Path>(
-                    std::move(Path::Create(ls)))
-                );
+                return RefPtr<Drawable::Path>(Path::Create(ls));
             }
             // render object
             //void Render(IGMRenderContext& rc) const noexcept override;

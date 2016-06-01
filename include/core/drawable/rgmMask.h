@@ -64,9 +64,7 @@ namespace RubyGM {
             static auto Create(const MaskStatus&) noexcept->Mask*;
             // create this
             static auto CreateSP(const MaskStatus& bs) noexcept {
-                return std::move(RubyGM::RefPtr<Drawable::Mask>(
-                    std::move(Mask::Create(bs)))
-                );
+                return RefPtr<Drawable::Mask>(Mask::Create(bs));
             }
         private:
             // ctor

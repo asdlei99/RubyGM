@@ -174,7 +174,7 @@ namespace RubyGM {
     void test_batch();
     // update fiber
     void impl_update_fiber() {
-        int switch_on = 4;
+        int switch_on = 0;
         switch (switch_on)
         {
         case 0: test_text();
@@ -190,7 +190,7 @@ namespace RubyGM {
         {
             const auto file_name = L"asset/FC4-screenshot.jpg";
             auto ast = Game::CreateBitmapAssetFromFile(file_name);
-            Drawable::BitmapStatus bs(ast);
+            Drawable::BatchStatus bs(ast);
             auto sp = Drawable::CreateSP(bs);
             sprite->SetDrawable(sp);
         }
@@ -359,7 +359,7 @@ namespace RubyGM {
         RefPtr<Asset::Brush> bitmap_brush(nullptr);
         {
             auto ast = Game::CreateBitmapAssetFromFile(L"asset/FC4-screenshot.jpg");
-            bitmap_brush = std::move(Game::CreateBrushAsset(ast));
+            bitmap_brush = Game::CreateBrushAsset(ast);
             Drawable::BitmapStatus bs(ast);
             auto sp = Drawable::CreateSP(bs);
             backgd->SetDrawable(sp);
@@ -456,7 +456,7 @@ namespace RubyGM {
             Drawable::TextlayoutStatus tls;
             tls.width = 64.f;
             tls.color = { 1.f, 1.f, 1.f, 1.f };
-            tls.font = std::move(Game::GetFontAsset(0));
+            tls.font = Game::GetFontAsset(0);
             tls.text = L"Hello, 世界!";
             tls.text = LR"(This is<font color="#6CF"> Maya Blue </font>)";
             tls.renderer = "outline";

@@ -63,9 +63,7 @@ namespace RubyGM {
             static auto Create(const PolylineStatus&) noexcept ->Polyline*;
             // create this
             static auto CreateSP(const PolylineStatus& ls) noexcept {
-                return std::move(RubyGM::RefPtr<Drawable::Polyline>(
-                    std::move(Polyline::Create(ls)))
-                );
+                return RefPtr<Drawable::Polyline>(Polyline::Create(ls));
             }
             // render object
             void Render(IGMRenderContext& rc) const noexcept override;

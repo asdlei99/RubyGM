@@ -74,20 +74,27 @@ namespace RubyGM {
                 isxml = false;
             }
         };
+        // editable text layout 
+        //struct EditableStatus : TextlayoutStatus { };
         // text layout 
-        class Textlayout final : public Drawable::Object {
+        class Textlayout : public Drawable::Object {
             // super class
             using Super = Drawable::Object;
             // frirend
             friend class Text;
+            // dispose object
+            void dispose() noexcept override;
+            // get context 
+            inline auto get_context() const noexcept { 
+                auto end = reinterpret_cast<const void*>(this + 1);
+                return const_cast<void*>(end); 
+            }
         public:
             // create this
             static auto Create(const TextlayoutStatus&) noexcept->Textlayout*;
             // create this
             static auto CreateSP(const TextlayoutStatus& ts) noexcept {
-                return std::move(RubyGM::RefPtr<Drawable::Textlayout>(
-                    std::move(Textlayout::Create(ts)))
-                );
+                return RefPtr<Drawable::Textlayout>(Textlayout::Create(ts));
             }
         protected:
             // ctor
@@ -96,9 +103,11 @@ namespace RubyGM {
             Textlayout(const Textlayout&) = delete;
             // ctor
             ~Textlayout() noexcept;
+            // recreate
+            auto recreate() noexcept ->Result override final;
         public:
             // render object
-            void Render(IGMRenderContext& rc) const noexcept override;
+            void Render(IGMRenderContext& rc) const noexcept override ;
             // Rasterization
             using Super::Rasterization;
             // rasterization helper
@@ -109,19 +118,24 @@ namespace RubyGM {
             auto Rasterization(SizeF sf) noexcept->Drawable::Bitmap* {
                 return this->Rasterization(sf, this->GetSizeFromMetrics());
             }
+#if 0
+            // rasterization helper
+            auto RasterizationSP(SizeF sf) noexcept {
+                return RefPtr<Drawable::Bitmap>(this->Rasterization(sf));
+            }
+            // rasterization helper
+            auto RasterizationSP(float sf) noexcept {
+                return RefPtr<Drawable::Bitmap>(this->Rasterization(sf));
+            }
+#else
             // rasterization helper
             template<typename ...Args>
             auto RasterizationSP(Args&&... args) noexcept {
-                return std::move(RubyGM::RefPtr<Drawable::Bitmap>(
-                    std::move(this->Rasterization(std::forward<Args>(args)...))
-                    ));
+                return RefPtr<Drawable::Bitmap>(
+                    this->Rasterization(std::forward<Args>(args)...)
+                    );
             }
-        protected:
-            // recreate
-            auto recreate() noexcept ->Result;
-        private:
-            // dispose object
-            void dispose() noexcept override;
+#endif
         public:
             // get text legnth
             auto GetTextLength() const noexcept { return m_uTextLength; }
@@ -183,14 +197,36 @@ namespace RubyGM {
             IGMTextlayout*          m_pTextlayout = nullptr;
             // text layout width
             float                   m_fWidth = 128.f;
-            // text layout hright
+            // text layout height
             float                   m_fHeight = 32.f;
             // text length
             uint32_t                m_uTextLength = 0;
-            // unused
-            uint32_t                m_unused = 0;
-            // draw context
-            alignas(size_t) size_t  m_bufDrawContext[0];
+            // unused u32
+            uint32_t                m_unused_u32 = 0;
+            // buffer
+            size_t                  m_buffer[0];
         };
+       /* // editable text layout
+        class Editable final : public Textlayout {
+            // get context 
+            auto get_context() const noexcept;
+        public:
+            // create this
+            static auto Create(const EditableStatus&) noexcept->Editable*;
+            // create this
+            static auto CreateSP(const EditableStatus& es) noexcept {
+                return RefPtr<Drawable::Editable>(Editable::Create(es));
+            }
+        protected:
+            // ctor
+            Editable(const EditableStatus&) noexcept;
+            // ctor
+            Editable(const Editable&) = delete;
+            // ctor
+            ~Editable() noexcept;
+        protected:
+            // buffer
+            size_t              m_buffer[0];
+        };*/
     }
 }
