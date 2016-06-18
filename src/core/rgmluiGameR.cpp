@@ -252,7 +252,8 @@ const noexcept -> Asset::Brush& {
 auto RubyGM::Game::GetBitmapAsset(
     uint32_t index) noexcept -> RefPtr<Asset::Bitmap> {
     auto& asset = Bridge::UIGame::GetInstance().RefBitmapAsset(index);
-    return RefPtr<Asset::Bitmap>(&asset);
+    auto* ptr = &asset;
+    return RefPtr<Asset::Bitmap>(ptr);
 }
 
 
@@ -264,7 +265,8 @@ auto RubyGM::Game::GetBitmapAsset(
 auto RubyGM::Game::GetFontAsset(
     uint32_t index) noexcept -> RefPtr<Asset::Font> {
     auto& asset = Bridge::UIGame::GetInstance().RefFontAsset(index);
-    return RefPtr<Asset::Font>(&asset);
+    auto* ptr = &asset;
+    return RefPtr<Asset::Font>(ptr);
 }
 
 /// <summary>
@@ -275,10 +277,9 @@ auto RubyGM::Game::GetFontAsset(
 auto RubyGM::Game::GetBrushAsset(
     uint32_t index) noexcept -> RefPtr<Asset::Brush> {
     auto& asset = Bridge::UIGame::GetInstance().RefBrushAsset(index);
-    return RefPtr<Asset::Brush>(&asset);
+    auto* ptr = &asset;
+    return RefPtr<Asset::Brush>(ptr);
 }
-
-
 
 
 /// <summary>

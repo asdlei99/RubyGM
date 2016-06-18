@@ -5,21 +5,6 @@
 #include <bridge/rgmluiConfig.h>
 #include <edit/rgmMainView.h>
 
-#ifdef _DEBUG
-namespace RubyGM { namespace impl { void init(); void uninit(); } }
-#endif
-// init
-inline void rubygm_init_call() {
-#ifdef _DEBUG
-    RubyGM::impl::init();
-#endif
-}
-void rubygm_uninit_call() {
-#ifdef _DEBUG
-    RubyGM::impl::uninit();
-#endif
-}
-
 // window layout
 static const char* const RUBYGM_EDITOR_LAYOUT 
 = u8R"xml(
@@ -48,8 +33,6 @@ xml(<?xml version="1.0" encoding="utf-8"?>
 int WINAPI WinMain(HINSTANCE, HINSTANCE, char* lpCmdLine, int nCmdShow) noexcept {
     // every windows desktop app should do this
     ::HeapSetInformation(nullptr, HeapEnableTerminationOnCorruption, nullptr, 0);
-    // init
-    ::rubygm_init_call();
     // use OleInitialize to init ole and com
     if (SUCCEEDED(::OleInitialize(nullptr))) {
         // main viewport
@@ -72,8 +55,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, char* lpCmdLine, int nCmdShow) noexcept
     }
     // cleanup ole and com
     ::OleUninitialize();
-    // un
-    ::rubygm_uninit_call();
     // exit
     return EXIT_SUCCESS;
 }

@@ -178,9 +178,10 @@ void RubyGM::Drawable::Textlayout::Render(IGMRenderContext& rc) const noexcept {
     m_pTextRenderer->target = &rc;
     m_pTextRenderer->basic_color.color = impl::d2d(this->basic_color);
     // 刻画文本
+    IDWriteTextRenderer1* pTextRenderer = m_pTextRenderer;
     m_pTextlayout->Draw(
         this->get_context(),
-        m_pTextRenderer,
+        pTextRenderer,
         0.f, 0.f
     );
     // 收尾

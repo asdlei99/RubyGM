@@ -531,7 +531,7 @@ auto RubyGM::Drawable::Realization::Create(
     assert(rs.source && "bad argument");
     if(!rs.source) return nullptr;
     // 申请空间
-    if (const auto ptr = RubyGM::SmallAlloc(sizeof(Realization))) {
+    if (const auto ptr = RubyGM::SmallAlloc<Realization>()) {
         // 创建对象
         auto obj = new(ptr) Realization(rs);
         // 创建成功
@@ -753,7 +753,7 @@ auto RubyGM::Drawable::Polygon::Create(
     // 参数无效
     if (ps.points == nullptr || ps.count < 3) return nullptr; 
     // 申请空间
-    if (const auto ptr = RubyGM::SmallAlloc(sizeof(Polygon))) {
+    if (const auto ptr = RubyGM::SmallAlloc<Polygon>()) {
         // 初始化对象
         auto obj = new(ptr) Polygon(ps);
         // 初始化成功
@@ -834,7 +834,7 @@ auto RubyGM::Drawable::Polyline::Create(
     // 参数无效
     if (ps.points == nullptr || ps.count < 2) return nullptr; 
     // 申请空间
-    if (const auto ptr = RubyGM::SmallAlloc(sizeof(Polyline))) {
+    if (const auto ptr = RubyGM::SmallAlloc<Polyline>()) {
         // 初始化对象
         auto obj = new(ptr) Polyline(ps);
         // 初始化成功
@@ -914,7 +914,7 @@ auto RubyGM::Drawable::Path::Create(const PathStatus& ps) noexcept ->Path* {
     // 参数无效
     if (ps.path == nullptr) return nullptr; 
     // 申请空间
-    if (const auto ptr = RubyGM::SmallAlloc(sizeof(Path))) {
+    if (const auto ptr = RubyGM::SmallAlloc<Path>()) {
         // 初始化对象
         auto obj = new(ptr) Path(ps);
         // 初始化成功

@@ -180,7 +180,7 @@ namespace RubyGM { namespace Drawable {
     auto GaussianBlur::Create(const GaussianBlurStatus& gbs)
     noexcept -> GaussianBlur * {
         // 申请空间
-        if (auto ptr = RubyGM::SmallAlloc(sizeof(GaussianBlur))) {
+        if (auto ptr = RubyGM::SmallAlloc<GaussianBlur>()) {
             // 创建成功
             auto obj = new(ptr) GaussianBlur(gbs);
             // 状态OK
@@ -310,7 +310,7 @@ namespace RubyGM { namespace Drawable {
     /// <returns></returns>
     auto Shadow::Create(const ShadowStatus& gbs) noexcept -> Shadow* {
         // 申请空间
-        if (auto ptr = RubyGM::SmallAlloc(sizeof(Shadow))) {
+        if (auto ptr = RubyGM::SmallAlloc<Shadow>()) {
             // 创建成功
             auto obj = new(ptr) Shadow(gbs);
             // 状态OK

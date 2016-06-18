@@ -374,7 +374,7 @@ auto RubyGM::Asset::RasterBitmapImpl::Create(
     // 无效对象
     if (obj) {
         // 申请失败
-        if (const auto ptr = RubyGM::SmallAlloc(sizeof(RasterBitmapImpl))) {
+        if (const auto ptr = RubyGM::SmallAlloc<RasterBitmapImpl>()) {
             return new(ptr) RasterBitmapImpl(*obj, zoom, size);
         }
     }

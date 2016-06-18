@@ -31,7 +31,16 @@ namespace RubyGM {
     // error code type
     using Result = int32_t;
     // small alloc, alloc for small size, cannot return nullptr, nor std::terminate
-    auto SmallAlloc(size_t len /* < 256*/) noexcept->void*;
+    void*SmallAlloc(size_t len /* < 256*/) noexcept;
+    // small alloc
+    template<size_t len> inline auto SmallAlloc() noexcept {
+        static_assert(len < 256, "too large");
+        return RubyGM::SmallAlloc(len);
+    }
+    // small alloc
+    template<typename T> inline auto SmallAlloc() noexcept {
+        return RubyGM::SmallAlloc<sizeof(T)>();
+    }
     // small free
     void SmallFree(void* ptr) noexcept;
     // alloc for drawable object

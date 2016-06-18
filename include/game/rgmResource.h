@@ -40,10 +40,12 @@ namespace RubyGM {
     namespace Bridge { class UIGame; }
     // base namepsace
     namespace Base {
+        // Linked class
+        struct Linked { Linked* prve, *next; };
         // resource class
-        class RUBYGM_NOVTABLE Resource {
-            // friend
-            friend class Bridge::UIGame;
+        class RUBYGM_NOVTABLE Resource : protected Linked {
+            // friend class
+            friend Bridge::UIGame;
         public:
             // add ref-count
             auto AddRef() noexcept->uint32_t;
@@ -63,7 +65,15 @@ namespace RubyGM {
             // after recreate:
             void AfterRecreate() noexcept { m_bCouldRecreate = true; }
             // recreate:
-            auto Recreate() noexcept->Result;
+            auto Recreate() noexcept ->Result;
+            // prve resource pointer, wont return null if self valid
+            auto Prve() const noexcept { 
+                return static_cast<Resource*>(this->Linked::prve); 
+            }
+            // next resource pointer, wont return null if self valid
+            auto Next() const noexcept { 
+                return static_cast<Resource*>(this->Linked::next); 
+            }
         protected:
             // ref-count
             uint32_t            m_cRef = 1;
@@ -73,11 +83,6 @@ namespace RubyGM {
             bool                m_bUnused = false;
             // custom data
             uint16_t            m_u16Data = 0;
-        public:
-            // prve
-            Resource*           m_pPrve;
-            // next
-            Resource*           m_pNext;
         };
     }
 }

@@ -124,7 +124,7 @@ auto RubyGM::Drawable::Text::Create(const TextStatus& ts) noexcept ->Text* {
         return nullptr;
     }
     // 申请空间
-    if (const auto ptr = RubyGM::SmallAlloc(sizeof(Text))) {
+    if (const auto ptr = RubyGM::SmallAlloc<Text>()) {
         // 初始化对象
         auto obj = new(ptr) Text(ts);
         // 初始化成功

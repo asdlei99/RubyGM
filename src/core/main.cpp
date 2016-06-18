@@ -371,7 +371,7 @@ namespace RubyGM {
         auto sprite2 = sprite->AddChild(RubyGM::DEFAULT_STATUS);
         sprite2->SetY(20.f);
         {
-            auto font = Game::GetFontAsset(0);
+            //auto font = Game::GetFontAsset(0);
             Drawable::TextlayoutStatus ts;
             ts.text = L"Hello, 世界!";
             ts.textlen = static_cast<uint32_t>(std::wcslen(ts.text));
@@ -421,9 +421,16 @@ namespace RubyGM {
                     //sprite1->SetDrawable(bsp);
                 }
             }
+            //auto font2 = font;
         }
         {
+            auto font = Game::GetFontAsset(0);
+            int bk = 9;
+        }
+        {
+            int bk = 9;
             decltype(bitmap_brush) tmp(std::move(bitmap_brush));
+            bk = 9;
         }
         while (true) {
             RubyGM::FiberYield();

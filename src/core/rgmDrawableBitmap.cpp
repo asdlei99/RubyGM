@@ -129,7 +129,7 @@ auto RubyGM::Drawable::Bitmap::Create(
     const BitmapStatus& bs) noexcept -> Bitmap* {
     assert(bs.bitmap && "bitmap from BitmapStatus cannot be null");
     // 申请空间
-    if (const auto ptr = RubyGM::SmallAlloc(sizeof(Bitmap))) {
+    if (const auto ptr = RubyGM::SmallAlloc<Bitmap>()) {
         return new(ptr) Bitmap(bs);
     }
     return nullptr;
@@ -213,7 +213,7 @@ m_pGiMask(ms.mask->GetBitmap()),m_pGiBrush(ms.brush->GetBrush()) {
 auto RubyGM::Drawable::Mask::Create(const MaskStatus& ms) noexcept ->Mask*{
     assert(ms.mask && "bitmap from MaskStatus cannot be null");
     // 申请空间
-    if (const auto ptr = RubyGM::SmallAlloc(sizeof(Mask))) {
+    if (const auto ptr = RubyGM::SmallAlloc<Mask>()) {
         return new(ptr) Mask(ms);
     }
     return nullptr;
@@ -373,7 +373,7 @@ m_pController(bs.controller ? bs.controller : this) {
 auto RubyGM::Drawable::Batch::Create(const BatchStatus& bs) noexcept ->Batch* {
     assert(bs.bitmap && "bitmap from BatchStatus cannot be null");
     // 申请空间
-    if (const auto ptr = RubyGM::SmallAlloc(sizeof(Batch))) {
+    if (const auto ptr = RubyGM::SmallAlloc<Batch>()) {
         return new(ptr) Batch(bs);
     }
     return nullptr;

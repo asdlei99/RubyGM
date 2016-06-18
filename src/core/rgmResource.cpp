@@ -37,13 +37,13 @@ RubyGM::Base::Resource::Resource() noexcept {
     auto last = Bridge::GetLastResourceObject();
     assert(last);
     // 链接后面
-    m_pNext = last;
+    this->next = last;
     // 链接前面
-    m_pPrve = last->m_pPrve;
+    this->prve = last->prve;
     // 前面链接自己
-    m_pPrve->m_pNext = this;
+    this->prve->next = this;
     // 后面链接自己
-    m_pNext->m_pPrve = this;
+    this->next->prve = this;
 }
 
 /// <summary>
@@ -67,12 +67,16 @@ auto RubyGM::Base::Resource::Recreate() noexcept -> Result {
 /// </summary>
 /// <returns></returns>
 RubyGM::Base::Resource::~Resource() noexcept {
-    // 前面链接后面
-    m_pPrve->m_pNext = m_pNext;
-    // 后面链接前面
-    m_pNext->m_pPrve = m_pPrve;
+    // 前面链接自己
+    this->prve->next = this->next;
+    // 后面链接自己
+    this->next->prve = this->prve;
 }
 
+/// <summary>
+/// Adds the reference.
+/// </summary>
+/// <returns></returns>
 auto RubyGM::Base::Resource::AddRef() noexcept -> uint32_t {
     assert(m_cRef < 1024 && "high ref-count");
     return ++m_cRef;
@@ -83,6 +87,7 @@ auto RubyGM::Base::Resource::AddRef() noexcept -> uint32_t {
 /// </summary>
 /// <returns></returns>
 auto RubyGM::Base::Resource::Release() noexcept -> uint32_t {
+    assert(m_cRef < 1024 && "high ref-count");
     uint32_t count = --m_cRef; 
     if (!count) this->dispose(); 
     return count; 

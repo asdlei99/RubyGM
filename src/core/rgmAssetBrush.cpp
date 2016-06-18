@@ -196,7 +196,7 @@ namespace RubyGM { namespace Asset {
     /// <param name="c">The color.</param>
     /// <returns></returns>
     auto ColorBrush::Create(const ColorF& c) noexcept ->ColorBrush* {
-        auto ptr = RubyGM::SmallAlloc(sizeof(ColorBrush));
+        auto ptr = RubyGM::SmallAlloc<ColorBrush>();
         assert(ptr && "RubyGM::SmallAlloc cannot return nullptr");
         auto obj = new(ptr) Asset::ColorBrush(c);
         return obj;
@@ -367,7 +367,7 @@ namespace RubyGM { namespace Asset {
     /// <returns></returns>
     auto BitmapBrush::Create(
         RefPtr<Asset::Bitmap>&& source) noexcept -> BitmapBrush*  {
-        auto ptr = RubyGM::SmallAlloc(sizeof(BitmapBrush));
+        auto ptr = RubyGM::SmallAlloc<BitmapBrush>();
         assert(ptr && "SmallAlloc cannot return nullptr");
         return new(ptr) BitmapBrush(std::move(source));
     }

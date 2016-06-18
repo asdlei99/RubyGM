@@ -24,8 +24,8 @@ m_uLastFrameTime(impl::get_time()) {
     std::memset(m_bufDrawaleHT, 0, sizeof(m_bufDrawaleHT));
     auto head = this->GetResourceHead();
     auto tail = this->GetResourceTail();
-    head->m_pNext = tail;
-    tail->m_pPrve = head;
+    head->next = tail;
+    tail->prve = head;
     // 创建Wic工厂
     auto hr = ::CoCreateInstance(
         CLSID_WICImagingFactory2,
@@ -85,8 +85,8 @@ RubyGM::Bridge::UIGame::~UIGame() noexcept {
 #ifdef _DEBUG
     auto head = this->GetResourceHead();
     auto tail = this->GetResourceTail();
-    assert(head->m_pNext == tail && "bad object releasing");
-    assert(tail->m_pPrve == head && "bad node linking");
+    assert(head->next == tail && "bad object releasing");
+    assert(tail->prve == head && "bad node linking");
 #endif
     // 检查资源释放情况
     if (m_pSubFiber) {
@@ -180,19 +180,19 @@ auto RubyGM::Bridge::UIGame::Recreate() noexcept -> HRESULT {
 #endif
     // 重建资源: 去掉头尾
     {
-        auto res = this->GetResourceTail()->m_pPrve;
-        while (res->m_pPrve) {
+        auto res = this->GetResourceTail()->Prve();
+        while (res->Prve()) {
             hr = static_cast<HRESULT>(res->Recreate());
             if (FAILED(hr)) break;
-            res = res->m_pPrve;
+            res = res->Prve();
         }
     }
     // 结束重建
     {
-        auto res = this->GetResourceTail()->m_pPrve;
-        while (res->m_pPrve) {
+        auto res = this->GetResourceTail()->Prve();
+        while (res->Prve()) {
             res->AfterRecreate();
-            res = res->m_pPrve;
+            res = res->Prve();
         }
     }
     // 调试
@@ -352,43 +352,6 @@ namespace RubyGM { namespace Cache {
 }}
 
 
-#ifdef _DEBUG
-#include <map>
-#include <cassert>
-namespace RubyGM { namespace impl {
-    // debugger
-    struct alloc_debugger {
-        alloc_debugger() {}
-        ~alloc_debugger() noexcept { assert(map.empty() && "bad alloc paired!"); }
-        void alloc(void* ptr, size_t len) { 
-            assert(map.find(ptr) == map.end());
-            try { map.insert(std::pair<void*, size_t>(ptr, len)); }
-            catch (...) { assert(!"error"); }
-        }
-        void free(void* ptr) { 
-            assert(map.find(ptr) != map.end());
-            try { map.erase(ptr); }
-            catch (...) { assert(!"error"); }
-        }
-        std::map<void*, size_t> map;
-    };
-    // buffer
-    alignas(void*) char g_dbg_small_alloc_data[sizeof(alloc_debugger)];
-    // get_alloc_debugger
-    static auto&get_alloc_debugger() noexcept { 
-        return *reinterpret_cast<alloc_debugger*>(g_dbg_small_alloc_data);
-    }
-    // init
-    void init() {
-        get_alloc_debugger().alloc_debugger::alloc_debugger();
-    }
-    // uninit
-    void uninit() {
-        get_alloc_debugger().alloc_debugger::~alloc_debugger();
-    }
-}}
-#endif
-
 /// <summary>
 /// Smalls the alloc a small size(less 256)
 /// </summary>
@@ -396,11 +359,7 @@ namespace RubyGM { namespace impl {
 /// <returns></returns>
 auto RubyGM::SmallAlloc(size_t len) noexcept -> void * {
     assert(len <= 256);
-    auto ptr = LongUI::SmallAlloc(len);
-#ifdef _DEBUG
-    impl::get_alloc_debugger().alloc(ptr, len);
-#endif
-    return ptr;
+    return LongUI::SmallAlloc(len);
 }
 
 /// <summary>
@@ -409,9 +368,6 @@ auto RubyGM::SmallAlloc(size_t len) noexcept -> void * {
 /// <param name="">The ptr</param>
 /// <returns></returns>
 void RubyGM::SmallFree(void* ptr) noexcept {
-#ifdef _DEBUG
-    impl::get_alloc_debugger().free(ptr);
-#endif
     return LongUI::SmallFree(ptr);
 }
 
